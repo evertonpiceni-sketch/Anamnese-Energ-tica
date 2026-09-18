@@ -221,3 +221,38 @@ export async function getAudioFileDuration(file: File): Promise<number | null> {
     element.src = url;
   });
 }
+
+
+export async function downloadPrivatePersonalizedAudio(
+  audioPlanId: string,
+  fallbackTitle = 'audio-exclusivo'
+): Promise<void> {
+  const carePlan = await getCarePlanByAudioPlanId(audioPlanId);
+  if (!carePlan || carePlan.status !== 'published') {
+    throw new Error('Este áudio ainda não está disponível para download.');
+  }
+
+  const { data, error } = await supabase.storage
+    .from(AUDIO_BUCKET)
+    .download(carePlan.storagePath);
+
+  if (error) throw error;
+  if (!data) throw new Error('Arquivo de áudio não encontrado.');
+
+  const extension = carePlan.storagePath.split('.').pop() || 'mp3';
+  const safeTitle = (carePlan.title || fallbackTitle)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toLowerCase() || 'audio-exclusivo';
+
+  const url = URL.createObjectURL(data);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${safeTitle}.${extension}`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
