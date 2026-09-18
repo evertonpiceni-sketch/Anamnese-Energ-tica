@@ -1740,3 +1740,82 @@ Quando um banho for indicado, explicar de forma acolhedora:
 ### Segurança e coerência
 Qualquer orientação prática deve respeitar os cuidados já catalogados na fonte do protocolo.
 Nenhum banho deve ser apresentado como tratamento médico ou com promessa garantida de resultado.
+
+
+## AUDITORIA VISUAL OBRIGATÓRIA — PRÉ-ENTREGA
+
+Status: **REGRA FIXA**
+
+Nenhuma arte, relatório, tela, PDF ou material visual deste projeto pode ser considerado pronto apenas porque foi gerado.
+
+Antes de qualquer entrega visual, executar obrigatoriamente uma revisão completa.
+
+### Checklist obrigatório
+
+#### 1. Logo oficial
+- usar exclusivamente o logo oficial aprovado;
+- conferir visualmente o logo em todas as páginas/telas;
+- remover qualquer versão antiga, genérica, reinterpretada ou criada pelo gerador;
+- aplicar com baixa opacidade/transparência quando a identidade visual pedir discrição;
+- manter a mesma linguagem de aplicação em todo o material.
+
+#### 2. Conteúdo obrigatório
+Conferir se nenhum bloco essencial ficou ausente:
+- diagnóstico da anamnese;
+- o que as respostas mostram;
+- padrões e relações percebidas;
+- necessidade central;
+- recursos preservados;
+- intenção do cuidado;
+- energias escolhidas e onde atuam;
+- Solfeggio, quando aplicável;
+- cristais etéricos, quando aplicável;
+- florais, quando aplicável;
+- aromaterapia, quando aplicável;
+- banhos, quando aplicável;
+- áreas corporais/chakras, quando aplicável;
+- integração dos recursos;
+- orientações para o período;
+- fechamento acolhedor.
+
+#### 3. Linguagem
+- acolhedora, humana e profunda;
+- sem tom frio, clínico ou julgador;
+- sem frases deterministas;
+- sem promessas de resultado;
+- sem simplificar demais o conteúdo já aprovado.
+
+#### 4. Coerência entre páginas
+- mesma paleta;
+- mesma tipografia;
+- mesma identidade;
+- mesmos espaçamentos e hierarquia;
+- mesmo padrão de logo;
+- mesmo nível de acabamento;
+- nenhuma página visualmente inferior ou desconectada das demais.
+
+#### 5. Fidelidade às decisões aprovadas
+Antes de criar ou alterar:
+- revisar as regras congeladas mais recentes;
+- não reinterpretar decisões já aprovadas;
+- não substituir logo, textos, estrutura ou recursos por versões “parecidas”;
+- não usar achismo quando já existe uma referência oficial.
+
+#### 6. Revisão final
+Após a geração:
+- revisar página por página;
+- comparar com as referências aprovadas;
+- verificar omissões;
+- verificar inconsistências;
+- corrigir antes de apresentar ao usuário.
+
+### Regra de reprovação automática
+A entrega deve ser considerada **REPROVADA** se:
+- o logo oficial estiver incorreto em qualquer página;
+- algum bloco essencial estiver ausente;
+- houver páginas com identidade visual inconsistente;
+- o conteúdo estiver simplificado em relação ao que foi aprovado;
+- houver invenção de elementos não autorizados.
+
+### Princípio central
+**Gerar não é concluir. Concluir é gerar, revisar, comparar, corrigir e só então entregar.**
