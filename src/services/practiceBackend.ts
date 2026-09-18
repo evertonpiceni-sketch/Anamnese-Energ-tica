@@ -9,6 +9,7 @@ export interface RemotePracticeLog {
   perceptionAfter: number | null;
   observation: string | null;
   status: 'started' | 'completed';
+  audioTitle: string | null;
 }
 
 export async function startPractice(params: {
@@ -72,7 +73,7 @@ export async function listOwnPracticeLogs(limit = 10): Promise<RemotePracticeLog
   const { data, error } = await supabase
     .from('practice_logs')
     .select(
-      'id,care_plan_id,started_at,completed_at,perception_before,perception_after,observation,status'
+      'id,care_plan_id,started_at,completed_at,perception_before,perception_after,observation,status,care_plans(audio_title)'
     )
     .eq('user_id', authData.user.id)
     .order('started_at', { ascending: false })
@@ -89,5 +90,8 @@ export async function listOwnPracticeLogs(limit = 10): Promise<RemotePracticeLog
     perceptionAfter: item.perception_after,
     observation: item.observation,
     status: item.status,
+    audioTitle: Array.isArray(item.care_plans)
+      ? item.care_plans[0]?.audio_title || null
+      : item.care_plans?.audio_title || null,
   }));
 }
