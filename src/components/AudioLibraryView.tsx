@@ -1,4 +1,5 @@
 import { AudioLines, Fingerprint, Layers3, ShieldCheck } from 'lucide-react';
+import { PreparatoryAudioAdminCard } from './PreparatoryAudioAdminCard';
 
 export function AudioLibraryView() {
   return (
@@ -35,6 +36,8 @@ export function AudioLibraryView() {
           text="Mesmo que duas pessoas tenham prioridades parecidas, o áudio final não é tratado como o mesmo arquivo nem como tratamento genérico."
         />
       </div>
+
+      <PreparatoryAudioAdminCard />
 
       <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
         <h2 className="font-semibold text-stone-100">O que a biblioteca passa a guardar</h2>
