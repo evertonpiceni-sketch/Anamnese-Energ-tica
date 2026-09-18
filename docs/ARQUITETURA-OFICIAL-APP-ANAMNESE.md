@@ -459,6 +459,38 @@ Cada áudio final deve permanecer vinculado a uma única pessoa/anamnese e à as
 
 ---
 
+## Tela A06.1 — Upload do áudio exclusivo
+
+### Objetivo
+Permitir que o ADM anexe o arquivo final da sessão ao plano correto do usuário.
+
+### Local
+O upload deve aparecer dentro do **Compositor de Cuidado** da pessoa, junto da composição técnica daquela anamnese.
+
+### Exibir antes do envio
+- nome do usuário;
+- ID da anamnese;
+- ID do plano de áudio;
+- assinatura da composição;
+- sistemas e recursos relacionados;
+- Solfeggio da sessão.
+
+### Ações
+- selecionar arquivo de áudio;
+- substituir arquivo;
+- remover arquivo;
+- confirmar vínculo.
+
+### Regra obrigatória
+O arquivo enviado fica vinculado a **um único plano de áudio**, que pertence a **uma única anamnese** e a **um único usuário**.
+
+O player da área do usuário deve buscar o áudio pelo ID do plano, não pelo nome do arquivo.
+
+### Produção
+No protótipo, o arquivo pode ser persistido localmente no navegador. Na produção, o mesmo vínculo deverá utilizar armazenamento privado/autenticado no backend para permitir acesso seguro entre dispositivos.
+
+---
+
 ## Tela A07 — Biblioteca de florais
 
 ### Exibir
