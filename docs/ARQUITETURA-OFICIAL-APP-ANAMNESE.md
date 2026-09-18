@@ -1287,7 +1287,8 @@ Status: **REGRA OFICIAL**
 - **R$ 50 — 7 dias / áudio personalizado sem meditação guiada**
   - inclui o áudio exclusivo;
   - uso por 7 dias;
-  - não libera o diagnóstico completo com as respostas.
+  - libera um **diagnóstico parcial**;
+  - não libera o diagnóstico completo nem o detalhamento integral das respostas.
 
 - **R$ 100 — 7 dias / áudio personalizado com meditação guiada**
   - inclui o áudio exclusivo;
@@ -1305,16 +1306,19 @@ Status: **REGRA OFICIAL**
 ### Regra de acesso
 O **diagnóstico completo + respostas** é liberado somente para compras de **R$ 100 ou mais**.
 
-O plano de R$ 50 pode apresentar apenas:
+O plano de R$ 50 libera um **diagnóstico parcial**, com:
 - acolhimento inicial;
-- orientação resumida;
+- leitura resumida do momento;
+- prioridades principais em linguagem humana;
+- direção do cuidado;
 - cuidado indicado;
 - áudio exclusivo;
 - instruções de uso.
 
-Ele não deve exibir:
+O diagnóstico parcial não deve exibir:
 - diagnóstico completo;
-- detalhamento das respostas;
+- todas as respostas individualmente;
+- detalhamento integral das respostas;
 - leitura ampliada;
 - conteúdo reservado às modalidades de R$ 100 e R$ 180.
 
