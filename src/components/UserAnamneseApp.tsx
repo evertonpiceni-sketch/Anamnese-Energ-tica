@@ -6,6 +6,7 @@ import { PERGUNTAS_ANAMNESE } from '../data/questions';
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'sent';
 
 const STORAGE_KEY = 'anamnese-integrativa-draft-v1';
+const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
 
 const emptyIntake = (): AnamneseInput => ({
   id: `ANAM-${Date.now().toString().slice(-6)}`,
@@ -94,6 +95,22 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
   function submit() {
     const finalData = { ...form, nomePessoa: form.nomePessoa.trim() };
+    try {
+      const existing = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
+      const submissions = Array.isArray(existing) ? existing : [];
+      localStorage.setItem(
+        SUBMISSIONS_KEY,
+        JSON.stringify([
+          ...submissions,
+          { ...finalData, enviadoEm: new Date().toISOString(), status: 'concluida' },
+        ])
+      );
+    } catch {
+      localStorage.setItem(
+        SUBMISSIONS_KEY,
+        JSON.stringify([{ ...finalData, enviadoEm: new Date().toISOString(), status: 'concluida' }])
+      );
+    }
     onSubmit?.(finalData);
     localStorage.removeItem(STORAGE_KEY);
     setStep('sent');
