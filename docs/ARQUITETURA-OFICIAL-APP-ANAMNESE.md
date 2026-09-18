@@ -1195,3 +1195,84 @@ Antes de ativar geração automática:
 
 Não inserir chave de voz no frontend.
 
+
+
+## PASSO 5 — MEU MOMENTO / MINHA JORNADA
+
+Status: **IMPLEMENTADO — ÁREA PERMANENTE DO USUÁRIO**
+
+### Navegação USER
+O usuário passa a ter acesso fixo a:
+- **Nova Anamnese**
+- **Meu Momento**
+- **Minha Jornada**
+- **Sair**
+
+### Meu Momento
+Carrega do backend:
+- última anamnese;
+- resultado acolhedor publicado;
+- prioridades em linguagem humana;
+- intenção do próximo passo;
+- mensagem final;
+- PDF permanente com recursos públicos do plano.
+
+Se ainda não houver composição aprovada:
+- mostrar que a anamnese foi recebida;
+- informar que o resultado permanente aparecerá após revisão/publicação;
+- nunca improvisar um plano.
+
+### Minha Jornada
+Reúne:
+- áudio exclusivo atual;
+- ouvir;
+- baixar áudio;
+- duração quando disponível;
+- Solfeggio;
+- floral;
+- aromaterapia;
+- cristais etéricos;
+- histórico de práticas;
+- espaço de reavaliação.
+
+### Persistência
+A área não depende mais do navegador usado na anamnese.
+
+Fontes:
+- `intake_sessions`
+- `user_results`
+- `care_plans`
+- `practice_logs`
+
+### Resultado aprovado
+Quando o ADM aprova uma composição:
+- o resultado acolhedor é persistido em `user_results`;
+- o plano público é persistido em `care_plans`;
+- o usuário passa a visualizá-los em Meu Momento / Minha Jornada.
+
+### Histórico de práticas
+O histórico deixou de depender do localStorage.
+
+Cada prática registra no backend:
+- usuário;
+- plano;
+- início;
+- conclusão;
+- percepção antes;
+- percepção depois;
+- observação opcional;
+- status.
+
+Assim o histórico acompanha a conta entre dispositivos.
+
+### Privacidade
+A área USER nunca consulta:
+- `care_plan_technical`;
+- `technical_assessments`;
+- Biblioteca-Mestra;
+- scores;
+- sistemas internos;
+- símbolos;
+- comandos;
+- justificativas técnicas.
+
