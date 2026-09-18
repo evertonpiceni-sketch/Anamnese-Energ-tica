@@ -1276,3 +1276,48 @@ A área USER nunca consulta:
 - comandos;
 - justificativas técnicas.
 
+
+
+## REGRA COMERCIAL — MODALIDADES E LIBERAÇÃO DO DIAGNÓSTICO COMPLETO
+
+Status: **REGRA OFICIAL**
+
+### Modalidades iniciais
+
+- **R$ 50 — 7 dias / áudio personalizado sem meditação guiada**
+  - inclui o áudio exclusivo;
+  - uso por 7 dias;
+  - não libera o diagnóstico completo com as respostas.
+
+- **R$ 100 — 7 dias / áudio personalizado com meditação guiada**
+  - inclui o áudio exclusivo;
+  - inclui meditação guiada personalizada;
+  - uso por 7 dias;
+  - libera o diagnóstico completo;
+  - libera a leitura organizada a partir das respostas da própria pessoa.
+
+- **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida**
+  - inclui a jornada de 21 dias;
+  - processo mais aprofundado;
+  - libera o diagnóstico completo;
+  - libera a leitura organizada a partir das respostas da própria pessoa.
+
+### Regra de acesso
+O **diagnóstico completo + respostas** é liberado somente para compras de **R$ 100 ou mais**.
+
+O plano de R$ 50 pode apresentar apenas:
+- acolhimento inicial;
+- orientação resumida;
+- cuidado indicado;
+- áudio exclusivo;
+- instruções de uso.
+
+Ele não deve exibir:
+- diagnóstico completo;
+- detalhamento das respostas;
+- leitura ampliada;
+- conteúdo reservado às modalidades de R$ 100 e R$ 180.
+
+### Regra de autenticidade
+Esta estrutura comercial e de entrega pertence ao projeto da Anamnese Integrativa / Protocolo da Transformação e não deve copiar textos, lógica, nomes, layout ou estrutura do Mini Diagnóstico ou de terceiros.
+
