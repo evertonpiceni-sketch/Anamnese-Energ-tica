@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { PrivacyPolicy } from './PrivacyPolicy';
 
 type Mode = 'signin' | 'signup';
 
@@ -13,6 +14,7 @@ export function AuthScreen() {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -65,6 +67,10 @@ export function AuthScreen() {
     } finally {
       setBusy(false);
     }
+  }
+
+  if (showPrivacy) {
+    return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
   }
 
   return (
@@ -173,9 +179,19 @@ export function AuthScreen() {
                       className="mt-1 h-4 w-4 accent-[#173f2d]"
                     />
                     <span>
-                      Autorizo o armazenamento dos dados que eu fornecer para viabilizar minha anamnese, resultado, práticas e acompanhamento.
+                      Li a Política de Privacidade e autorizo, de forma específica, o tratamento dos dados que eu fornecer — inclusive dados pessoais sensíveis presentes na anamnese — para viabilizar minha análise, composição individual do cuidado, materiais, práticas e acompanhamento.
                     </span>
                   </label>
+                )}
+
+                {mode === 'signup' && (
+                  <button
+                    type="button"
+                    onClick={() => setShowPrivacy(true)}
+                    className="text-left text-xs font-semibold text-[#806c3f] underline underline-offset-4"
+                  >
+                    Ler Política de Privacidade e LGPD
+                  </button>
                 )}
 
                 {errorMessage && (
