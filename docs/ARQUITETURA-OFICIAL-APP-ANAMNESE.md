@@ -1473,12 +1473,18 @@ A mensagem deve:
 ### Áudio preparativo
 Após a confirmação da compra, enquanto o material exclusivo estiver em produção:
 - liberar imediatamente um **áudio preparativo do protocolo**;
-- este áudio pode ser reutilizável entre usuários, desde que seja explicitamente identificado como preparativo e não como áudio personalizado;
+- este áudio é **fixo e único para todos os usuários**;
+- não é um áudio personalizado;
 - ele deve ser separado tecnicamente dos áudios exclusivos;
 - sua função dentro do protocolo é preparar a pessoa para a etapa seguinte;
 - pode contemplar, dentro da proposta energética do protocolo, os campos físico, emocional, mental e espiritual;
 - não deve conter leitura individual, diagnóstico, sistemas específicos da pessoa ou composição exclusiva;
-- deve desaparecer como “material em espera” quando o áudio/jornada personalizada for publicada, podendo permanecer opcionalmente em uma biblioteca de apoio se o projeto decidir isso depois.
+- deve ser disponibilizado **somente para reprodução dentro do app**;
+- **não pode ser baixado pelo usuário**;
+- não deve gerar link público permanente;
+- não deve exibir botão “Baixar”;
+- o controle de acesso deve permanecer no app/backend;
+- quando o áudio/jornada personalizada for publicada, o preparativo pode deixar de aparecer como material principal de espera, sem alterar sua natureza de áudio fixo do protocolo.
 
 ### Prazo exibido junto da mensagem
 - modalidade R$ 50: até **3 dias**;
@@ -1492,3 +1498,34 @@ Enquanto o personalizado não estiver pronto, mostrar:
 - player do áudio preparativo;
 - mensagem acolhedora explicando que a composição individual está sendo preparada.
 
+
+
+### Composição energética oficial do áudio preparativo
+Base de sustentação:
+- Golden Light Source;
+- Original Reiki Platinum.
+
+Sistema principal:
+- Soul Shakti.
+
+Sequência preparativa:
+- Body Purification — preparação do campo físico;
+- Soul Healing — preparação emocional;
+- Mind Empowerment — preparação mental;
+- Spiritual Alignment — preparação espiritual;
+- integração e fechamento.
+
+### Regra técnica
+O áudio preparativo deve ter um identificador próprio de asset global do protocolo.
+
+Não usar:
+- `audio_plan_id` individual;
+- caminho por usuário/anamnese;
+- download autenticado individual.
+
+Usar:
+- asset global privado;
+- reprodução autorizada dentro do app;
+- sem opção de download na interface USER.
+
+A regra de download continua válida apenas para os áudios personalizados/exclusivos do usuário.
