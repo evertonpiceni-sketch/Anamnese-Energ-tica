@@ -1,4 +1,4 @@
-import { ProgrammedAudio } from '../audio/audioCatalog';
+import { PersonalizedAudioPlan } from '../audio/audioCatalog';
 import {
   AromatherapyResource,
   ComplementaryCareSelection,
@@ -8,7 +8,7 @@ import {
 import { SolfeggioFrequency } from './solfeggioCatalog';
 
 export interface CareComposition {
-  audio: ProgrammedAudio | null;
+  audio: PersonalizedAudioPlan | null;
   floral: FloralResource[];
   aromatherapy: AromatherapyResource[];
   ethericCrystals: EthericCrystalResource[];
@@ -17,7 +17,7 @@ export interface CareComposition {
 }
 
 export function buildCareComposition(
-  audio: ProgrammedAudio | null,
+  audio: PersonalizedAudioPlan | null,
   complementary: ComplementaryCareSelection,
   solfeggio: SolfeggioFrequency | null,
   options?: { journey21Mode?: CareComposition['journey21Mode'] }
