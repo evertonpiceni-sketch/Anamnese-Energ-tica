@@ -11,7 +11,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       autovalor: 2,
       vitalidade: 1,
     },
-    dicaAcolhedora: 'Avalie se a hesitação é frequente ou se surge em projetos específicos.',
+    dicaAcolhedora: 'Perceba com gentileza em quais momentos começar fica mais difícil. Não precisa entender o motivo agora — apenas reconhecer como isso aparece para você.',
   },
   {
     id: 'q2_mente_acelerada',
@@ -23,7 +23,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       movimento: 1,
       vitalidade: 1,
     },
-    dicaAcolhedora: 'Observe se isso interfere no repouso ou no foco do momento presente.',
+    dicaAcolhedora: 'Repare apenas no quanto isso ocupa seu espaço interno hoje. Sua percepção já é suficiente para seguirmos.',
   },
   {
     id: 'q3_sensacao_ameaca_inseguranca',
@@ -35,7 +35,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       protecao: 3,
       vitalidade: 2,
     },
-    dicaAcolhedora: 'Verifique se há sensação de falta de chão firme ou instabilidade básica.',
+    dicaAcolhedora: 'Se essa sensação aparece, tente apenas reconhecer quando ela fica mais presente. Você não precisa explicar tudo neste momento.',
   },
   {
     id: 'q4_cansaco_esgotamento',
@@ -47,7 +47,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       movimento: 2,
       limpeza: 2,
     },
-    dicaAcolhedora: 'A energia parece esvair-se rapidamente durante as tarefas simples.',
+    dicaAcolhedora: 'Observe como sua energia tem se comportado nos últimos dias, sem se cobrar por estar mais ou menos disposto(a).',
   },
   {
     id: 'q5_autocobranca_insuficiencia',
@@ -59,7 +59,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       mente: 2,
       movimento: 2,
     },
-    dicaAcolhedora: 'Perceba se há uma voz interna crítica exigindo perfeição contínua.',
+    dicaAcolhedora: 'Veja se você tem conseguido reconhecer o que já faz bem, mesmo quando sente que poderia fazer mais.',
   },
   {
     id: 'q6_engolir_emocoes',
@@ -71,7 +71,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       relacionamentos: 2,
       limpeza: 2,
     },
-    dicaAcolhedora: 'Como seu peito e sua garganta respondem quando você precisa conter o que sente?',
+    dicaAcolhedora: 'Se fizer sentido, perceba como seu corpo reage quando você guarda o que sente. Não existe uma forma certa de responder.',
   },
   {
     id: 'q7_dificuldade_dizer_nao',
@@ -83,7 +83,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       receber: 3,
       protecao: 2,
     },
-    dicaAcolhedora: 'O medo de desagradar ou ser rejeitado costuma pesar na sua escolha.',
+    dicaAcolhedora: 'Pense em como você se sente ao colocar um limite. O importante aqui é reconhecer sua experiência, não julgá-la.',
   },
   {
     id: 'q8_dificuldade_receber',
@@ -95,7 +95,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       relacionamentos: 2,
       seguranca: 2,
     },
-    dicaAcolhedora: 'Receber algo sem retribuir imediatamente gera desconforto?',
+    dicaAcolhedora: 'Perceba como é para você receber cuidado, ajuda ou descanso sem precisar compensar imediatamente.',
   },
   {
     id: 'q9_sensibilidade_ambientes',
@@ -107,7 +107,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       seguranca: 2,
       vitalidade: 2,
     },
-    dicaAcolhedora: 'Sua aura é muito receptiva ao redor.',
+    dicaAcolhedora: 'Observe se alguns ambientes ou encontros parecem exigir mais de você do que outros. Apenas registre como isso é percebido por você.',
   },
   {
     id: 'q10_repeticao_ciclos',
@@ -119,7 +119,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       autovalor: 2,
       proposito: 1,
     },
-    dicaAcolhedora: 'Sensação de déjà vu situacional ou promessas internas quebradas.',
+    dicaAcolhedora: 'Se algo parece se repetir, apenas reconheça o padrão que você percebe. Não precisamos encontrar uma causa agora.',
   },
   {
     id: 'q11_desconexao_corpo_prazer',
@@ -131,7 +131,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       vitalidade: 2,
       seguranca: 1,
     },
-    dicaAcolhedora: 'Você consegue se permitir momentos de deleite sem culpa produtiva?',
+    dicaAcolhedora: 'Perceba como tem sido permitir descanso, prazer e presença no corpo sem transformar isso em obrigação.',
   },
   {
     id: 'q12_trava_expressao_criatividade',
@@ -143,7 +143,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       poder_pessoal: 2,
       mente: 1,
     },
-    dicaAcolhedora: 'A garganta ou a inspiração parecem bloqueadas pelo julgamento.',
+    dicaAcolhedora: 'Observe se existe algo que você gostaria de expressar com mais liberdade, mesmo que ainda não saiba como.',
   },
   {
     id: 'q13_inseguranca_material_prosperidade',
@@ -155,7 +155,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       movimento: 2,
       autovalor: 1,
     },
-    dicaAcolhedora: 'Sensação de esforço grande com pouca colheita prática e material.',
+    dicaAcolhedora: 'Considere como as questões materiais têm afetado sua sensação de segurança e liberdade para agir.',
   },
   {
     id: 'q14_falta_direcao_proposito',
@@ -167,7 +167,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       mente: 2,
       recomeco: 2,
     },
-    dicaAcolhedora: 'Desejo de alinhar ação cotidiana com propósito de alma.',
+    dicaAcolhedora: 'Perceba se existe algo em você pedindo mais sentido ou direção. Não é preciso ter a resposta pronta.',
   },
   {
     id: 'q15_desconexao_espiritual',
@@ -179,7 +179,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       seguranca: 2,
       integracao: 2,
     },
-    dicaAcolhedora: 'Sensação de solidão existencial ou ruído na própria intuição.',
+    dicaAcolhedora: 'Observe como está sua sensação de conexão com aquilo que lhe traz sentido, fé, presença ou confiança.',
   },
   {
     id: 'q16_dificuldade_desapegar',
@@ -191,7 +191,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       emocional: 2,
       recomeco: 2,
     },
-    dicaAcolhedora: 'Reter velhos pesos impede o novo de florescer.',
+    dicaAcolhedora: 'Perceba se existe algo que você gostaria de deixar mais leve. Reconhecer isso já é um primeiro movimento.',
   },
   {
     id: 'q17_desejo_recomeco',
@@ -203,7 +203,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       seguranca: 2,
       proposito: 2,
     },
-    dicaAcolhedora: 'A transição de fase requer sustentação e coragem.',
+    dicaAcolhedora: 'Se você sente que algo novo quer começar, perceba o que hoje tornaria esse primeiro passo um pouco mais possível.',
   },
   {
     id: 'q18_sensacao_fragmentacao',
@@ -215,7 +215,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       emocional: 2,
       corpo: 2,
     },
-    dicaAcolhedora: 'Necessidade de alinhar mente, coração e corpo numa síntese unificada.',
+    dicaAcolhedora: 'Observe se pensamentos, emoções e corpo parecem pedir ritmos diferentes. Aqui estamos apenas reconhecendo o seu momento.',
   },
   {
     id: 'q19_tensao_corporal_cronica',
@@ -227,7 +227,7 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       emocional: 2,
       receber: 2,
     },
-    dicaAcolhedora: 'O corpo físico guarda e expressa as memórias não digeridas.',
+    dicaAcolhedora: 'Perceba onde o corpo costuma mostrar tensão ou desconforto, sem precisar atribuir uma causa a isso agora.',
   },
   {
     id: 'q20_conflitos_relacionamento',
@@ -239,6 +239,6 @@ export const PERGUNTAS_ANAMNESE: PerguntaObjetiva[] = [
       poder_pessoal: 2,
       autovalor: 2,
     },
-    dicaAcolhedora: 'A harmonia nas trocas interpessoais precisa de equilíbrio e clareza.',
+    dicaAcolhedora: 'Pense em como você tem se sentido nas relações mais próximas. Sua resposta pode mostrar apenas o que está mais presente hoje.',
   },
 ];
