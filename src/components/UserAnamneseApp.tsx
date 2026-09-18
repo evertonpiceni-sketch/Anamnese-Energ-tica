@@ -7,6 +7,8 @@ import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { escolherAudioProgramado, ProgrammedAudio } from '../audio/audioCatalog';
 import { ProgrammedAudioCard } from './ProgrammedAudioCard';
 import { PracticeHistory } from './PracticeHistory';
+import { selectComplementaryCare } from '../care/complementaryCatalogs';
+import { buildCareComposition, CareComposition } from '../care/careComposer';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 
@@ -57,6 +59,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
   const [analysis, setAnalysis] = useState<AnaliseCompletaResultado | null>(null);
   const [friendlyResult, setFriendlyResult] = useState<FriendlyResult | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<ProgrammedAudio | null>(null);
+  const [careComposition, setCareComposition] = useState<CareComposition | null>(null);
 
   useEffect(() => {
     try {
@@ -116,11 +119,15 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
     window.setTimeout(() => {
       const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
       const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
-      const audio = escolherAudioProgramado(technicalAnalysis.relatorioEverton.eixosOrdenados);
+      const axes = technicalAnalysis.relatorioEverton.eixosOrdenados;
+      const audio = escolherAudioProgramado(axes);
+      const complementary = selectComplementaryCare(axes);
+      const composition = buildCareComposition(audio, complementary);
 
       setAnalysis(technicalAnalysis);
       setFriendlyResult(friendly);
       setSelectedAudio(audio);
+      setCareComposition(composition);
 
       const savedRecord = {
         ...finalData,
@@ -128,6 +135,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
         status: 'concluida',
         resultadoPessoa: friendly,
         audioProgramado: audio,
+        composicaoCuidado: composition,
         analiseTecnica: technicalAnalysis,
       };
 
@@ -454,6 +462,42 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
               {selectedAudio && (
                 <ProgrammedAudioCard audio={selectedAudio} userId={form.id} />
               )}
+
+              {careComposition &&
+                (careComposition.floral.length > 0 ||
+                  careComposition.aromatherapy.length > 0 ||
+                  careComposition.ethericCrystals.length > 0) && (
+                  <section className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-6 shadow-lg shadow-[#173f2d]/8 sm:p-8">
+                    <SmallEyebrow>APOIOS COMPLEMENTARES</SmallEyebrow>
+                    <h3 className="mt-2 font-serif text-2xl text-[#173c2c]">Recursos indicados para este momento</h3>
+                    <div className="mt-5 space-y-4">
+                      {careComposition.floral.length > 0 && (
+                        <div className="rounded-2xl border border-[#e0d5bb] bg-white/60 p-4">
+                          <div className="text-sm font-semibold text-[#365441]">Florais</div>
+                          <div className="mt-2 space-y-2 text-sm leading-6 text-[#657168]">
+                            {careComposition.floral.map(item => <p key={item.id}>{item.nome}</p>)}
+                          </div>
+                        </div>
+                      )}
+                      {careComposition.aromatherapy.length > 0 && (
+                        <div className="rounded-2xl border border-[#e0d5bb] bg-white/60 p-4">
+                          <div className="text-sm font-semibold text-[#365441]">Aromaterapia</div>
+                          <div className="mt-2 space-y-2 text-sm leading-6 text-[#657168]">
+                            {careComposition.aromatherapy.map(item => <p key={item.id}>{item.nome}</p>)}
+                          </div>
+                        </div>
+                      )}
+                      {careComposition.ethericCrystals.length > 0 && (
+                        <div className="rounded-2xl border border-[#e0d5bb] bg-white/60 p-4">
+                          <div className="text-sm font-semibold text-[#365441]">Cristais etéricos</div>
+                          <div className="mt-2 space-y-2 text-sm leading-6 text-[#657168]">
+                            {careComposition.ethericCrystals.map(item => <p key={item.id}>{item.nome}</p>)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </section>
+                )}
             </div>
           )}
 
@@ -473,7 +517,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
               <PracticeHistory />
 
-              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setQuestionIndex(0); setStep('welcome'); }}>
+              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setQuestionIndex(0); setStep('welcome'); }}>
                 Nova anamnese
               </PrimaryButton>
             </CenteredCard>
