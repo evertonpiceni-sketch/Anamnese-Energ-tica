@@ -10,6 +10,7 @@ import { PracticeHistory } from './PracticeHistory';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition, CareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
+import { saveIntakeSession } from '../services/backend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
@@ -43,7 +44,9 @@ const emptyIntake = (): AnamneseInput => ({
 });
 
 interface UserAnamneseAppProps {
+  userId: string;
   onSubmit?: (data: AnamneseInput) => void;
+  onSignOut?: () => void | Promise<void>;
 }
 
 const scaleLabels = [
@@ -54,7 +57,7 @@ const scaleLabels = [
   'Está muito presente',
 ];
 
-export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
+export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAnamneseAppProps) {
   const [step, setStep] = useState<Step>('welcome');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
@@ -62,6 +65,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
   const [friendlyResult, setFriendlyResult] = useState<FriendlyResult | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<PersonalizedAudioPlan | null>(null);
   const [careComposition, setCareComposition] = useState<CareComposition | null>(null);
+  const [submissionError, setSubmissionError] = useState('');
 
   useEffect(() => {
     try {
@@ -114,19 +118,25 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
     else setStep('profile');
   }
 
-  function submit() {
+  async function submit() {
     const finalData = { ...form, nomePessoa: form.nomePessoa.trim() };
+    setSubmissionError('');
     setStep('processing');
 
-    window.setTimeout(() => {
+    try {
+      const backendIntakeId = await saveIntakeSession({
+        userId,
+        intake: finalData,
+      });
+
       const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
       const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
       const axes = technicalAnalysis.relatorioEverton.eixosOrdenados;
       const complementary = selectComplementaryCare(axes);
       const solfeggio = selectSolfeggioFrequency(axes);
       const audio = criarPlanoAudioPersonalizado({
-        userId: finalData.id,
-        anamneseId: finalData.id,
+        userId,
+        anamneseId: backendIntakeId,
         nomePessoa: finalData.nomePessoa,
         eixos: axes,
         relatorio: technicalAnalysis.relatorioEverton,
@@ -141,6 +151,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
       const savedRecord = {
         ...finalData,
+        backendIntakeId,
         enviadoEm: new Date().toISOString(),
         status: 'concluida',
         resultadoPessoa: friendly,
@@ -160,7 +171,14 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
       onSubmit?.(finalData);
       localStorage.removeItem(STORAGE_KEY);
       setStep('result');
-    }, 650);
+    } catch (error) {
+      setSubmissionError(
+        error instanceof Error
+          ? error.message
+          : 'Não foi possível salvar sua anamnese com segurança.'
+      );
+      setStep('review');
+    }
   }
 
   return (
@@ -177,6 +195,17 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
               <div className="font-serif text-lg font-semibold tracking-wide text-[#204a37]">Everton Piceni</div>
               <div className="text-xs tracking-[0.18em] text-[#8e7946]">ANAMNESE INTEGRATIVA</div>
             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {onSignOut && (
+              <button
+                type="button"
+                onClick={() => void onSignOut()}
+                className="rounded-full border border-[#d8c99f] bg-white/60 px-4 py-2 text-xs font-semibold text-[#617066] hover:bg-white"
+              >
+                Sair
+              </button>
+            )}
           </div>
           {step !== 'welcome' && step !== 'sent' && (
             <div className="hidden items-center gap-2 text-xs text-[#6f756d] sm:flex">
@@ -416,6 +445,11 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
                 {!allAnswered && (
                   <div className="mt-4 rounded-2xl border border-[#dfc785] bg-[#fff5d8] p-4 text-sm text-[#735f2c]">
                     Ainda existem perguntas sem resposta. Volte ao questionário antes de enviar.
+                  </div>
+                )}
+                {submissionError && (
+                  <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                    Não foi possível salvar sua anamnese no momento. ${submissionError}
                   </div>
                 )}
                 <div className="mt-7 flex flex-wrap gap-3">
