@@ -1680,12 +1680,33 @@ Ele deve apresentar, em linguagem acessível ao usuário:
 - fechamento acolhedor e reavaliação ao final do período.
 
 ### Regra de linguagem
+Todo o Relatório Completo deve ser escrito em **linguagem acolhedora, humana, simples e respeitosa**.
+
+A pessoa deve sentir que está sendo acompanhada e compreendida, não avaliada de forma fria ou julgada.
+
 As descrições de energia, sistema, cristal, floral, aroma, frequência ou chakra devem:
 - permanecer dentro da linguagem do protocolo;
-- explicar finalidade e área de atuação sem prometer resultado garantido;
+- explicar finalidade e área de atuação de forma acolhedora e acessível;
+- apresentar possibilidades de cuidado, nunca sentenças sobre quem a pessoa é;
+- preferir expressões como “neste momento”, “pode estar pedindo atenção”, “pode ser um apoio”, “a intenção aqui é...”;
+- evitar linguagem determinista, acusatória, fatalista ou excessivamente técnica;
+- não prometer resultado garantido;
 - não transformar linguagem energética em alegação médica;
 - não expor lógica interna, score, peso, fórmula, Biblioteca-Mestra, comandos privados, símbolos internos ou justificativas técnicas reservadas ao ADM;
 - usar apenas propriedades já documentadas/catalogadas, sem improvisação.
+
+### Tom oficial do relatório
+O relatório deve:
+- acolher antes de explicar;
+- contextualizar antes de aprofundar;
+- explicar cada recurso sem assustar ou sobrecarregar;
+- manter profundidade sem perder delicadeza;
+- evitar excesso de termos técnicos quando uma explicação simples for suficiente;
+- encerrar cada bloco de forma integrativa, mostrando como aquele recurso participa do cuidado;
+- preservar a autonomia da pessoa, sem dizer o que ela “é” ou o que “vai acontecer”.
+
+Exemplo de construção:
+**“Neste momento, sua leitura mostra que algumas áreas podem estar pedindo mais espaço, presença e sustentação. A composição foi organizada para acompanhar esse movimento com cuidado, respeitando o seu ritmo e utilizando recursos que se complementam ao longo dos 7 dias.”**
 
 ### Regra dos recursos
 Se um recurso não estiver documentado ou validado na Biblioteca-Mestra, ele não deve aparecer no relatório como se sua função fosse conhecida.
