@@ -356,6 +356,7 @@ export function CareComposerAdminView({
             nome: item.nome,
             descricao: item.descricao,
           })),
+          userResult: friendlyResult,
         });
       }
 
