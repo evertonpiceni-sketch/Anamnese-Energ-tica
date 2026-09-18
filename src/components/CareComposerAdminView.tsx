@@ -5,6 +5,7 @@ import { criarPlanoAudioPersonalizado } from '../audio/audioCatalog';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
+import { AdminAudioUpload } from './AdminAudioUpload';
 
 interface CareComposerAdminViewProps {
   anamnese: AnamneseInput;
@@ -133,6 +134,13 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
           </div>
         </section>
       </div>
+
+      {composition.audio && (
+        <AdminAudioUpload
+          audio={composition.audio}
+          nomePessoa={anamnese.nomePessoa || 'Interagente'}
+        />
+      )}
 
       <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
         <div className="flex items-start gap-3">
