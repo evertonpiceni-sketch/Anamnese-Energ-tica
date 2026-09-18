@@ -11,6 +11,7 @@ import {
   Waves,
 } from 'lucide-react';
 import { ProgrammedAudioCard } from './ProgrammedAudioCard';
+import { PreparatoryAudioCard } from './PreparatoryAudioCard';
 import { PracticeHistory } from './PracticeHistory';
 import { loadUserMoment, UserMomentData } from '../services/userMomentBackend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
@@ -186,7 +187,17 @@ export function UserMomentArea({ mode, onStartNewIntake }: UserMomentAreaProps) 
         </p>
       </section>
 
-      {data.audio && <ProgrammedAudioCard audio={data.audio} />}
+      {data.carePlan?.audioStatus === 'published' && data.audio ? (
+        <ProgrammedAudioCard audio={data.audio} />
+      ) : (
+        <>
+          <section className="rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5 text-sm leading-6 text-[#715f36]">
+            Seu material personalizado está em preparação. Enquanto isso, este áudio preparativo
+            já está disponível para acompanhar o início da sua jornada.
+          </section>
+          <PreparatoryAudioCard />
+        </>
+      )}
 
       {data.carePlan ? (
         <section className="grid gap-4 md:grid-cols-2">
