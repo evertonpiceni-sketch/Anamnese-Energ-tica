@@ -1,18 +1,39 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Clock3, History } from 'lucide-react';
-import { AudioPracticeLog, getAudioPracticeLogs } from './ProgrammedAudioCard';
+import { listOwnPracticeLogs, RemotePracticeLog } from '../services/practiceBackend';
 
 export function PracticeHistory() {
-  const [logs, setLogs] = useState<AudioPracticeLog[]>([]);
+  const [logs, setLogs] = useState<RemotePracticeLog[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setLogs(getAudioPracticeLogs().slice().reverse());
+    let active = true;
+
+    listOwnPracticeLogs(10)
+      .then(items => {
+        if (active) setLogs(items);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
   }, []);
+
+  if (loading) {
+    return (
+      <div className="rounded-2xl border border-[#e0d5bb] bg-white/55 p-4 text-sm leading-6 text-[#6f786f]">
+        Carregando seu histórico de práticas...
+      </div>
+    );
+  }
 
   if (!logs.length) {
     return (
       <div className="rounded-2xl border border-[#e0d5bb] bg-white/55 p-4 text-sm leading-6 text-[#6f786f]">
-        Seu histórico de práticas aparecerá aqui depois que um áudio oficial estiver disponível e for utilizado.
+        Seu histórico aparecerá aqui depois que você utilizar um áudio oficial.
       </div>
     );
   }
@@ -25,30 +46,27 @@ export function PracticeHistory() {
       </div>
 
       <div className="space-y-3">
-        {logs.slice(0, 5).map(log => (
+        {logs.map(log => (
           <div key={log.id} className="rounded-xl border border-[#e6ddca] bg-[#fffaf0] p-4">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <div className="font-medium text-[#365441]">{log.titulo}</div>
-                <div className="mt-1 flex items-center gap-1.5 text-xs text-[#7b817b]">
-                  <Clock3 className="h-3.5 w-3.5" />
-                  {new Date(log.iniciadoEm).toLocaleString('pt-BR')}
-                </div>
+              <div className="mt-1 flex items-center gap-1.5 text-xs text-[#7b817b]">
+                <Clock3 className="h-3.5 w-3.5" />
+                {new Date(log.startedAt).toLocaleString('pt-BR')}
               </div>
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#57715f]">
                 <CheckCircle2 className="h-4 w-4" />
-                {log.status === 'concluido' ? 'Concluída' : 'Iniciada'}
+                {log.status === 'completed' ? 'Concluída' : 'Iniciada'}
               </div>
             </div>
 
-            {(log.percepcaoAntes !== undefined || log.percepcaoDepois !== undefined) && (
+            {(log.perceptionBefore !== null || log.perceptionAfter !== null) && (
               <div className="mt-3 text-xs text-[#6b746d]">
-                Percepção registrada: antes {log.percepcaoAntes ?? '—'} • depois {log.percepcaoDepois ?? '—'}
+                Percepção registrada: antes {log.perceptionBefore ?? '—'} • depois {log.perceptionAfter ?? '—'}
               </div>
             )}
 
-            {log.observacao && (
-              <p className="mt-2 text-sm leading-6 text-[#677268]">{log.observacao}</p>
+            {log.observation && (
+              <p className="mt-2 text-sm leading-6 text-[#677268]">{log.observation}</p>
             )}
           </div>
         ))}
