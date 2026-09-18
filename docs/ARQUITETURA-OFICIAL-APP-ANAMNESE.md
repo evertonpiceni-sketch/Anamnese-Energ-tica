@@ -1478,6 +1478,9 @@ Após a confirmação da compra, enquanto o material exclusivo estiver em produ�
 - ele deve ser separado tecnicamente dos áudios exclusivos;
 - sua função dentro do protocolo é preparar a pessoa para a etapa seguinte;
 - pode contemplar, dentro da proposta energética do protocolo, os campos físico, emocional, mental e espiritual;
+- **não possui voz, narração ou meditação guiada**;
+- **não possui roteiro falado**;
+- deve funcionar como uma faixa sonora/energética de preparação;
 - não deve conter leitura individual, diagnóstico, sistemas específicos da pessoa ou composição exclusiva;
 - deve ser disponibilizado **somente para reprodução dentro do app**;
 - **não pode ser baixado pelo usuário**;
@@ -1599,3 +1602,24 @@ O fluxo deve permitir futuramente operacionalizar:
 ### Regra de fechamento
 Nenhum destes itens deve ser marcado como **FECHADO**, **APROVADO PARA PRODUÇÃO** ou equivalente sem revisão específica e validação final do fluxo real do aplicativo.
 
+
+
+### Regra sonora do áudio preparativo
+O áudio preparativo é **instrumental/ambiental e sem locução**.
+
+Não usar:
+- voz humana;
+- TTS;
+- meditação guiada;
+- afirmações faladas;
+- instruções de respiração narradas;
+- roteiro de abertura ou fechamento falado.
+
+Podem existir, quando aprovados:
+- trilha ambiente;
+- Solfeggio;
+- silêncio estruturado;
+- elementos sonoros suaves;
+- programação energética realizada pelo Everton.
+
+Este áudio não entra no pipeline de geração de voz dos áudios personalizados.
