@@ -6,8 +6,8 @@ import { SistemaBiblioteca } from '../types';
  * Regra:
  * - nenhum símbolo, comando, frequência, linhagem, página ou propriedade é inventado;
  * - campos sem comprovação ficam vazios;
- * - MATERIAL_CONFIRMADO = há material/documentação no acervo;
- * - FORMAÇÃO_CONFIRMADA = há evidência documental explícita de formação/certificação;
+ * - FORMAÇÃO_CONFIRMADA = existe PDF/material do curso na biblioteca do Everton; por regra do projeto isso confirma que ele possui a iniciação correspondente;
+ * - MATERIAL_CONFIRMADO = usar apenas para materiais sem confirmação de iniciação pela regra acima;
  * - AGUARDANDO_VALIDACAO = nome encontrado, mas ainda sem documentação suficiente para recomendação automática.
  */
 
@@ -47,7 +47,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Original Reiki Platinum',
       'Uso confirmado nos roteiros aprovados da Reintegração da Vida.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: true,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -96,7 +96,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Karuna Ki / Cristais Etéricos Quânticos Karuna',
       'Símbolos e usos confirmados nos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -154,7 +154,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Soul Shakti',
       'Recursos e combinações confirmados nos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -205,7 +205,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'DNA Light Integrative',
       'Uso e recursos confirmados nos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -249,7 +249,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Life Force Energy Cone',
       'Comando e uso confirmados nos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: true,
     requerEstabilizacaoPrevia: false,
@@ -289,7 +289,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Etheric Clearing',
       'Primeira sequência e comando confirmados no roteiro aprovado.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -329,7 +329,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Acupuntura Etérica Quântica',
       'Procedimento de ativação e uso confirmados nos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: true,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -370,7 +370,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Golden Light Source',
       'Uso confirmado na abertura/ancoragem dos roteiros aprovados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: true,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -449,9 +449,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       'E-mail: Re: Reiki Usui 3a e 3b',
       'Cristais Etéricos Quânticos Usui',
-      'Curso e materiais anexos confirmados por e-mail; conteúdo técnico ainda não catalogado.'
+      'Curso/material confirmado no acervo; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico ainda não catalogado.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -484,9 +484,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       'E-mail: Re: Reiki Usui 3a e 3b',
       'Violet Flame',
-      'Curso e materiais anexos confirmados por e-mail; detalhes técnicos ainda não catalogados.'
+      'Curso/material confirmado no acervo; iniciação considerada confirmada pela regra do projeto. Detalhes técnicos ainda não catalogados.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -559,7 +559,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'My Red Hot Sizzling Aura',
       'Manual confirmado na biblioteca.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: true,
     requerEstabilizacaoPrevia: true,
@@ -600,7 +600,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
       'Shamballa Multidimensional Healing',
       'Manuais dos níveis 1, 2, 3 e 4 confirmados na biblioteca.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -636,9 +636,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Ama Deus",
       "Cura Xamânica Ama Deus",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -671,9 +671,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Artes Místicas de Java",
       "Artes Místicas de Java",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -706,9 +706,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Ativação dos Chakras Celestiais",
       "The Celestial Chakra Activation",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -741,9 +741,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Benteng Diri Pamungkas",
       "Benteng Diri Pamungkas",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -776,9 +776,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Benzi Reiki",
       "Benzi Reiki",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -811,9 +811,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Energias Douradas de Abundância",
       "Energias Douradas de Abundância",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -846,9 +846,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Escudo Cristalino de Metatron",
       "Escudo Cristalino de Metatron",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -881,9 +881,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Fonte de Luz Magenta — Magenta Source 2017",
       "Fonte de Luz Magenta — Magenta Source 2017",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -916,9 +916,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/God's Angels of Psychometry",
       "God's Angels of Psychometry",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -951,9 +951,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Higher Self Will Alignment",
       "Higher Self Will Alignment",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -986,9 +986,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Ilmu Rajah Kalachakra",
       "Ilmu Rajah Kalachakra",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1021,9 +1021,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Magical Red Light Vortex",
       "Magical Red Light Vortex",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1056,9 +1056,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Mega Power Spell Breaker",
       "Mega Power Spell Breaker",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1091,9 +1091,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Original Reiki Cristalino",
       "Original Reiki Cristalino",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1126,9 +1126,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Original Reiki Healing System",
       "Original Reiki Healing System",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1161,9 +1161,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Prosonodo Light",
       "Prosonodo Light",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1196,9 +1196,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Samurai Reiki",
       "Samurai Reiki",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1231,9 +1231,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Seichim 7 Facetas",
       "Seichim 7 Facetas",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1266,9 +1266,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Sekhem Heka",
       "Sekhem Heka",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1301,9 +1301,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Sol A Vana",
       "Sol A Vana",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1336,9 +1336,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/Solar Fire Crystals",
       "Solar Fire Crystals",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
@@ -1371,9 +1371,9 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     origemDocumental: fonte(
       "/Biblioteca do Protocolo da Transformação/Sistemas Energéticos/The Magic Cosmic Light — Sol a Vana",
       "The Magic Cosmic Light — Sol a Vana",
-      'Sistema/material confirmado na Biblioteca do Protocolo da Transformação; conteúdo técnico aguardando catalogação.'
+      'PDF/material do sistema confirmado na Biblioteca do Protocolo da Transformação; iniciação considerada confirmada pela regra do projeto. Conteúdo técnico aguardando catalogação.'
     ),
-    status: 'MATERIAL_CONFIRMADO',
+    status: 'FORMAÇÃO_CONFIRMADA',
     ehBaseSustentacao: false,
     ehEstimulanteAtivo: false,
     requerEstabilizacaoPrevia: false,
