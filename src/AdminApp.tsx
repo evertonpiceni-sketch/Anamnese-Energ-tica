@@ -10,10 +10,11 @@ import { RelatorioEvertonView } from './components/RelatorioEvertonView';
 import { BibliotecaMestraView } from './components/BibliotecaMestraView';
 import { ReavaliacaoView } from './components/ReavaliacaoView';
 import { AudioLibraryView } from './components/AudioLibraryView';
+import { ComplementaryLibrariesView } from './components/ComplementaryLibrariesView';
 import { CasosTesteView } from './components/CasosTesteView';
 import { Sparkles, ShieldCheck, Heart, BookOpen, Activity, Play, RotateCcw } from 'lucide-react';
 
-type ViewMode = 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'reavaliacao' | 'casos';
+type ViewMode = 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'reavaliacao' | 'casos';
 
 export const ANAMNESE_LIMPA: AnamneseInput = {
   id: '',
@@ -268,6 +269,10 @@ export default function AdminApp() {
 
         {viewAtiva === 'audios' && (
           <AudioLibraryView />
+        )}
+
+        {viewAtiva === 'complementares' && (
+          <ComplementaryLibrariesView />
         )}
 
         {viewAtiva === 'reavaliacao' && (
