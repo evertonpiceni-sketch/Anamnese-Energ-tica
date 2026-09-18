@@ -1,7 +1,7 @@
 import { AudioLines, Flower2, Gem, Layers3, Leaf, ShieldCheck } from 'lucide-react';
 import { AnamneseInput } from '../types';
 import { AnaliseCompletaResultado } from '../engine/analysisEngine';
-import { escolherAudioProgramado } from '../audio/audioCatalog';
+import { criarPlanoAudioPersonalizado } from '../audio/audioCatalog';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
@@ -26,9 +26,16 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
   }
 
   const axes = analise.relatorioEverton.eixosOrdenados;
-  const audio = escolherAudioProgramado(axes);
   const complementary = selectComplementaryCare(axes);
   const solfeggio = selectSolfeggioFrequency(axes);
+  const audio = criarPlanoAudioPersonalizado({
+    userId: anamnese.id,
+    anamneseId: anamnese.id,
+    nomePessoa: anamnese.nomePessoa,
+    eixos: axes,
+    relatorio: analise.relatorioEverton,
+    solfeggio,
+  });
   const composition = buildCareComposition(audio, complementary, solfeggio);
 
   return (
@@ -75,8 +82,8 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
           <div className="mt-4 space-y-3">
             <ResourceRow
               icon={<AudioLines className="h-5 w-5" />}
-              title="Áudio programado"
-              value={composition.audio?.titulo || 'Nenhum áudio selecionado'}
+              title="Áudio exclusivo"
+              value={composition.audio?.titulo || 'Plano de áudio não gerado'}
               status={composition.audio?.status || 'SEM SELEÇÃO'}
             />
 
