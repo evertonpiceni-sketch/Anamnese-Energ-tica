@@ -1623,3 +1623,71 @@ Podem existir, quando aprovados:
 - programação energética realizada pelo Everton.
 
 Este áudio não entra no pipeline de geração de voz dos áudios personalizados.
+
+
+## COMPLEMENTO OPCIONAL — RELATÓRIO COMPLETO NO PLANO DE 7 DIAS
+
+Status: **REGRA OFICIAL**
+
+### Aplicação
+No plano de **R$ 50 / 7 dias**, o usuário recebe normalmente a leitura básica já definida para essa modalidade.
+
+Opcionalmente, poderá adquirir o **Relatório Completo** por **R$ 15 adicionais**, totalizando **R$ 65**.
+
+No plano de **R$ 100**, o relatório completo permanece incluído, sem cobrança adicional.
+
+### Regra de apresentação
+O complemento deve ser apresentado de forma discreta e sem pressão comercial.
+
+Texto sugerido:
+**“Quero conhecer minha leitura completa — + R$ 15”**
+
+Não usar linguagem como:
+- “resultado melhor”;
+- “versão superior”;
+- “diagnóstico verdadeiro”;
+- “você precisa disso”;
+- comparações que diminuam a entrega do plano de R$ 50.
+
+O plano de R$ 50 continua completo dentro da proposta contratada; o Relatório Completo é apenas um aprofundamento opcional.
+
+### Conteúdo do Relatório Completo
+O relatório completo deve ser detalhado e manter o mesmo padrão de profundidade das modalidades que já incluem leitura completa.
+
+Ele deve apresentar, em linguagem acessível ao usuário:
+
+- síntese acolhedora do momento atual;
+- áreas que aparecem como prioritárias;
+- relação entre as respostas, sem expor pontuações, pesos ou fórmulas internas;
+- padrões percebidos e como eles se conectam no momento atual;
+- intenção central do cuidado;
+- tipo de energia que será trabalhada;
+- para que essa energia é utilizada dentro do protocolo;
+- em quais campos/áreas ela atua dentro da proposta do sistema;
+- sistemas energéticos selecionados para a composição;
+- recursos específicos usados dentro desses sistemas, quando for apropriado revelar ao usuário;
+- Solfeggio selecionado, quando aplicável, com explicação simples da intenção de uso;
+- florais selecionados, quando aplicável, com explicação simples de sua função dentro do protocolo;
+- aromaterapia selecionada, quando aplicável, incluindo forma de uso e cuidados já catalogados;
+- cristais etéricos selecionados, quando aplicável, explicando:
+  - que não é necessário possuir a pedra física;
+  - que o cristal é usado como referência energética na composição;
+  - qual a intenção de cada cristal dentro do protocolo;
+- áreas corporais/chakras relacionadas à composição, quando isso fizer parte da leitura aprovada;
+- como os recursos se complementam;
+- orientação de uso do áudio;
+- o que observar ao longo dos 7 dias;
+- fechamento acolhedor e reavaliação ao final do período.
+
+### Regra de linguagem
+As descrições de energia, sistema, cristal, floral, aroma, frequência ou chakra devem:
+- permanecer dentro da linguagem do protocolo;
+- explicar finalidade e área de atuação sem prometer resultado garantido;
+- não transformar linguagem energética em alegação médica;
+- não expor lógica interna, score, peso, fórmula, Biblioteca-Mestra, comandos privados, símbolos internos ou justificativas técnicas reservadas ao ADM;
+- usar apenas propriedades já documentadas/catalogadas, sem improvisação.
+
+### Regra dos recursos
+Se um recurso não estiver documentado ou validado na Biblioteca-Mestra, ele não deve aparecer no relatório como se sua função fosse conhecida.
+
+O relatório completo deve refletir exatamente a composição aprovada para aquele usuário e aquela anamnese.
