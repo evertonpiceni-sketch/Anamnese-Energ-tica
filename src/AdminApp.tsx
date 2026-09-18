@@ -13,7 +13,7 @@ import { AudioLibraryView } from './components/AudioLibraryView';
 import { ComplementaryLibrariesView } from './components/ComplementaryLibrariesView';
 import { CareComposerAdminView } from './components/CareComposerAdminView';
 import { CasosTesteView } from './components/CasosTesteView';
-import { Sparkles, ShieldCheck, Heart, BookOpen, Activity, Play, RotateCcw } from 'lucide-react';
+import { Sparkles, ShieldCheck, Heart, BookOpen, Activity, Play, RotateCcw, LogOut } from 'lucide-react';
 
 type ViewMode = 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'compositor' | 'reavaliacao' | 'casos';
 
@@ -59,7 +59,7 @@ function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: Ana
   }
 }
 
-export default function AdminApp() {
+export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promise<void> }) {
   const ultimaConcluida = carregarUltimaAnamneseConcluida();
 
   // O ADM abre a última anamnese concluída quando houver uma no dispositivo.
@@ -149,6 +149,17 @@ export default function AdminApp() {
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
+            {onSignOut && (
+              <button
+                type="button"
+                onClick={() => void onSignOut()}
+                className="px-2.5 py-1 rounded-lg text-stone-400 hover:text-stone-200 hover:bg-stone-800 transition-all flex items-center gap-1.5 text-xs border border-stone-700/60"
+                title="Encerrar sessão administrativa"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Sair</span>
+              </button>
+            )}
             <button
               id="btn-banner-limpar"
               onClick={handleLimparAnamnese}
