@@ -1287,6 +1287,7 @@ Status: **REGRA OFICIAL**
 - **R$ 50 — 7 dias / áudio personalizado sem meditação guiada**
   - inclui o áudio exclusivo;
   - uso por 7 dias;
+  - prazo de entrega: **até 3 dias** após a confirmação da compra e conclusão da anamnese;
   - libera um **diagnóstico parcial**;
   - não libera o diagnóstico completo nem o detalhamento integral das respostas.
 
@@ -1301,6 +1302,7 @@ Status: **REGRA OFICIAL**
 - **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida**
   - inclui a jornada de 21 dias;
   - processo mais aprofundado;
+  - prazo de entrega: **até 3 dias** após a confirmação da compra e conclusão da anamnese;
   - libera o diagnóstico completo;
   - libera a leitura organizada a partir das respostas da própria pessoa.
 
@@ -1418,20 +1420,32 @@ Exemplo:
 
 
 
-## REGRA DE PRAZO — ÁUDIO + MEDITAÇÃO GUIADA
+## REGRA DE PRAZO — TODAS AS MODALIDADES
 
 Status: **REGRA OFICIAL**
 
-Para a modalidade de **R$ 100 — 7 dias / áudio personalizado com meditação guiada**:
+O prazo de entrega é de **até 3 dias para todas as modalidades**:
 
-- prazo de entrega do material: **até 3 dias**;
-- o prazo começa após:
-  - confirmação da compra;
-  - conclusão da anamnese;
-  - existência dos dados necessários para montar a composição;
-- o usuário deve ver esse prazo antes da finalização da compra e na área **Minha Jornada** enquanto o material estiver sendo preparado;
-- o sistema não deve marcar como pronto antes da publicação real do áudio/meditação;
-- enquanto estiver em produção, exibir estado de preparação de forma clara e acolhedora.
+- **R$ 50 — 7 dias / áudio personalizado sem meditação guiada**
+- **R$ 100 — 7 dias / áudio personalizado com meditação guiada**
+- **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida**
 
-Exemplo de mensagem USER:
-**“Seu áudio com meditação guiada está sendo preparado com base na sua anamnese. O prazo de entrega é de até 3 dias.”**
+### Início do prazo
+O prazo começa após:
+- confirmação da compra;
+- conclusão da anamnese;
+- existência dos dados necessários para montar a composição individual.
+
+### Comunicação ao usuário
+O prazo deve aparecer:
+- antes da finalização da compra;
+- após a confirmação da compra;
+- em **Minha Jornada** enquanto o material estiver sendo preparado.
+
+### Regra de status
+O sistema nunca deve marcar o material como pronto antes da publicação real.
+
+Enquanto estiver em produção, usar mensagem acolhedora e objetiva, como:
+
+**“Seu material personalizado está sendo preparado com base na sua anamnese. O prazo de entrega é de até 3 dias.”**
+
