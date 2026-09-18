@@ -243,11 +243,37 @@ export const CATALOGACAO_DOCUMENTAL: Record<string, OverrideSistema> = {
   },
 
   empoderamentos_ganesha: {
-    catalogacaoTecnica: 'PENDENTE',
-    objetivos: 'Formação confirmada por certificado. O conteúdo técnico ainda não foi encontrado em manual legível no acervo consultado.',
-    areasAtuacao: [],
-    recursosInternos: [],
-    compatibilidadeEixos: {},
+    catalogacaoTecnica: 'COMPLETA',
+    nivel: 'Nível Único / Mestrado',
+    modulos: [
+      'Magical Ganesha Power',
+      'Ganesha Empowerment',
+      'Ganesha Spiritual Energy Flush',
+      'Ganesha’s Success Blessings Empowerment'
+    ],
+    comandos: [
+      'ATIVANDO GANESHA EMPOWERMENT',
+      'ATIVANDO EMPODERAMENTO DE GANESHA',
+      'Ativando Ganesha’s Success Blessings Empowerment'
+    ],
+    objetivos: 'Formação em nível único/Mestrado composta por quatro partes. O manual descreve aplicações pessoais, em outras pessoas, à distância, em lugares/objetos e práticas voltadas a obstáculos, aprendizagem, prosperidade e sucesso.',
+    areasAtuacao: ['movimento', 'prosperidade', 'aprendizagem', 'proteção', 'propósito'],
+    recursosInternos: [
+      r('Magical Ganesha Power','energia',['movimento','criatividade','mente','protecao'],'Apostila Empoderamentos de Ganesha Oficial'),
+      r('Ganesha Empowerment','energia',['movimento','prosperidade','poder_pessoal'],'Apostila Empoderamentos de Ganesha Oficial'),
+      r('Ganesha Spiritual Energy Flush','energia',['limpeza','espiritualidade','integracao'],'Apostila Empoderamentos de Ganesha Oficial'),
+      r('Ganesha’s Success Blessings Empowerment','energia',['prosperidade','movimento','proposito'],'Apostila Empoderamentos de Ganesha Oficial'),
+    ],
+    formasAplicacao: ['Autocuidado','Aplicação em outra pessoa','À distância','Lugar ou objeto','Sessão com imposição de mãos'],
+    metodosAtivacao: ['Ativação verbal ou mental por três repetições conforme o módulo escolhido; o manual permite aplicação semelhante ao Reiki.'],
+    duracaoSugerida: 'O manual exemplifica sessões de aproximadamente 10 a 15 minutos ou até o fluxo diminuir.',
+    cuidados: ['Tratar prosperidade, proteção e demais efeitos como descrições do sistema, não como garantias de resultado.'],
+    origemDocumental: {
+      idDocumento: 'Apostila-Empoderamentos-de-Ganesha-Oficial.pdf + módulos complementares',
+      curso: 'Empoderamentos de Ganesha',
+      statusConfirmacao: 'Manual oficial, módulos complementares e certificado confirmados.',
+    },
+    compatibilidadeEixos: { movimento: 4, prosperidade: 4, poder_pessoal: 3, mente: 3, criatividade: 3, protecao: 3, limpeza: 2, proposito: 3, integracao: 2 },
   },
 
   my_red_hot_sizzling_aura: {
