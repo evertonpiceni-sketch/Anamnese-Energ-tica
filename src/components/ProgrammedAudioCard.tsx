@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Clock3, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
 import { PersonalizedAudioPlan } from '../audio/audioCatalog';
+import { createPersonalizedAudioObjectUrl } from '../audio/audioStorage';
 
 const PRACTICE_LOG_KEY = 'anamnese-integrativa-practice-logs-v1';
 
@@ -29,13 +30,35 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [playing, setPlaying] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [practiceId, setPracticeId] = useState<string | null>(null);
+  const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
 
-  const available = audio.status === 'GERADO' && !!audio.arquivoUrl;
+  const playbackUrl = audio.arquivoUrl || localAudioUrl;
+  const available = !!playbackUrl;
 
   const durationLabel = useMemo(() => {
     if (!audio.duracaoMinutos) return 'Duração definida quando o arquivo for cadastrado';
     return `${audio.duracaoMinutos} min`;
   }, [audio.duracaoMinutos]);
+
+  useEffect(() => {
+    let active = true;
+    let objectUrl: string | null = null;
+
+    if (!audio.arquivoUrl) {
+      createPersonalizedAudioObjectUrl(audio.id)
+        .then(result => {
+          if (!active || !result) return;
+          objectUrl = result.url;
+          setLocalAudioUrl(result.url);
+        })
+        .catch(() => setLocalAudioUrl(null));
+    }
+
+    return () => {
+      active = false;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [audio.id, audio.arquivoUrl]);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -167,12 +190,12 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
         <div className="mt-6 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5">
           <div className="font-semibold text-[#6f5d31]">Sua sessão exclusiva está sendo preparada.</div>
           <p className="mt-2 text-sm leading-6 text-[#7b6b46]">
-            Este áudio será gerado exclusivamente a partir da sua anamnese e da composição desta sessão. Ele não é reutilizado para outra pessoa.
+            Este áudio será gerado exclusivamente a partir da sua anamnese e da composição desta sessão. Quando o terapeuta anexar o arquivo no ADM, ele ficará disponível aqui somente para este plano.
           </p>
         </div>
       ) : (
         <>
-          <audio ref={elementRef} src={audio.arquivoUrl} preload="metadata" />
+          <audio ref={elementRef} src={playbackUrl || undefined} preload="metadata" />
 
           <div className="mt-6">
             <p className="mb-2 text-sm font-semibold text-[#365441]">Antes de ouvir, como você percebe seu estado agora?</p>
