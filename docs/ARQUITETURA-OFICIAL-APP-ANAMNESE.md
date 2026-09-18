@@ -1533,7 +1533,7 @@ A regra de download continua válida apenas para os áudios personalizados/exclu
 
 ## REGRA LGPD E POLÍTICA DE PRIVACIDADE
 
-Status: **IMPLEMENTAÇÃO INICIAL OBRIGATÓRIA**
+Status: **EM REVISÃO — NÃO CONSIDERAR FECHADO PARA PRODUÇÃO**
 
 O aplicativo trata dados pessoais e pode tratar dados pessoais sensíveis fornecidos pela própria pessoa na anamnese. Por isso, a experiência deve manter uma camada permanente de transparência e proteção de dados.
 
@@ -1573,10 +1573,29 @@ O fluxo deve permitir futuramente operacionalizar:
 - eliminação quando cabível;
 - demais direitos previstos na LGPD.
 
-### Pendente antes da publicação comercial
+### Itens em revisão antes da publicação comercial
+- revisar e eliminar riscos de armazenamento local de dados sensíveis em chaves compartilhadas do navegador;
+- criar a área **Privacidade e meus dados**;
+- separar consentimentos gerais de consentimento para dados pessoais sensíveis da anamnese;
 - definir o canal oficial de contato para privacidade/LGPD;
 - confirmar os fornecedores efetivamente utilizados e refletir isso na política;
 - definir formalmente os prazos/regras de retenção por categoria de dado;
-- implementar o fluxo operacional de solicitação de direitos;
-- revisar juridicamente a versão final antes do lançamento comercial.
+- definir o fluxo de acesso, correção, revogação, portabilidade quando aplicável e solicitação de exclusão;
+- registrar protocolo e histórico das solicitações de privacidade;
+- definir o que pode ser eliminado imediatamente e o que eventualmente precisa ser conservado por fundamento legal;
+- revisar juridicamente a versão final antes do lançamento comercial;
+- executar auditoria LGPD completa antes de considerar o módulo apto para produção.
+
+### Ordem sugerida para a revisão
+1. armazenamento local e exposição entre contas;
+2. área **Privacidade e meus dados**;
+3. consentimentos separados;
+4. canal oficial de privacidade;
+5. política de retenção;
+6. fluxo operacional dos direitos do titular;
+7. revisão jurídica;
+8. auditoria final de produção.
+
+### Regra de fechamento
+Nenhum destes itens deve ser marcado como **FECHADO**, **APROVADO PARA PRODUÇÃO** ou equivalente sem revisão específica e validação final do fluxo real do aplicativo.
 
