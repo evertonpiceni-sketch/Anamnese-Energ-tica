@@ -246,6 +246,40 @@ Mostrar apenas o que foi selecionado para aquele momento.
 
 ---
 
+## Tela U09.1 — Download do resultado em PDF
+
+### Objetivo
+Permitir que o usuário salve uma cópia do próprio resultado.
+
+### Conteúdo do PDF
+- identidade visual do projeto;
+- nome e data;
+- leitura acolhedora do momento;
+- prioridades em linguagem humana;
+- intenção do próximo passo;
+- Solfeggio indicado;
+- floral sugerido, quando houver;
+- aromaterapia, quando houver;
+- cristais etéricos, quando houver;
+- informação de que a sessão de áudio é exclusiva;
+- mensagem final e aviso de caráter complementar.
+
+### Nunca incluir no PDF do usuário
+- Biblioteca-Mestra;
+- scores;
+- pesos;
+- nomes dos sistemas internos;
+- símbolos;
+- comandos;
+- justificativa técnica;
+- recursos rejeitados;
+- relatório ADM.
+
+### Ação
+Botão: **Baixar meu resultado em PDF**
+
+---
+
 ## Tela U10 — Player de áudio
 
 ### Objetivo
