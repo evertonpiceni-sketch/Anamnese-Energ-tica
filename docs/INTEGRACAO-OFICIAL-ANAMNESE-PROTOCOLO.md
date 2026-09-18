@@ -31,26 +31,32 @@ Conforme a necessidade identificada, o sistema poderá indicar uma composição 
 
 Não é obrigatório utilizar todos os recursos em todos os casos. A composição deve priorizar coerência e adequação ao momento da pessoa, não quantidade.
 
-## 3. Áudios programados
+## 3. Áudio personalizado e exclusivo
 
-Os áudios programados são parte do tratamento e não simples conteúdo complementar.
+O áudio é parte central do tratamento, mas **não existe como biblioteca de faixas prontas para reutilização**.
 
-Podem ser utilizados para:
+Cada usuário recebe um áudio exclusivo, criado a partir da sua própria anamnese e da composição energética definida para aquele momento.
 
-- acolhimento inicial;
-- estabilização;
-- presença e aterramento;
-- medo;
-- insegurança;
-- vitalidade;
-- reconexão corporal;
-- movimento;
-- recomeço;
-- preparação para o protocolo de 21 dias;
-- apoio durante a jornada;
-- reavaliação e continuidade.
+A composição do áudio deve considerar, entre outros elementos:
 
-O app deve permitir acompanhar a execução do áudio e, quando previsto, colher uma percepção simples antes/depois para alimentar a reavaliação.
+- eixo estruturante e prioridades secundárias;
+- sistema-base;
+- sistema principal;
+- sistemas complementares;
+- símbolos, energias, frequências e recursos internos selecionados;
+- Solfeggio indicado para a sessão;
+- cristais etéricos;
+- floral e aromaterapia quando fizerem parte da composição;
+- necessidade de estabilização, movimento, integração ou preparação;
+- momento atual do usuário e histórico de reavaliação.
+
+**Regra obrigatória:** nenhum áudio final é tratado como genérico, reaproveitável ou igual ao de outro usuário.
+
+Mesmo que duas pessoas apresentem eixos semelhantes, a combinação de sistemas, recursos e sequência é individual. O app deve gerar uma nova composição e uma nova instância de áudio para cada anamnese.
+
+A biblioteca sonora do sistema deve guardar apenas componentes, regras, estruturas, trilhas-base, Solfeggios e recursos de composição — nunca um “tratamento final padrão” para reutilizar entre pessoas.
+
+O app deve permitir acompanhar a execução do áudio exclusivo e, quando previsto, colher uma percepção simples antes/depois para alimentar a reavaliação.
 
 ## 3.1. Solfeggio na sessão
 
@@ -177,7 +183,7 @@ E a resposta operacional é:
 
 ## 9. Arquitetura consolidada
 
-**PESSOA → ANAMNESE → NECESSIDADE ATUAL → LEITURA INTERNA → ÁUDIO PROGRAMADO + FLORAL + AROMATERAPIA + CRISTAIS ETÉRICOS + TRILHA DISPONÍVEL → ACOMPANHAMENTO → REAVALIAÇÃO → INTEGRAÇÃO COM OS 21 DIAS, QUANDO INDICADO**
+**PESSOA → ANAMNESE → NECESSIDADE ATUAL → LEITURA INTERNA → COMPOSIÇÃO INDIVIDUAL DOS SISTEMAS → GERAÇÃO DE ÁUDIO EXCLUSIVO + SOLFEGGIO + FLORAL + AROMATERAPIA + CRISTAIS ETÉRICOS + TRILHA DISPONÍVEL → ACOMPANHAMENTO → REAVALIAÇÃO → NOVA COMPOSIÇÃO QUANDO NECESSÁRIO → INTEGRAÇÃO COM OS 21 DIAS, QUANDO INDICADO**
 
 ## 10. Regra de evolução
 
