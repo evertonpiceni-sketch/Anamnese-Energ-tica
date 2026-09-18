@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download, Heart, Leaf, Mail, Save, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download, Heart, Leaf, Mail, Save, ShieldCheck, Sparkles, LayoutDashboard, Route, PlusCircle } from 'lucide-react';
 import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
@@ -13,8 +13,10 @@ import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
 import { saveIntakeSession } from '../services/backend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
 import { requestResultEmail } from '../services/resultEmail';
+import { UserMomentArea } from './UserMomentArea';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
+type UserArea = 'anamnese' | 'momento' | 'jornada';
 
 type FriendlyResult = {
   headline: string;
@@ -60,6 +62,7 @@ const scaleLabels = [
 
 export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAnamneseAppProps) {
   const [step, setStep] = useState<Step>('welcome');
+  const [userArea, setUserArea] = useState<UserArea>('anamnese');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
   const [analysis, setAnalysis] = useState<AnaliseCompletaResultado | null>(null);
@@ -203,7 +206,54 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
               <div className="text-xs tracking-[0.18em] text-[#8e7946]">ANAMNESE INTEGRATIVA</div>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setUserArea('anamnese');
+                setForm(emptyIntake());
+                setAnalysis(null);
+                setFriendlyResult(null);
+                setSelectedAudio(null);
+                setCareComposition(null);
+                setBackendIntakeId(null);
+                setEmailMessage('');
+                setQuestionIndex(0);
+                setStep('welcome');
+              }}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                userArea === 'anamnese'
+                  ? 'border-[#b89546] bg-[#173f2d] text-white'
+                  : 'border-[#d8c99f] bg-white/60 text-[#617066] hover:bg-white'
+              }`}
+            >
+              <PlusCircle className="h-4 w-4" /> Nova Anamnese
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setUserArea('momento')}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                userArea === 'momento'
+                  ? 'border-[#b89546] bg-[#173f2d] text-white'
+                  : 'border-[#d8c99f] bg-white/60 text-[#617066] hover:bg-white'
+              }`}
+            >
+              <LayoutDashboard className="h-4 w-4" /> Meu Momento
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setUserArea('jornada')}
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 text-xs font-semibold transition ${
+                userArea === 'jornada'
+                  ? 'border-[#b89546] bg-[#173f2d] text-white'
+                  : 'border-[#d8c99f] bg-white/60 text-[#617066] hover:bg-white'
+              }`}
+            >
+              <Route className="h-4 w-4" /> Minha Jornada
+            </button>
+
             {onSignOut && (
               <button
                 type="button"
@@ -214,7 +264,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
               </button>
             )}
           </div>
-          {step !== 'welcome' && step !== 'sent' && (
+          {userArea === 'anamnese' && step !== 'welcome' && step !== 'sent' && (
             <div className="hidden items-center gap-2 text-xs text-[#6f756d] sm:flex">
               <Save className="h-4 w-4 text-[#b89546]" />
               Seu progresso é salvo neste dispositivo
@@ -230,6 +280,8 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
         </div>
 
         <div className="relative mx-auto max-w-5xl px-5 py-10 sm:py-14">
+          {userArea === 'anamnese' && (
+            <>
           {step === 'welcome' && (
             <section className="grid min-h-[68vh] items-center gap-10 lg:grid-cols-[1.05fr_.95fr]">
               <div className="space-y-6">
@@ -635,15 +687,42 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
                 A partir daqui, seu cuidado poderá ser organizado com os recursos mais adequados disponíveis no protocolo. A leitura técnica permanece reservada ao painel administrativo.
               </p>
               <p className="text-sm text-[#7b817b]">
-                A partir desta leitura, o app poderá conectar os áudios programados, florais, aromaterapia, cristais etéricos e, quando indicado, a jornada de 21 dias. Esses recursos serão exibidos apenas quando estiverem cadastrados e disponíveis para aquele cuidado.
+                Você poderá acompanhar a publicação do seu cuidado em Meu Momento e Minha Jornada.
               </p>
 
               <PracticeHistory />
 
-              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setBackendIntakeId(null); setEmailMessage(''); setQuestionIndex(0); setStep('welcome'); }}>
-                Nova anamnese
-              </PrimaryButton>
+              <div className="flex flex-wrap gap-3">
+                <PrimaryButton onClick={() => setUserArea('momento')}>
+                  Ir para Meu Momento
+                </PrimaryButton>
+                <SecondaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setBackendIntakeId(null); setEmailMessage(''); setQuestionIndex(0); setStep('welcome'); }}>
+                  Nova anamnese
+                </SecondaryButton>
+              </div>
             </CenteredCard>
+          )}
+            </>
+          )}
+
+          {userArea === 'momento' && (
+            <UserMomentArea
+              mode="momento"
+              onStartNewIntake={() => {
+                setUserArea('anamnese');
+                setStep('welcome');
+              }}
+            />
+          )}
+
+          {userArea === 'jornada' && (
+            <UserMomentArea
+              mode="jornada"
+              onStartNewIntake={() => {
+                setUserArea('anamnese');
+                setStep('welcome');
+              }}
+            />
           )}
         </div>
       </main>
