@@ -157,6 +157,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
 
       const savedRecord = {
         ...finalData,
+        backendUserId: userId,
         backendIntakeId,
         enviadoEm: new Date().toISOString(),
         status: 'concluida',
