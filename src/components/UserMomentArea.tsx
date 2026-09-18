@@ -134,6 +134,13 @@ export function UserMomentArea({ mode, onStartNewIntake }: UserMomentAreaProps) 
                     intention: data.result!.intention,
                     closing: data.result!.closing,
                     composition: null,
+                    publicCare: {
+                      solfeggio: data.carePlan?.solfeggio || null,
+                      floralNames: data.carePlan?.floral?.map(item => item?.nome).filter(Boolean) || [],
+                      aromatherapyNames: data.carePlan?.aromatherapy?.map(item => item?.nome).filter(Boolean) || [],
+                      crystalNames: data.carePlan?.ethericCrystals?.map(item => item?.nome).filter(Boolean) || [],
+                      hasExclusiveAudio: Boolean(data.carePlan?.audioPlanId),
+                    },
                   })
                 }
                 className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#cdbc91] bg-white/70 px-5 py-3 font-semibold text-[#53675b]"
