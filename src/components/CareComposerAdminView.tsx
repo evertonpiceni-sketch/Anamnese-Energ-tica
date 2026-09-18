@@ -24,6 +24,7 @@ import { buildCareComposition } from '../care/careComposer';
 import { SOLFEGGIO_CATALOG } from '../care/solfeggioCatalog';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { AdminAudioUpload } from './AdminAudioUpload';
+import { AudioGenerationAdminPanel } from './AudioGenerationAdminPanel';
 import { requestResultEmail } from '../services/resultEmail';
 import {
   loadCareCompositionReview,
@@ -692,6 +693,15 @@ export function CareComposerAdminView({
           />
         </div>
       </section>
+
+      {composition.audio && backendUserId && backendIntakeId && reviewStatus === 'approved' && (
+        <AudioGenerationAdminPanel
+          audioPlanId={composition.audio.id}
+          firstName={anamnese.nomePessoa.trim().split(/\s+/)[0] || 'Interagente'}
+          intention={composition.audio.intencao}
+          solfeggioHz={composition.solfeggio?.hz || null}
+        />
+      )}
 
       {composition.audio && backendUserId && backendIntakeId && reviewStatus === 'approved' ? (
         <AdminAudioUpload
