@@ -563,8 +563,9 @@ function buildFriendlyResult(analysis: AnaliseCompletaResultado, nome: string): 
     intro: 'Neste momento, algumas áreas parecem pedir mais presença. Isso não define quem você é; é apenas uma leitura do que aparece com mais força agora.',
     priorities,
     intention:
-      analysis.resultadoPessoa.intencaoDaPratica ||
-      'Seguir com gentileza, respeitando seu ritmo e escolhendo um próximo passo possível.',
+      priorities[0]
+        ? `Dar atenção, com gentileza, a ${priorities[0]}, respeitando seu ritmo e escolhendo um próximo passo possível.`
+        : 'Seguir com gentileza, respeitando seu ritmo e escolhendo um próximo passo possível.',
     closing:
       'Esta leitura é complementar e serve para orientar as práticas do protocolo. Ela não substitui avaliação ou tratamento médico ou psicológico quando necessários.',
   };
