@@ -129,39 +129,41 @@ function buildUserResultPdf(data: UserResultPdfData) {
       }
     }
 
-    if (data.composition.solfeggio) {
-      paragraph(
-        `Frequência da sessão: ${data.composition.solfeggio.hz} Hz - ${data.composition.solfeggio.chakraProjeto}. ${data.composition.solfeggio.intencaoProjeto}`,
-        { size: 10 }
-      );
-    }
+    if (data.composition) {
+      if (data.composition.solfeggio) {
+        paragraph(
+          `Frequência da sessão: ${data.composition.solfeggio.hz} Hz - ${data.composition.solfeggio.chakraProjeto}. ${data.composition.solfeggio.intencaoProjeto}`,
+          { size: 10 }
+        );
+      }
 
-    if (data.composition.floral.length) {
-      paragraph(
-        `Floral sugerido: ${data.composition.floral.map(x => x.nome).join(', ')}.`,
-        { size: 10 }
-      );
-    }
+      if (data.composition.floral.length) {
+        paragraph(
+          `Floral sugerido: ${data.composition.floral.map(x => x.nome).join(', ')}.`,
+          { size: 10 }
+        );
+      }
 
-    if (data.composition.aromatherapy.length) {
-      paragraph(
-        `Aromaterapia: ${data.composition.aromatherapy.map(x => x.nome).join(', ')}.`,
-        { size: 10 }
-      );
-    }
+      if (data.composition.aromatherapy.length) {
+        paragraph(
+          `Aromaterapia: ${data.composition.aromatherapy.map(x => x.nome).join(', ')}.`,
+          { size: 10 }
+        );
+      }
 
-    if (data.composition.ethericCrystals.length) {
-      paragraph(
-        `Cristais etéricos indicados: ${data.composition.ethericCrystals.map(x => x.nome).join(', ')}.`,
-        { size: 10 }
-      );
-    }
+      if (data.composition.ethericCrystals.length) {
+        paragraph(
+          `Cristais etéricos indicados: ${data.composition.ethericCrystals.map(x => x.nome).join(', ')}.`,
+          { size: 10 }
+        );
+      }
 
-    if (data.composition.audio) {
-      paragraph(
-        'Sua sessão de áudio é exclusiva e foi composta a partir desta anamnese. O áudio final não é reutilizado para outra pessoa.',
-        { size: 10 }
-      );
+      if (data.composition.audio) {
+        paragraph(
+          'Sua sessão de áudio é exclusiva e foi composta a partir desta anamnese. O áudio final não é reutilizado para outra pessoa.',
+          { size: 10 }
+        );
+      }
     }
   }
 
