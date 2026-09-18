@@ -1529,3 +1529,54 @@ Usar:
 - sem opção de download na interface USER.
 
 A regra de download continua válida apenas para os áudios personalizados/exclusivos do usuário.
+
+
+## REGRA LGPD E POLÍTICA DE PRIVACIDADE
+
+Status: **IMPLEMENTAÇÃO INICIAL OBRIGATÓRIA**
+
+O aplicativo trata dados pessoais e pode tratar dados pessoais sensíveis fornecidos pela própria pessoa na anamnese. Por isso, a experiência deve manter uma camada permanente de transparência e proteção de dados.
+
+### Obrigatório no cadastro
+- acesso à Política de Privacidade antes da criação da conta;
+- consentimento específico e destacado para os dados fornecidos na anamnese;
+- indicação de que a anamnese pode conter dados pessoais sensíveis;
+- registro da data/hora do consentimento quando tecnicamente disponível;
+- nenhuma caixa de consentimento pré-marcada.
+
+### Política de Privacidade
+A política deve explicar, em linguagem simples:
+- quem é o controlador;
+- quais categorias de dados são tratadas;
+- quais são as finalidades;
+- como são tratados dados sensíveis;
+- operadores/fornecedores necessários à prestação do serviço;
+- armazenamento e segurança;
+- retenção e eliminação;
+- direitos do titular;
+- decisões/análises automatizadas quando aplicável;
+- atualizações da política;
+- canal de contato para exercício dos direitos.
+
+### Acesso permanente
+A Política de Privacidade deve permanecer acessível:
+- na tela de cadastro;
+- após o login;
+- pelo rodapé/área da conta.
+
+### Direitos do titular
+O fluxo deve permitir futuramente operacionalizar:
+- confirmação e acesso;
+- correção;
+- informação sobre compartilhamento;
+- revogação de consentimento;
+- eliminação quando cabível;
+- demais direitos previstos na LGPD.
+
+### Pendente antes da publicação comercial
+- definir o canal oficial de contato para privacidade/LGPD;
+- confirmar os fornecedores efetivamente utilizados e refletir isso na política;
+- definir formalmente os prazos/regras de retenção por categoria de dado;
+- implementar o fluxo operacional de solicitação de direitos;
+- revisar juridicamente a versão final antes do lançamento comercial.
+
