@@ -4,7 +4,7 @@ import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
-import { escolherAudioProgramado, ProgrammedAudio } from '../audio/audioCatalog';
+import { criarPlanoAudioPersonalizado, PersonalizedAudioPlan } from '../audio/audioCatalog';
 import { ProgrammedAudioCard } from './ProgrammedAudioCard';
 import { PracticeHistory } from './PracticeHistory';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
@@ -59,7 +59,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
   const [analysis, setAnalysis] = useState<AnaliseCompletaResultado | null>(null);
   const [friendlyResult, setFriendlyResult] = useState<FriendlyResult | null>(null);
-  const [selectedAudio, setSelectedAudio] = useState<ProgrammedAudio | null>(null);
+  const [selectedAudio, setSelectedAudio] = useState<PersonalizedAudioPlan | null>(null);
   const [careComposition, setCareComposition] = useState<CareComposition | null>(null);
 
   useEffect(() => {
@@ -121,9 +121,16 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
       const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
       const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
       const axes = technicalAnalysis.relatorioEverton.eixosOrdenados;
-      const audio = escolherAudioProgramado(axes);
       const complementary = selectComplementaryCare(axes);
       const solfeggio = selectSolfeggioFrequency(axes);
+      const audio = criarPlanoAudioPersonalizado({
+        userId: finalData.id,
+        anamneseId: finalData.id,
+        nomePessoa: finalData.nomePessoa,
+        eixos: axes,
+        relatorio: technicalAnalysis.relatorioEverton,
+        solfeggio,
+      });
       const composition = buildCareComposition(audio, complementary, solfeggio);
 
       setAnalysis(technicalAnalysis);
