@@ -1448,3 +1448,47 @@ Mensagens sugeridas:
 - planos de 7 dias: **“Seu material personalizado está sendo preparado com base na sua anamnese. O prazo de entrega é de até 3 dias.”**
 - jornada de 21 dias: **“Sua jornada personalizada está sendo preparada com base na sua anamnese. O prazo de entrega é de 3 a 5 dias.”**
 
+
+
+## REGRA PRÉ-PAGAMENTO — PRAZO E ÁUDIO PREPARATIVO
+
+Status: **REGRA OFICIAL**
+
+Antes da confirmação do pagamento, o usuário deve visualizar uma mensagem clara explicando o motivo do prazo de entrega.
+
+### Mensagem de pré-pagamento
+Texto-base:
+
+**“Como cada áudio é preparado de forma exclusiva a partir da sua anamnese, pedimos esse tempo para realizar com cuidado a programação energética necessária para o seu momento. Enquanto o seu material personalizado está sendo preparado, você receberá acesso imediato a um áudio preparativo do protocolo, já programado para apoiar a preparação dos aspectos físico, emocional, mental e espiritual para a sua imersão.”**
+
+### Regra de transparência
+A mensagem deve:
+- aparecer antes do pagamento;
+- informar o prazo da modalidade escolhida;
+- deixar claro que o áudio exclusivo ainda será preparado;
+- não sugerir que o material personalizado já está pronto;
+- explicar que o áudio preparativo é uma etapa provisória de preparação;
+- não usar promessa de resultado garantido.
+
+### Áudio preparativo
+Após a confirmação da compra, enquanto o material exclusivo estiver em produção:
+- liberar imediatamente um **áudio preparativo do protocolo**;
+- este áudio pode ser reutilizável entre usuários, desde que seja explicitamente identificado como preparativo e não como áudio personalizado;
+- ele deve ser separado tecnicamente dos áudios exclusivos;
+- sua função dentro do protocolo é preparar a pessoa para a etapa seguinte;
+- pode contemplar, dentro da proposta energética do protocolo, os campos físico, emocional, mental e espiritual;
+- não deve conter leitura individual, diagnóstico, sistemas específicos da pessoa ou composição exclusiva;
+- deve desaparecer como “material em espera” quando o áudio/jornada personalizada for publicada, podendo permanecer opcionalmente em uma biblioteca de apoio se o projeto decidir isso depois.
+
+### Prazo exibido junto da mensagem
+- modalidade R$ 50: até **3 dias**;
+- modalidade R$ 100: até **3 dias**;
+- modalidade R$ 180 / 21 Dias: entre **3 e 5 dias**.
+
+### Estado em Minha Jornada
+Enquanto o personalizado não estiver pronto, mostrar:
+- status **Em preparação**;
+- prazo correspondente;
+- player do áudio preparativo;
+- mensagem acolhedora explicando que a composição individual está sendo preparada.
+
