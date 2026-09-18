@@ -28,6 +28,7 @@ import { requestResultEmail } from '../services/resultEmail';
 import {
   loadCareCompositionReview,
   ManualCareComposition,
+  persistApprovedCarePlan,
   saveCareCompositionReview,
 } from '../services/compositionBackend';
 
@@ -312,6 +313,45 @@ export function CareComposerAdminView({
         adminNotes,
         approve,
       });
+
+      if (approve) {
+        await persistApprovedCarePlan({
+          intakeId: backendIntakeId,
+          userId: backendUserId,
+          audioPlanId: audio.id,
+          audioTitle: audio.titulo,
+          compositionSignature: audio.assinaturaComposicao,
+          baseSystem: baseSystem?.nome || '',
+          mainSystem: mainSystem?.nome || '',
+          complementarySystems: complementSystems.map(item => item.nome),
+          internalResources: audio.recursosEnergeticos,
+          scriptLines: manual.scriptLines,
+          adminNotes,
+          solfeggio: selectedSolfeggio
+            ? {
+                hz: selectedSolfeggio.hz,
+                chakraProjeto: selectedSolfeggio.chakraProjeto,
+                intencaoProjeto: selectedSolfeggio.intencaoProjeto,
+              }
+            : null,
+          florals: selectedFlorals.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            descricao: item.descricao,
+          })),
+          aromatherapy: selectedAromatherapy.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            descricao: item.descricao,
+            formaUsoPermitida: item.formaUsoPermitida || null,
+          })),
+          ethericCrystals: selectedCrystals.map(item => ({
+            id: item.id,
+            nome: item.nome,
+            descricao: item.descricao,
+          })),
+        });
+      }
 
       setReviewStatus(saved.status === 'approved' ? 'approved' : 'draft');
       setReviewMessage(
