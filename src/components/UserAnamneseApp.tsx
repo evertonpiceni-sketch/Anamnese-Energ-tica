@@ -60,14 +60,6 @@ const scaleLabels = [
   'Está muito presente',
 ];
 
-const RESPONSE_SUPPORT_MESSAGES = [
-  'Obrigado por olhar para isso com sinceridade. Cada resposta ajuda a construir um cuidado mais próximo do seu momento.',
-  'Você não precisa explicar tudo agora. Reconhecer como isso aparece em você já é importante.',
-  'Siga no seu ritmo. Não existem respostas certas ou erradas aqui.',
-  'Sua percepção de hoje é o que importa. Podemos continuar a partir dela.',
-  'Você está fazendo apenas uma leitura do seu momento, sem precisar se definir por ele.',
-];
-
 export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAnamneseAppProps) {
   const [step, setStep] = useState<Step>('welcome');
   const [userArea, setUserArea] = useState<UserArea>('anamnese');
@@ -81,6 +73,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
   const [backendIntakeId, setBackendIntakeId] = useState<string | null>(null);
   const [emailSending, setEmailSending] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
+  const [showIdleSupport, setShowIdleSupport] = useState(false);
 
   useEffect(() => {
     try {
@@ -99,6 +92,31 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
     if (step === 'sent') return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify({ form, step, questionIndex }));
   }, [form, step, questionIndex]);
+
+  useEffect(() => {
+    setShowIdleSupport(false);
+
+    if (userArea !== 'anamnese' || step !== 'questions' || !currentQuestion) {
+      return;
+    }
+
+    const alreadyAnswered =
+      form.respostasObjetivas[currentQuestion.id] !== undefined;
+
+    if (alreadyAnswered) return;
+
+    const timer = window.setTimeout(() => {
+      setShowIdleSupport(true);
+    }, 60_000);
+
+    return () => window.clearTimeout(timer);
+  }, [
+    userArea,
+    step,
+    questionIndex,
+    currentQuestion?.id,
+    form.respostasObjetivas,
+  ]);
 
   const answered = Object.keys(form.respostasObjetivas).length;
   const progress = Math.round((answered / PERGUNTAS_ANAMNESE.length) * 100);
@@ -412,10 +430,10 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
                   <p className="mt-3 text-sm leading-6 text-[#748077]">{currentQuestion.dicaAcolhedora}</p>
                 )}
 
-                {form.respostasObjetivas[currentQuestion.id] !== undefined && (
+                {showIdleSupport && (
                   <div className="mt-5 rounded-2xl border border-[#d9caa8] bg-[#f7f0df] p-4">
                     <p className="text-sm leading-6 text-[#5d6c63]">
-                      {RESPONSE_SUPPORT_MESSAGES[questionIndex % RESPONSE_SUPPORT_MESSAGES.length]}
+                      Pode ir no seu tempo. Não existe resposta certa aqui — escolha apenas o que mais se aproxima de como você se percebe hoje.
                     </p>
                   </div>
                 )}
