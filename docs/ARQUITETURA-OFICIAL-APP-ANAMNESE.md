@@ -24,7 +24,7 @@ O aplicativo deve:
 4. identificar prioridades internas;
 5. gerar um direcionamento adequado com base nos recursos disponíveis;
 6. indicar um ou mais recursos, conforme necessário:
-   - áudio programado;
+   - áudio exclusivo gerado para aquela anamnese;
    - tratamento/trilha;
    - floral;
    - aromaterapia;
@@ -203,10 +203,14 @@ Mostrar a composição de cuidado recomendada.
 
 ### Blocos possíveis
 
-#### Áudio programado
+#### Áudio exclusivo da sessão
+- gerado individualmente para a pessoa;
+- baseado nos sistemas e recursos selecionados naquela anamnese;
+- nunca reutilizado automaticamente para outro usuário;
 - título;
 - intenção;
 - duração;
+- Solfeggio da sessão;
 - botão **Ouvir agora**.
 
 #### Floral
@@ -435,19 +439,23 @@ Esta tela nunca aparece para o usuário.
 
 ---
 
-## Tela A06 — Biblioteca de áudios
+## Tela A06 — Gerador de áudios personalizados
+
+### Regra
+Não existe catálogo de áudios finais reutilizáveis.
 
 ### Exibir
-- nome;
-- tema;
-- objetivo;
-- duração;
-- tipo;
-- arquivo;
-- indicação;
-- contraindicações/restrições;
-- status ativo/inativo;
-- vínculo com trilhas.
+- componentes de locução;
+- estruturas de sessão;
+- recursos sonoros disponíveis;
+- Solfeggios;
+- regras de composição;
+- versões geradas por usuário;
+- vínculo entre áudio, anamnese e composição técnica;
+- status da geração;
+- arquivo final exclusivo quando produzido.
+
+Cada áudio final deve permanecer vinculado a uma única pessoa/anamnese e à assinatura técnica que o originou.
 
 ---
 
@@ -646,7 +654,7 @@ O motor deve:
 5. filtrar recursos disponíveis;
 6. excluir recursos indisponíveis ou bloqueados;
 7. compor o cuidado;
-8. escolher o áudio;
+8. gerar o plano de áudio exclusivo a partir da composição selecionada;
 9. selecionar complementos quando apropriado;
 10. decidir entre:
    - cuidado isolado;
@@ -716,7 +724,7 @@ A quantidade de recursos nunca deve ser usada como sinal de qualidade.
 - UserTechnicalProfile
 - TechnicalAnalysis
 - MasterLibraryView
-- AudioLibrary
+- PersonalizedAudioGenerator
 - FloralLibrary
 - AromatherapyLibrary
 - EthericCrystalLibrary
@@ -811,7 +819,7 @@ A implementação deve respeitar esta ordem:
 - painel ADM.
 
 ### Fase 3
-- áudio programado;
+- geração de áudio exclusivo por usuário;
 - player;
 - histórico de prática;
 - reavaliação.
