@@ -1304,21 +1304,53 @@ Status: **REGRA OFICIAL**
   - libera a leitura organizada a partir das respostas da própria pessoa.
 
 ### Regra de acesso
-O plano de R$ 50 libera um **diagnóstico parcial**, com:
-- acolhimento inicial;
-- leitura resumida do momento;
-- prioridades principais em linguagem humana;
-- direção do cuidado;
-- cuidado indicado;
-- áudio exclusivo;
-- instruções de uso.
+O plano de R$ 50 libera um **diagnóstico parcial**, com leitura simples e sem aprofundamento.
 
-O diagnóstico parcial não deve exibir:
-- todas as respostas individualmente;
-- detalhamento integral das respostas;
+### O que o diagnóstico parcial deve mostrar
+- acolhimento inicial;
+- leitura básica do momento atual;
+- o que será trabalhado nesta fase;
+- intenção do cuidado;
+- energias e recursos escolhidos para aquele momento;
+- Solfeggio, quando houver;
+- floral, quando houver;
+- aromaterapia, quando houver;
+- cristais etéricos, quando houver;
+- áudio exclusivo;
+- instruções simples de uso durante os 7 dias.
+
+### O que o diagnóstico parcial não deve aprofundar
+- causas;
+- padrões;
+- relações entre respostas;
+- análise detalhada das respostas;
+- cadeias internas;
+- scores;
+- pesos;
+- justificativas técnicas;
+- sistemas internos;
+- símbolos;
+- comandos;
 - leitura ampliada.
 
 Também não deve conter chamadas comerciais ou comparativas sugerindo que uma leitura “melhor”, “mais completa” ou “superior” está disponível mediante pagamento adicional.
+
+### Cristais etéricos — regra de explicação ao usuário
+Cristais etéricos não devem ser exibidos apenas como uma lista de nomes.
+
+Sempre explicar, em linguagem simples, que dentro do protocolo:
+- não se trata necessariamente de uma pedra física que a pessoa precisa possuir;
+- o cristal é utilizado como um **recurso energético/frequencial dentro da composição da sessão**;
+- ele é selecionado de acordo com a intenção daquele cuidado;
+- a pessoa não precisa fazer nada técnico para “ativá-lo”;
+- quando houver orientação prática adicional, ela deve estar previamente cadastrada e validada no protocolo.
+
+### Exemplo de linguagem USER
+**Cristais etéricos escolhidos para este momento**
+
+Nesta sessão, foram incluídos cristais etéricos como parte da composição energética do seu cuidado. Eles não precisam estar fisicamente com você. Dentro do protocolo, utilizamos a referência energética desses cristais durante a prática, escolhida de acordo com a intenção trabalhada neste momento.
+
+Depois, apresentar cada cristal com uma frase curta e simples sobre sua função **dentro do protocolo**, sem linguagem técnica excessiva e sem promessas de resultado.
 
 ### Regra de autenticidade
 Esta estrutura comercial e de entrega pertence ao projeto da Anamnese Integrativa / Protocolo da Transformação e não deve copiar textos, lógica, nomes, layout ou estrutura do Mini Diagnóstico ou de terceiros.
