@@ -2,20 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Clock3, Download, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
 import { PersonalizedAudioPlan } from '../audio/audioCatalog';
 import { createPrivateAudioPlaybackUrl, downloadPrivatePersonalizedAudio } from '../services/audioBackend';
-
-const PRACTICE_LOG_KEY = 'anamnese-integrativa-practice-logs-v1';
-
-export interface AudioPracticeLog {
-  id: string;
-  audioId: string;
-  titulo: string;
-  iniciadoEm: string;
-  concluidoEm?: string;
-  percepcaoAntes?: number;
-  percepcaoDepois?: number;
-  observacao?: string;
-  status: 'iniciado' | 'concluido';
-}
+import { completePractice, startPractice, updatePracticeBefore } from '../services/practiceBackend';
 
 interface ProgrammedAudioCardProps {
   audio: PersonalizedAudioPlan;
@@ -32,6 +19,7 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [practiceId, setPracticeId] = useState<string | null>(null);
   const [remoteAudioUrl, setRemoteAudioUrl] = useState<string | null>(null);
   const [remoteDurationSeconds, setRemoteDurationSeconds] = useState<number | null>(null);
+  const [carePlanId, setCarePlanId] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
   const [downloadMessage, setDownloadMessage] = useState('');
 
@@ -53,10 +41,12 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
           if (!active || !result) return;
           setRemoteAudioUrl(result.url);
           setRemoteDurationSeconds(result.carePlan.durationSeconds);
+          setCarePlanId(result.carePlan.carePlanId);
         })
         .catch(() => {
           setRemoteAudioUrl(null);
           setRemoteDurationSeconds(null);
+          setCarePlanId(null);
         });
     }
 
@@ -87,51 +77,26 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
     };
   }, [available]);
 
-  function loadLogs(): AudioPracticeLog[] {
-    try {
-      const raw = localStorage.getItem(PRACTICE_LOG_KEY);
-      const parsed = raw ? JSON.parse(raw) : [];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [];
-    }
-  }
-
-  function saveLog(log: AudioPracticeLog) {
-    const logs = loadLogs();
-    const index = logs.findIndex(item => item.id === log.id);
-    if (index >= 0) logs[index] = log;
-    else logs.push(log);
-    localStorage.setItem(PRACTICE_LOG_KEY, JSON.stringify(logs));
-  }
-
-  function ensurePractice(): string {
+  async function ensurePractice(): Promise<string> {
     if (practiceId) return practiceId;
+    if (!carePlanId) throw new Error('Plano de cuidado ainda não disponível.');
 
-    const id = `PRACTICE-${Date.now()}`;
+    const id = await startPractice({
+      carePlanId,
+      before,
+    });
     setPracticeId(id);
-    saveLog({
-      id,
-      audioId: audio.id,
-      titulo: audio.titulo,
-      iniciadoEm: new Date().toISOString(),
-      percepcaoAntes: before ?? undefined,
-      status: 'iniciado',
-      ...(userId ? { userId } : {}),
-    } as AudioPracticeLog & { userId?: string });
     return id;
   }
 
   async function togglePlayback() {
     if (!available || !elementRef.current) return;
 
-    const id = ensurePractice();
+    const id = await ensurePractice();
 
     if (elementRef.current.paused) {
       if (before !== null) {
-        const logs = loadLogs();
-        const current = logs.find(item => item.id === id);
-        if (current) saveLog({ ...current, percepcaoAntes: before });
+        await updatePracticeBefore({ practiceId: id, before });
       }
       await elementRef.current.play();
     } else {
@@ -147,23 +112,14 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
     setCompleted(false);
   }
 
-  function finishPractice() {
-    const id = ensurePractice();
-    const logs = loadLogs();
-    const current = logs.find(item => item.id === id);
+  async function finishPractice() {
+    const id = await ensurePractice();
 
-    saveLog({
-      ...(current || {
-        id,
-        audioId: audio.id,
-        titulo: audio.titulo,
-        iniciadoEm: new Date().toISOString(),
-      }),
-      concluidoEm: new Date().toISOString(),
-      percepcaoAntes: before ?? undefined,
-      percepcaoDepois: after ?? undefined,
-      observacao: observation.trim() || undefined,
-      status: 'concluido',
+    await completePractice({
+      practiceId: id,
+      before,
+      after,
+      observation,
     });
 
     setCompleted(true);
@@ -312,12 +268,3 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   );
 }
 
-export function getAudioPracticeLogs(): AudioPracticeLog[] {
-  try {
-    const raw = localStorage.getItem(PRACTICE_LOG_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
