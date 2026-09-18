@@ -36,7 +36,19 @@ export const ANAMNESE_LIMPA: AnamneseInput = {
 
 const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
 
-function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: AnaliseCompletaResultado | null } | null {
+type BackendContext = {
+  backendUserId?: string;
+  backendIntakeId?: string;
+  friendlyResult?: {
+    headline: string;
+    intro: string;
+    priorities: string[];
+    intention: string;
+    closing: string;
+  };
+};
+
+function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: AnaliseCompletaResultado | null; backend: BackendContext } | null {
   try {
     const raw = localStorage.getItem(SUBMISSIONS_KEY);
     if (!raw) return null;
@@ -44,8 +56,10 @@ function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: Ana
     if (!Array.isArray(lista) || lista.length === 0) return null;
     const ultima = lista[lista.length - 1];
     const {
-      resultadoPessoa: _resultadoPessoa,
+      resultadoPessoa,
       analiseTecnica,
+      backendUserId,
+      backendIntakeId,
       enviadoEm: _enviadoEm,
       status: _status,
       ...dados
@@ -53,6 +67,11 @@ function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: Ana
     return {
       dados: dados as AnamneseInput,
       analise: (analiseTecnica as AnaliseCompletaResultado) || null,
+      backend: {
+        backendUserId,
+        backendIntakeId,
+        friendlyResult: resultadoPessoa,
+      },
     };
   } catch {
     return null;
@@ -291,6 +310,9 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
           <CareComposerAdminView
             anamnese={anamneseAtual}
             analise={resultadoAnalise}
+            backendUserId={ultimaConcluida?.backend.backendUserId}
+            backendIntakeId={ultimaConcluida?.backend.backendIntakeId}
+            friendlyResult={ultimaConcluida?.backend.friendlyResult}
           />
         )}
 
