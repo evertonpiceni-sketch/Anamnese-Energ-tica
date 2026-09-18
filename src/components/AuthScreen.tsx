@@ -38,6 +38,7 @@ export function AuthScreen() {
         options: {
           data: {
             display_name: name.trim(),
+            consent_lgpd: true,
           },
         },
       });
