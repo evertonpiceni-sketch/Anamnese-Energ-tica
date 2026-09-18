@@ -127,6 +127,13 @@ export async function persistApprovedCarePlan(params: {
   aromatherapy: Array<Record<string, unknown>>;
   ethericCrystals: Array<Record<string, unknown>>;
   journeyMode?: 'NAO_INDICADO' | 'PREPARACAO' | 'ENTRADA_DIRETA' | 'APOIO_PARALELO';
+  userResult?: {
+    headline: string;
+    intro: string;
+    priorities: string[];
+    intention: string;
+    closing: string;
+  };
 }) {
   const now = new Date().toISOString();
 
@@ -139,6 +146,37 @@ export async function persistApprovedCarePlan(params: {
     .eq('intake_id', params.intakeId)
     .neq('audio_plan_id', params.audioPlanId)
     .in('status', ['preparing', 'ready', 'active']);
+
+  let resultId: string | null = null;
+
+  if (params.userResult) {
+    const { data: result, error: resultError } = await supabase
+      .from('user_results')
+      .upsert(
+        {
+          intake_id: params.intakeId,
+          user_id: params.userId,
+          headline: params.userResult.headline,
+          intro: params.userResult.intro,
+          priorities: params.userResult.priorities,
+          intention: params.userResult.intention,
+          closing: params.userResult.closing,
+          solfeggio: params.solfeggio,
+          floral: params.florals,
+          aromatherapy: params.aromatherapy,
+          etheric_crystals: params.ethericCrystals,
+          journey_mode: params.journeyMode || 'NAO_INDICADO',
+          published_at: now,
+          updated_at: now,
+        },
+        { onConflict: 'intake_id' }
+      )
+      .select('id')
+      .single();
+
+    if (resultError) throw resultError;
+    resultId = result.id;
+  }
 
   const { data: existingPlan } = await supabase
     .from('care_plans')
@@ -156,6 +194,7 @@ export async function persistApprovedCarePlan(params: {
       {
         intake_id: params.intakeId,
         user_id: params.userId,
+        result_id: resultId,
         status: alreadyPublished ? (existingPlan?.status || 'ready') : 'preparing',
         audio_plan_id: params.audioPlanId,
         audio_title: params.audioTitle,
