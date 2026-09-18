@@ -7,6 +7,15 @@ export type PersonalizedAudioStatus =
   | 'GERADO'
   | 'INATIVO';
 
+export interface PersonalizedAudioOverride {
+  sistemaBase?: string;
+  sistemaPrincipal?: string;
+  sistemasComplementares?: string[];
+  recursosEnergeticos?: Partial<PersonalizedAudioPlan['recursosEnergeticos']>;
+  intencao?: string;
+  roteiroBase?: string[];
+}
+
 export interface PersonalizedAudioPlan {
   id: string;
   userId: string;
@@ -46,23 +55,35 @@ export function criarPlanoAudioPersonalizado(params: {
   eixos: Array<{ eixoId: EixoId; percentual: number }>;
   relatorio: RelatorioTecnicoEverton;
   solfeggio: SolfeggioFrequency | null;
+  override?: PersonalizedAudioOverride;
 }): PersonalizedAudioPlan {
-  const { userId, anamneseId, nomePessoa, eixos, relatorio, solfeggio } = params;
+  const { userId, anamneseId, nomePessoa, eixos, relatorio, solfeggio, override } = params;
   const principais = eixos.slice(0, 5).map(item => item.eixoId);
 
-  const sistemaBase = relatorio.sistemaBase.nome;
-  const sistemaPrincipal = relatorio.sistemaPrincipal.nome;
-  const sistemasComplementares = relatorio.sistemasComplementares.map(item => item.nome);
+  const sistemaBase = override?.sistemaBase || relatorio.sistemaBase.nome;
+  const sistemaPrincipal = override?.sistemaPrincipal || relatorio.sistemaPrincipal.nome;
+  const sistemasComplementares =
+    override?.sistemasComplementares || relatorio.sistemasComplementares.map(item => item.nome);
+
+  const recursosEnergeticos = {
+    simbolos: override?.recursosEnergeticos?.simbolos || [...relatorio.recursosInternos.simbolos],
+    energias: override?.recursosEnergeticos?.energias || [...relatorio.recursosInternos.energias],
+    frequencias: override?.recursosEnergeticos?.frequencias || [...relatorio.recursosInternos.frequencias],
+    cristais: override?.recursosEnergeticos?.cristais || [...relatorio.recursosInternos.cristais],
+    chakras: override?.recursosEnergeticos?.chakras || [...relatorio.recursosInternos.chakras],
+  };
 
   const assinaturaComposicao = [
     anamneseId,
     sistemaBase,
     sistemaPrincipal,
     ...sistemasComplementares,
-    ...relatorio.recursosInternos.simbolos,
-    ...relatorio.recursosInternos.energias,
-    ...relatorio.recursosInternos.frequencias,
-    ...relatorio.recursosInternos.cristais,
+    ...recursosEnergeticos.simbolos,
+    ...recursosEnergeticos.energias,
+    ...recursosEnergeticos.frequencias,
+    ...recursosEnergeticos.cristais,
+    ...(override?.roteiroBase || []),
+    ...(override?.intencao ? [override.intencao] : []),
     ...(solfeggio ? [String(solfeggio.hz)] : []),
   ].join('|');
 
@@ -74,20 +95,14 @@ export function criarPlanoAudioPersonalizado(params: {
     anamneseId,
     titulo: `Sessão personalizada de ${firstName}`,
     subtitulo: 'Criada exclusivamente a partir desta anamnese e desta composição energética.',
-    intencao: construirIntencao(relatorio),
+    intencao: override?.intencao || construirIntencao(relatorio),
     eixos: principais,
     sistemaBase,
     sistemaPrincipal,
     sistemasComplementares,
-    recursosEnergeticos: {
-      simbolos: [...relatorio.recursosInternos.simbolos],
-      energias: [...relatorio.recursosInternos.energias],
-      frequencias: [...relatorio.recursosInternos.frequencias],
-      cristais: [...relatorio.recursosInternos.cristais],
-      chakras: [...relatorio.recursosInternos.chakras],
-    },
+    recursosEnergeticos,
     solfeggio,
-    roteiroBase: construirRoteiroBase(relatorio, solfeggio),
+    roteiroBase: override?.roteiroBase || construirRoteiroBase(relatorio, solfeggio),
     status: 'AGUARDANDO_GERACAO',
     assinaturaComposicao,
   };
