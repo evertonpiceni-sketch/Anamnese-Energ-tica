@@ -1106,3 +1106,92 @@ O upload do áudio só fica disponível quando:
 - existe anamnese real no backend;
 - a composição está APROVADA.
 
+
+
+## PASSO 4 — GERAÇÃO DO ÁUDIO EXCLUSIVO
+
+Status: **IMPLEMENTADO — PIPELINE E REVISÃO ADM**
+
+### Fluxo oficial
+**composição aprovada → roteiro falado → revisão do Everton → aprovação do roteiro → geração de voz → mixagem/trilha/Solfeggio → revisão final → publicação**
+
+### Separação obrigatória
+A composição técnica e o roteiro falado são camadas diferentes.
+
+A composição técnica pode conter:
+- sistemas;
+- recursos internos;
+- símbolos;
+- energias;
+- frequências;
+- cristais;
+- sequência;
+- Solfeggio;
+- complementos.
+
+O roteiro falado:
+- deve ser acolhedor;
+- não precisa narrar nomes técnicos dos sistemas;
+- pode ser editado pelo Everton;
+- é versionado;
+- precisa de aprovação explícita antes da geração de voz.
+
+### Estados da geração
+- script_draft;
+- awaiting_script_approval;
+- script_approved;
+- awaiting_voice_provider;
+- generating_voice;
+- narration_ready;
+- awaiting_mix;
+- mix_ready;
+- awaiting_final_review;
+- ready_to_publish;
+- published;
+- failed;
+- cancelled.
+
+### Persistência
+Fila atual:
+`audio_generation_jobs`
+
+Histórico de versões:
+`audio_generation_job_versions`
+
+Arquivos intermediários:
+bucket privado `audio-generation-work`
+
+Arquivo final:
+bucket privado `personalized-audios`
+
+### Duração
+A duração do áudio da anamnese **não está congelada**.
+
+Não herdar automaticamente os 29:57 da jornada **21 Dias para Voltar para Mim**.
+
+### Solfeggio
+Selecionar uma frequência na composição não significa que existe automaticamente uma faixa sonora mixada.
+
+O arquivo real de Solfeggio e a forma de mixagem precisam existir tecnicamente antes de marcar a etapa como concluída.
+
+### Upload manual
+Enquanto o provedor automático não estiver configurado:
+- Everton pode produzir o áudio externamente;
+- revisar;
+- anexar o arquivo final pelo ADM;
+- o upload finaliza a fila como PUBLICADO.
+
+### PENDÊNCIA DO EVERTON — PROVEDOR DE VOZ
+Status: **PENDENTE / NÃO BLOQUEIA O RESTANTE DO DESENVOLVIMENTO**
+
+Antes de ativar geração automática:
+- escolher o provedor de voz;
+- definir a voz oficial ou regra de seleção de voz;
+- cadastrar a chave do provedor somente no backend;
+- definir se a narração será gerada em um único arquivo ou por blocos;
+- testar pronúncia, pausas e ritmo;
+- definir a estratégia técnica de mixagem com Solfeggio/trilha;
+- validar um áudio completo antes de liberar geração automática para usuários.
+
+Não inserir chave de voz no frontend.
+
