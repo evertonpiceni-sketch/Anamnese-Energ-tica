@@ -1,8 +1,8 @@
-import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle } from 'lucide-react';
+import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, Headphones } from 'lucide-react';
 
 interface NavbarProps {
-  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'reavaliacao' | 'casos';
-  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'reavaliacao' | 'casos') => void;
+  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'reavaliacao' | 'casos';
+  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'reavaliacao' | 'casos') => void;
   temAnalisePronta: boolean;
   onLimparAnamnese?: () => void;
 }
@@ -120,6 +120,19 @@ export function Navbar({ viewAtiva, onMudarView, temAnalisePronta, onLimparAnamn
               <BookOpen className="w-4 h-4" />
               <span className="hidden md:inline">Biblioteca-Mestra</span>
               <span className="md:hidden">Biblioteca</span>
+            </button>
+
+            <button
+              id="nav-btn-audios"
+              onClick={() => onMudarView('audios')}
+              className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                viewAtiva === 'audios'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'text-stone-300 hover:text-white hover:bg-stone-800'
+              }`}
+            >
+              <Headphones className="w-4 h-4" />
+              <span className="hidden lg:inline">Áudios</span>
             </button>
 
             <button
