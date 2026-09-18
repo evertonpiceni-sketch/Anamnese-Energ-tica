@@ -387,16 +387,25 @@ export const CATALOGACAO_DOCUMENTAL: Record<string, OverrideSistema> = {
   },
 
   energias_douradas_abundancia: {
-    catalogacaoTecnica: 'PENDENTE',
+    catalogacaoTecnica: 'COMPLETA',
     nivel: 'Mestrado',
-    objetivos: 'PDF local confirma curso e iniciação em nível Mestrado, mas funciona como folha de acesso e não contém conteúdo técnico suficiente para recomendação automática.',
-    areasAtuacao: [],
-    compatibilidadeEixos: {},
+    modulos: ['Flor Dourada de Abundantia / Golden Flower from Abundantia'],
+    energias: ['Flor Dourada de Abundantia'],
+    comandos: ['Flor Dourada da Abundância','Golden Flower from Abundantia'],
+    chakras: ['Plexo Solar'],
+    objetivos: 'O manual apresenta práticas de abundância ligadas a identidade, autovalor, talentos, propósito, capacidade de receber e expressão no mundo material. Inclui a Flor Dourada de Abundantia.',
+    areasAtuacao: ['prosperidade', 'autovalor', 'receber', 'propósito', 'poder pessoal'],
+    recursosInternos: [
+      r('Flor Dourada de Abundantia','energia',['prosperidade','autovalor','receber','poder_pessoal'],'Energias Douradas de Abundância de Master Abundantia.pdf')
+    ],
+    metodosAtivacao: ['O manual orienta usar a Flor Dourada como meditação, ativando mentalmente uma vez pelo nome e visualizando a flor dourada no Plexo Solar.'],
+    cuidados: ['Tratar prosperidade e abundância como objetivos espirituais descritos pelo sistema, sem prometer resultado financeiro.'],
     origemDocumental: {
-      idDocumento: 'Material - Energias Douradas de Abundância da Mestre Ascensionada Abundantia.pdf',
+      idDocumento: 'Energias Douradas de Abundância de Master Abundantia.pdf / Google Doc',
       curso: 'Energias Douradas de Abundância',
-      statusConfirmacao: 'Iniciação Mestrado confirmada; conteúdo técnico do curso não está detalhado no PDF local.',
+      statusConfirmacao: 'Manual técnico e formação Mestrado confirmados no Drive.',
     },
+    compatibilidadeEixos: { prosperidade: 4, autovalor: 4, receber: 4, proposito: 4, poder_pessoal: 3, criatividade: 2 },
   },
 
   escudo_cristalino_metatron: {
@@ -528,16 +537,23 @@ export const CATALOGACAO_DOCUMENTAL: Record<string, OverrideSistema> = {
   },
 
   original_reiki_healing_system: {
-    catalogacaoTecnica: 'PENDENTE',
+    catalogacaoTecnica: 'COMPLETA',
     nivel: 'Níveis 1, 2 e 3 — Mestrado',
-    objetivos: 'Formação completa confirmada pela folha de curso e sintonização. O PDF local encontrado não contém o manual técnico suficiente para mapeamento automático.',
-    areasAtuacao: [],
-    compatibilidadeEixos: {},
+    simbolos: ['Cho Ku Rei','Sei He Ki','Hon Sha Ze Sho Nen','Dai Koo Myo'],
+    energias: ['Original Reiki'],
+    comandos: ['Original Reiki'],
+    objetivos: 'Sistema Reiki simplificado, ativado por intenção. O manual descreve autotratamento, aplicação em outra pessoa, envio à distância, encerramento/desconexão e aterramento.',
+    areasAtuacao: ['harmonização', 'corpo energético', 'emocional', 'mente', 'distância', 'integração'],
+    metodosAtivacao: ['Pensar mentalmente “Original Reiki” uma vez para iniciar o fluxo, conforme o manual.'],
+    formasAplicacao: ['Autotratamento','Aplicação presencial','Envio à distância','Posições intuitivas de mãos'],
+    cuidados: ['As alegações de cura do manual são registradas como linguagem do sistema e não como eficácia médica comprovada.'],
     origemDocumental: {
-      idDocumento: 'Material - Original Reiki Platinum e Original Reiki Healing System.pdf',
+      idDocumento: 'Original Reiki Healing System 2022.pdf / Google Doc',
       curso: 'Original Reiki Healing System',
-      statusConfirmacao: 'Formação níveis 1, 2 e 3 Mestrado confirmada; conteúdo técnico local pendente.',
+      statusConfirmacao: 'Manual técnico no Drive e formação níveis 1, 2 e 3 Mestrado confirmados.',
     },
+    ehBaseSustentacao: true,
+    compatibilidadeEixos: { seguranca: 3, emocional: 3, mente: 3, corpo: 4, vitalidade: 3, espiritualidade: 3, integracao: 4 },
   },
 
   prosonodo_light: {
@@ -628,18 +644,24 @@ export const CATALOGACAO_DOCUMENTAL: Record<string, OverrideSistema> = {
   },
 
   the_magic_cosmic_light_sol_a_vana: {
-    catalogacaoTecnica: 'PARCIAL',
+    catalogacaoTecnica: 'COMPLETA',
     nivel: 'Mestrado',
-    simbolos: ['Anson'],
-    objetivos: 'Formação e símbolo Anson confirmados pela folha de curso. O conteúdo técnico detalhado não está presente no PDF local consultado.',
-    areasAtuacao: [],
-    recursosInternos: [],
-    compatibilidadeEixos: {},
+    simbolos: ['ANSOM'],
+    energias: ['The Magic Cosmic Light','SOL’A’VANA'],
+    objetivos: 'O manual apresenta o símbolo ANSOM e a energia SOL’A’VANA, dentro de uma cosmologia espiritual própria, como recursos universais de conexão, paz, harmonia, proteção e desenvolvimento interior.',
+    areasAtuacao: ['espiritualidade', 'integração', 'proteção', 'segurança', 'propósito'],
+    recursosInternos: [
+      r('ANSOM','símbolo',['espiritualidade','integracao','protecao'],'The Magic Cosmic Light Sol a Vana.pdf'),
+      r('SOL’A’VANA','energia',['seguranca','espiritualidade','integracao','proposito'],'The Magic Cosmic Light Sol a Vana.pdf'),
+    ],
+    metodosAtivacao: ['O manual afirma não haver instrução rígida para ANSOM e orienta uso intuitivo alinhado ao Eu Superior; a sintonização inclui SOL’A’VANA.'],
+    cuidados: ['Preservar a linguagem simbólica/cosmológica do manual como tradição do sistema, não como afirmação objetiva sobre o universo ou saúde.'],
     origemDocumental: {
-      idDocumento: 'Material - The Magic Cosmic Light Sol a Vana.pdf',
+      idDocumento: 'The Magic Cosmic Light Sol a Vana.pdf',
       curso: 'The Magic Cosmic Light / Sol a Vana',
-      statusConfirmacao: 'Formação Mestrado e símbolo Anson confirmados; aplicação técnica pendente.',
+      statusConfirmacao: 'Manual técnico e formação Mestrado confirmados no Drive.',
     },
+    compatibilidadeEixos: { espiritualidade: 4, integracao: 4, protecao: 3, seguranca: 3, proposito: 3 },
   },
 
   kundalini_reiki_millennium: {
