@@ -4,6 +4,7 @@ import { AnaliseCompletaResultado } from '../engine/analysisEngine';
 import { escolherAudioProgramado } from '../audio/audioCatalog';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition } from '../care/careComposer';
+import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
 
 interface CareComposerAdminViewProps {
   anamnese: AnamneseInput;
@@ -27,7 +28,8 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
   const axes = analise.relatorioEverton.eixosOrdenados;
   const audio = escolherAudioProgramado(axes);
   const complementary = selectComplementaryCare(axes);
-  const composition = buildCareComposition(audio, complementary);
+  const solfeggio = selectSolfeggioFrequency(axes);
+  const composition = buildCareComposition(audio, complementary, solfeggio);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
@@ -76,6 +78,17 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
               title="Áudio programado"
               value={composition.audio?.titulo || 'Nenhum áudio selecionado'}
               status={composition.audio?.status || 'SEM SELEÇÃO'}
+            />
+
+            <ResourceRow
+              icon={<AudioLines className="h-5 w-5" />}
+              title="Solfeggio"
+              value={
+                composition.solfeggio
+                  ? `${composition.solfeggio.hz} Hz • ${composition.solfeggio.chakraProjeto}`
+                  : 'Nenhuma frequência selecionada'
+              }
+              status={composition.solfeggio ? 'SELECIONADO' : 'SEM SELEÇÃO'}
             />
 
             <ResourceRow
