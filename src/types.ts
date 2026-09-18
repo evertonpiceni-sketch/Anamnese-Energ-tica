@@ -84,6 +84,7 @@ export interface SistemaBiblioteca {
   ehEstimulanteAtivo?: boolean;
   requerEstabilizacaoPrevia?: boolean;
   prioridadePadrao?: number;
+  catalogacaoTecnica?: 'COMPLETA' | 'PARCIAL' | 'PENDENTE';
 }
 
 export interface PerguntaObjetiva {
