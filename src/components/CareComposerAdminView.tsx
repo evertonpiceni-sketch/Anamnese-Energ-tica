@@ -249,6 +249,11 @@ export function CareComposerAdminView({
       recursosEnergeticos: overriddenResources,
       intencao: manual.audioIntention,
       roteiroBase: manual.scriptLines,
+      assinaturaExtras: [
+        ...manual.floralIds.map(id => `floral:${id}`),
+        ...manual.aromatherapyIds.map(id => `aroma:${id}`),
+        ...manual.crystalIds.map(id => `cristal:${id}`),
+      ],
     },
   });
 
