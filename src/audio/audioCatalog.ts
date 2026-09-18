@@ -14,6 +14,7 @@ export interface PersonalizedAudioOverride {
   recursosEnergeticos?: Partial<PersonalizedAudioPlan['recursosEnergeticos']>;
   intencao?: string;
   roteiroBase?: string[];
+  assinaturaExtras?: string[];
 }
 
 export interface PersonalizedAudioPlan {
@@ -84,6 +85,7 @@ export function criarPlanoAudioPersonalizado(params: {
     ...recursosEnergeticos.cristais,
     ...(override?.roteiroBase || []),
     ...(override?.intencao ? [override.intencao] : []),
+    ...(override?.assinaturaExtras || []),
     ...(solfeggio ? [String(solfeggio.hz)] : []),
   ].join('|');
 
