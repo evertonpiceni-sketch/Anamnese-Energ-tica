@@ -1,4 +1,5 @@
 import { SistemaBiblioteca } from '../types';
+import { aplicarCatalogacaoDocumental } from './catalogacaoDocumental';
 
 /**
  * Biblioteca-Mestra documental.
@@ -18,7 +19,7 @@ const fonte = (idDocumento: string, curso: string, statusConfirmacao: string, pa
   statusConfirmacao,
 });
 
-export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
+const BIBLIOTECA_MESTRA_BASE: SistemaBiblioteca[] = [
   {
     id: 'original_reiki_platinum',
     nome: 'Original Reiki Platinum',
@@ -1381,5 +1382,7 @@ export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = [
     compatibilidadeEixos: {},
   },
 ];
+
+export const BIBLIOTECA_MESTRA: SistemaBiblioteca[] = aplicarCatalogacaoDocumental(BIBLIOTECA_MESTRA_BASE);
 
 export const BIBLIOTECA_MESTRA_INICIAL = BIBLIOTECA_MESTRA;
