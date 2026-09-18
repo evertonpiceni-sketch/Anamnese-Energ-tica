@@ -1395,16 +1395,22 @@ Evitar:
 - linguagem de culpa;
 - frases que possam aumentar medo ou sensação de defeito.
 
-### Depois de cada resposta
-Exibir uma devolutiva curta e não interpretativa que:
-- agradeça a sinceridade;
-- reforce que não há resposta certa;
-- normalize o ritmo;
-- motive a continuar;
-- não antecipe diagnóstico;
-- não faça venda;
-- não sugira produto;
-- não premie respostas mais intensas.
+### Apoio durante a pergunta
+Não exibir devolutiva automática depois de cada resposta.
+
+Somente quando a pessoa permanecer **1 minuto sem responder à pergunta atual**, mostrar uma mensagem curta e discreta de acolhimento.
+
+Essa mensagem deve:
+- reforçar que não existe resposta certa;
+- lembrar que a pessoa pode responder no próprio ritmo;
+- não interpretar o silêncio;
+- não pressionar;
+- não antecipar diagnóstico;
+- não fazer venda;
+- não sugerir produto.
+
+Exemplo:
+“Pode ir no seu tempo. Não existe resposta certa aqui — escolha apenas o que mais se aproxima de como você se percebe hoje.”
 
 ### Princípio central
 **A pessoa não deve sentir que está sendo analisada a cada clique. Deve sentir que está sendo acompanhada enquanto se percebe.**
