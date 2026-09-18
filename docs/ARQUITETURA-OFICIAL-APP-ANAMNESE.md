@@ -1004,3 +1004,105 @@ O ADM deve permitir ao Everton compreender:
 **“Por que o sistema chegou a este direcionamento e como posso ajustá-lo?”**
 
 A arquitetura deve manter essas duas experiências separadas em todas as etapas.
+
+
+## PASSO 2.1 — DOWNLOAD PRIVADO DO ÁUDIO PELO USUÁRIO
+
+Status: **IMPLEMENTADO**
+
+O usuário pode usar **Baixar meu áudio** no próprio player.
+
+Regras:
+- o bucket continua privado;
+- o app faz o download autenticado do arquivo pertencente ao plano da própria conta;
+- nenhum link público permanente é criado;
+- o nome baixado deriva do título da sessão;
+- o usuário não pode baixar áudio de outro usuário por RLS.
+
+---
+
+## PASSO 3 — COMPOSITOR ADM COMPLETO
+
+Status: **IMPLEMENTADO — BASE FUNCIONAL**
+
+### Princípio
+**O motor sugere. O Everton revisa. A composição aprovada prevalece.**
+
+A sugestão original do motor nunca é apagada.
+
+### O ADM pode revisar
+- sistema-base;
+- sistema principal;
+- sistemas complementares;
+- Solfeggio;
+- florais;
+- aromaterapia;
+- cristais etéricos;
+- intenção do áudio;
+- roteiro técnico da composição;
+- observações do terapeuta.
+
+Sistemas com catalogação técnica PENDENTE não são disponibilizados para seleção manual automática.
+
+### Estados
+- RASCUNHO;
+- APROVADO.
+
+Qualquer alteração manual após aprovação retorna a composição para RASCUNHO.
+
+### Persistência
+A revisão atual fica em `care_composition_reviews`.
+
+Cada salvamento gera uma versão imutável em `care_composition_review_versions`.
+
+Assim:
+- a versão mais recente aprovada é a vigente;
+- versões anteriores continuam auditáveis;
+- sugestão do motor e decisão manual ficam separadas.
+
+### Aprovação
+Ao clicar **Aprovar composição**:
+- salva a revisão;
+- grava a camada USER em `care_plans`;
+- grava a camada técnica em `care_plan_technical`;
+- recalcula a assinatura técnica do plano;
+- libera o upload do áudio exclusivo.
+
+### Camada USER
+Pode conter apenas recursos legíveis:
+- Solfeggio;
+- floral;
+- aromaterapia;
+- cristais;
+- status do áudio;
+- rota de jornada quando aplicável.
+
+### Camada ADM
+Pode conter:
+- sistema-base;
+- sistema principal;
+- complementares;
+- recursos internos;
+- assinatura da composição;
+- roteiro;
+- observações do Everton.
+
+### Exclusividade do áudio
+A assinatura do áudio muda quando mudam:
+- sistemas;
+- recursos internos;
+- Solfeggio;
+- intenção;
+- roteiro;
+- floral;
+- aromaterapia;
+- cristais.
+
+Uma composição diferente gera um plano técnico diferente e não deve reutilizar automaticamente o áudio anterior.
+
+### Regra de publicação
+O upload do áudio só fica disponível quando:
+- existe usuário real no backend;
+- existe anamnese real no backend;
+- a composição está APROVADA.
+
