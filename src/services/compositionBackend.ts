@@ -82,6 +82,20 @@ export async function saveCareCompositionReview(params: {
 
   if (error) throw error;
 
+  const { error: versionError } = await supabase
+    .from('care_composition_review_versions')
+    .insert({
+      review_id: data.id,
+      intake_id: params.intakeId,
+      user_id: params.userId,
+      status,
+      engine_snapshot: params.engineSnapshot,
+      manual_composition: params.manualComposition,
+      admin_notes: params.adminNotes || null,
+    });
+
+  if (versionError) throw versionError;
+
   return {
     id: data.id,
     intakeId: data.intake_id,
@@ -126,21 +140,32 @@ export async function persistApprovedCarePlan(params: {
     .neq('audio_plan_id', params.audioPlanId)
     .in('status', ['preparing', 'ready', 'active']);
 
+  const { data: existingPlan } = await supabase
+    .from('care_plans')
+    .select('audio_storage_path,audio_status,published_at,status')
+    .eq('audio_plan_id', params.audioPlanId)
+    .maybeSingle();
+
+  const alreadyPublished =
+    Boolean(existingPlan?.audio_storage_path) &&
+    existingPlan?.audio_status === 'published';
+
   const { data: carePlan, error: carePlanError } = await supabase
     .from('care_plans')
     .upsert(
       {
         intake_id: params.intakeId,
         user_id: params.userId,
-        status: 'preparing',
+        status: alreadyPublished ? (existingPlan?.status || 'ready') : 'preparing',
         audio_plan_id: params.audioPlanId,
         audio_title: params.audioTitle,
-        audio_status: 'awaiting_audio',
+        audio_status: alreadyPublished ? 'published' : 'awaiting_audio',
         solfeggio: params.solfeggio,
         floral: params.florals,
         aromatherapy: params.aromatherapy,
         etheric_crystals: params.ethericCrystals,
         journey_mode: params.journeyMode || 'NAO_INDICADO',
+        published_at: alreadyPublished ? existingPlan?.published_at : null,
         updated_at: now,
       },
       { onConflict: 'audio_plan_id' }
