@@ -4,6 +4,9 @@ import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
+import { escolherAudioProgramado, ProgrammedAudio } from '../audio/audioCatalog';
+import { ProgrammedAudioCard } from './ProgrammedAudioCard';
+import { PracticeHistory } from './PracticeHistory';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 
@@ -53,6 +56,7 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
   const [analysis, setAnalysis] = useState<AnaliseCompletaResultado | null>(null);
   const [friendlyResult, setFriendlyResult] = useState<FriendlyResult | null>(null);
+  const [selectedAudio, setSelectedAudio] = useState<ProgrammedAudio | null>(null);
 
   useEffect(() => {
     try {
@@ -112,15 +116,18 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
     window.setTimeout(() => {
       const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
       const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
+      const audio = escolherAudioProgramado(technicalAnalysis.relatorioEverton.eixosOrdenados);
 
       setAnalysis(technicalAnalysis);
       setFriendlyResult(friendly);
+      setSelectedAudio(audio);
 
       const savedRecord = {
         ...finalData,
         enviadoEm: new Date().toISOString(),
         status: 'concluida',
         resultadoPessoa: friendly,
+        audioProgramado: audio,
         analiseTecnica: technicalAnalysis,
       };
 
@@ -443,6 +450,10 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
                   <PrimaryButton onClick={() => setStep('sent')}>Ver próximos passos</PrimaryButton>
                 </div>
               </section>
+
+              {selectedAudio && (
+                <ProgrammedAudioCard audio={selectedAudio} userId={form.id} />
+              )}
             </div>
           )}
 
@@ -459,7 +470,10 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
               <p className="text-sm text-[#7b817b]">
                 A partir desta leitura, o app poderá conectar os áudios programados, florais, aromaterapia, cristais etéricos e, quando indicado, a jornada de 21 dias. Esses recursos serão exibidos apenas quando estiverem cadastrados e disponíveis para aquele cuidado.
               </p>
-              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setQuestionIndex(0); setStep('welcome'); }}>
+
+              <PracticeHistory />
+
+              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setQuestionIndex(0); setStep('welcome'); }}>
                 Nova anamnese
               </PrimaryButton>
             </CenteredCard>
