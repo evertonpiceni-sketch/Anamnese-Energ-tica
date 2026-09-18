@@ -314,6 +314,24 @@ O envio:
 ### Provedor
 A função de envio deve usar provedor transacional configurado por segredo de ambiente. Enquanto o provedor não estiver configurado, a solicitação permanece registrada sem simular envio bem-sucedido.
 
+### PENDÊNCIA DO EVERTON — CONFIGURAR QUANDO FOR ATIVAR O ENVIO REAL
+Status: **PENDENTE / NÃO BLOQUEIA O RESTANTE DO DESENVOLVIMENTO**
+
+Quando Everton decidir ativar o envio real dos resultados por e-mail:
+- criar/usar uma conta em um provedor transacional compatível, como Resend;
+- obter a chave de API do provedor;
+- cadastrar a chave no Supabase Edge Function Secrets como `RESEND_API_KEY`;
+- opcionalmente configurar `RESULT_EMAIL_FROM` com o remetente desejado;
+- enquanto não houver domínio próprio, usar a configuração permitida pelo provedor para testes/uso inicial;
+- quando houver domínio próprio, verificar o domínio no provedor e trocar o remetente para um endereço profissional;
+- realizar um envio de teste USER;
+- realizar um envio de teste ADM;
+- confirmar recebimento do PDF correto;
+- conferir que nenhuma informação técnica do ADM aparece no e-mail ou no PDF;
+- somente depois considerar o recurso de envio por e-mail como **ATIVO EM PRODUÇÃO**.
+
+Não remover esta pendência até a configuração do provedor ser concluída e testada.
+
 ---
 
 ## Tela U10 — Player de áudio
