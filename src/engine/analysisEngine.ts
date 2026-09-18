@@ -296,6 +296,13 @@ function cruzarComBibliotecaMestra(
   return sistemasValidos.map((sistema) => {
     let compatibilidadeTotal = 0;
     const motivos: string[] = [];
+    const possuiMapeamentoTecnico = Object.values(sistema.compatibilidadeEixos).some(
+      (peso) => typeof peso === 'number' && peso > 0
+    );
+
+    if (!possuiMapeamentoTecnico) {
+      motivos.push('Sistema registrado na Biblioteca-Mestra, mas ainda aguardando catalogação técnica documental.');
+    }
 
     // Cruzar compatibilidade com cada eixo cadastrado
     Object.entries(sistema.compatibilidadeEixos).forEach(([eixoStr, pesoCompativel]) => {
@@ -346,7 +353,7 @@ function cruzarComBibliotecaMestra(
     }
 
     // Sistemas com Formação Confirmada possuem preferência técnica
-    if (sistema.status === 'FORMAÇÃO_CONFIRMADA') {
+    if (sistema.status === 'FORMAÇÃO_CONFIRMADA' && possuiMapeamentoTecnico) {
       compatibilidadeTotal += 10;
     } else if (sistema.status === 'AGUARDANDO_VALIDACAO') {
       compatibilidadeTotal *= 0.7; // Reduz para evitar uso automático sem documentação
@@ -378,7 +385,9 @@ function selecionarComposicaoFinal(
   const ordenados = [...sistemasPontuados].sort((a, b) => b.compatibilidadeTotal - a.compatibilidadeTotal);
 
   // 1. SISTEMA-BASE (Sustentação geral)
-  const candidatosBase = ordenados.filter((s) => s.sistema.ehBaseSustentacao);
+  const candidatosBase = ordenados.filter(
+    (s) => s.sistema.ehBaseSustentacao && s.compatibilidadeTotal > 0
+  );
   const selecionadoBase =
     candidatosBase.find((s) => s.sistema.id === 'original_reiki_platinum') ||
     candidatosBase[0] ||
@@ -387,7 +396,10 @@ function selecionarComposicaoFinal(
   // 2. SISTEMA PRINCIPAL (Recurso mais diretamente relacionado à necessidade predominante)
   // Não pode ser o mesmo do sistema base, salvo se não houver outro com formação confirmada
   const candidatosPrincipal = ordenados.filter(
-    (s) => s.sistema.id !== selecionadoBase.sistema.id && s.sistema.status !== 'AGUARDANDO_VALIDACAO'
+    (s) =>
+      s.sistema.id !== selecionadoBase.sistema.id &&
+      s.sistema.status !== 'AGUARDANDO_VALIDACAO' &&
+      s.compatibilidadeTotal > 0
   );
 
   // Se houver recomendação direta da cadeia causal para o sistema principal
@@ -425,7 +437,8 @@ function selecionarComposicaoFinal(
     (s) =>
       s.sistema.id !== selecionadoBase.sistema.id &&
       s.sistema.id !== selecionadoPrincipal.sistema.id &&
-      s.sistema.status !== 'AGUARDANDO_VALIDACAO'
+      s.sistema.status !== 'AGUARDANDO_VALIDACAO' &&
+      s.compatibilidadeTotal > 0
   );
 
   const complementaresSelecionados: {
