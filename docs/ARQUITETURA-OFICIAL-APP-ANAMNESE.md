@@ -1355,3 +1355,57 @@ Depois, apresentar cada cristal com uma frase curta e simples sobre sua função
 ### Regra de autenticidade
 Esta estrutura comercial e de entrega pertence ao projeto da Anamnese Integrativa / Protocolo da Transformação e não deve copiar textos, lógica, nomes, layout ou estrutura do Mini Diagnóstico ou de terceiros.
 
+
+
+## REGRA DE ACOLHIMENTO DURANTE A ANAMNESE
+
+Status: **REGRA OFICIAL**
+
+A anamnese deve acolher enquanto pergunta.
+
+### Objetivo emocional da experiência
+O usuário deve sentir:
+- que pode responder sem medo de errar;
+- que não está sendo julgado;
+- que não precisa compreender tudo imediatamente;
+- que sua percepção atual já é válida;
+- que consegue seguir para a próxima etapa no próprio ritmo.
+
+### Regra das perguntas
+As perguntas podem investigar temas profundos, mas devem:
+- usar linguagem humana;
+- evitar tom clínico, acusatório ou fatalista;
+- evitar frases que definam quem a pessoa é;
+- evitar afirmar causas sem evidência;
+- evitar transformar percepção em diagnóstico;
+- convidar à observação, e não impor interpretação.
+
+### Regra das dicas acolhedoras
+As dicas devem funcionar como convites de percepção.
+
+Preferir:
+- “Perceba como isso aparece para você.”
+- “Não é preciso entender a causa agora.”
+- “Sua percepção de hoje já é suficiente.”
+- “Não existem respostas certas ou erradas aqui.”
+
+Evitar:
+- afirmações deterministas;
+- sentenças sobre aura, corpo, memória ou padrão como fato consumado;
+- linguagem de culpa;
+- frases que possam aumentar medo ou sensação de defeito.
+
+### Depois de cada resposta
+Exibir uma devolutiva curta e não interpretativa que:
+- agradeça a sinceridade;
+- reforce que não há resposta certa;
+- normalize o ritmo;
+- motive a continuar;
+- não antecipe diagnóstico;
+- não faça venda;
+- não sugira produto;
+- não premie respostas mais intensas.
+
+### Princípio central
+**A pessoa não deve sentir que está sendo analisada a cada clique. Deve sentir que está sendo acompanhada enquanto se percebe.**
+
