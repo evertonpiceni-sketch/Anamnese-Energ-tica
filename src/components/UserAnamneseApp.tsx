@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Heart, Leaf, Save, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download, Heart, Leaf, Save, ShieldCheck, Sparkles } from 'lucide-react';
 import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
@@ -10,6 +10,7 @@ import { PracticeHistory } from './PracticeHistory';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition, CareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
+import { downloadUserResultPdf } from '../pdf/userResultPdf';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 
@@ -465,6 +466,22 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
                 <div className="mt-7 flex flex-wrap gap-3">
                   <PrimaryButton onClick={() => setStep('sent')}>Ver próximos passos</PrimaryButton>
+                  <SecondaryButton
+                    onClick={() =>
+                      downloadUserResultPdf({
+                        nome: form.nomePessoa,
+                        data: form.data,
+                        headline: friendlyResult.headline,
+                        intro: friendlyResult.intro,
+                        priorities: friendlyResult.priorities,
+                        intention: friendlyResult.intention,
+                        closing: friendlyResult.closing,
+                        composition: careComposition,
+                      })
+                    }
+                  >
+                    <Download className="h-4 w-4" /> Baixar meu resultado em PDF
+                  </SecondaryButton>
                 </div>
               </section>
 
