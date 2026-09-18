@@ -1,67 +1,62 @@
-import { Clock3, FileAudio, Headphones, Link2Off } from 'lucide-react';
-import { PROGRAMMED_AUDIO_CATALOG } from '../audio/audioCatalog';
+import { AudioLines, Fingerprint, Layers3, ShieldCheck } from 'lucide-react';
 
 export function AudioLibraryView() {
   return (
-    <div className="mx-auto max-w-7xl px-4 py-8">
-      <div className="mb-6 rounded-2xl border border-stone-800 bg-stone-900 p-6">
+    <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="rounded-2xl border border-stone-800 bg-stone-900 p-6">
         <div className="flex items-start gap-3">
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-amber-400">
-            <Headphones className="h-6 w-6" />
+            <AudioLines className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-stone-100">Biblioteca de Áudios Programados</h1>
-            <p className="mt-1 max-w-3xl text-sm leading-6 text-stone-400">
-              O motor já consegue escolher o áudio mais coerente com os eixos predominantes. Um item só é reproduzido para o usuário quando tiver arquivo oficial e status ATIVO.
+            <h1 className="text-xl font-bold text-stone-100">Gerador de Áudios Personalizados</h1>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-400">
+              Não existe biblioteca de áudios finais reutilizáveis. Cada sessão sonora nasce da anamnese daquela pessoa
+              e da combinação específica de sistemas, recursos, Solfeggio e apoios selecionados para aquele momento.
             </p>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {PROGRAMMED_AUDIO_CATALOG.map(audio => {
-          const active = audio.status === 'ATIVO' && !!audio.arquivoUrl;
-
-          return (
-            <article key={audio.id} className="rounded-2xl border border-stone-800 bg-stone-900 p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-wider text-amber-400/80">
-                    {audio.eixos.join(' • ')}
-                  </div>
-                  <h2 className="mt-1 text-lg font-semibold text-stone-100">{audio.titulo}</h2>
-                  <p className="mt-1 text-sm leading-6 text-stone-400">{audio.subtitulo}</p>
-                </div>
-
-                <span
-                  className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-                    active
-                      ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300'
-                      : 'border-amber-500/30 bg-amber-500/10 text-amber-300'
-                  }`}
-                >
-                  {active ? 'ATIVO' : 'AGUARDANDO ARQUIVO'}
-                </span>
-              </div>
-
-              <div className="mt-4 rounded-xl bg-stone-950/60 p-4 text-xs leading-5 text-stone-400">
-                {audio.intencao}
-              </div>
-
-              <div className="mt-4 flex flex-wrap gap-4 text-xs text-stone-500">
-                <span className="inline-flex items-center gap-1.5">
-                  <Clock3 className="h-4 w-4" />
-                  {audio.duracaoMinutos ? `${audio.duracaoMinutos} min` : 'duração pendente'}
-                </span>
-                <span className="inline-flex items-center gap-1.5">
-                  {audio.arquivoUrl ? <FileAudio className="h-4 w-4" /> : <Link2Off className="h-4 w-4" />}
-                  {audio.arquivoUrl || 'nenhum arquivo vinculado'}
-                </span>
-              </div>
-            </article>
-          );
-        })}
+      <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <InfoCard
+          icon={<Fingerprint className="h-5 w-5" />}
+          title="Exclusivo por usuário"
+          text="Cada plano recebe um identificador próprio e fica vinculado a uma única anamnese."
+        />
+        <InfoCard
+          icon={<Layers3 className="h-5 w-5" />}
+          title="Composição única"
+          text="Sistema-base, sistema principal, complementares, recursos internos e Solfeggio formam a assinatura da sessão."
+        />
+        <InfoCard
+          icon={<ShieldCheck className="h-5 w-5" />}
+          title="Sem reaproveitamento automático"
+          text="Mesmo que duas pessoas tenham prioridades parecidas, o áudio final não é tratado como o mesmo arquivo nem como tratamento genérico."
+        />
       </div>
+
+      <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
+        <h2 className="font-semibold text-stone-100">O que a biblioteca passa a guardar</h2>
+        <div className="mt-4 grid gap-3 text-sm text-stone-400 sm:grid-cols-2">
+          <div className="rounded-xl bg-stone-950/60 p-4">Blocos de locução e estrutura de sessão</div>
+          <div className="rounded-xl bg-stone-950/60 p-4">Sistemas e recursos energéticos documentados</div>
+          <div className="rounded-xl bg-stone-950/60 p-4">Regras de composição por eixo e prioridade</div>
+          <div className="rounded-xl bg-stone-950/60 p-4">Solfeggio e elementos sonoros de fundo</div>
+          <div className="rounded-xl bg-stone-950/60 p-4">Florais, aromaterapia e cristais etéricos indicados</div>
+          <div className="rounded-xl bg-stone-950/60 p-4">Histórico de versões geradas para cada usuário</div>
+        </div>
+      </section>
     </div>
+  );
+}
+
+function InfoCard({ icon, title, text }: { icon: React.ReactNode; title: string; text: string }) {
+  return (
+    <article className="rounded-2xl border border-stone-800 bg-stone-900 p-5">
+      <div className="text-amber-400">{icon}</div>
+      <h2 className="mt-3 font-semibold text-stone-100">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-stone-400">{text}</p>
+    </article>
   );
 }
