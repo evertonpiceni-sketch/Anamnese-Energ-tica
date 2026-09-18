@@ -44,7 +44,6 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
 
   useEffect(() => {
     let active = true;
-    let objectUrl: string | null = null;
 
     if (!audio.arquivoUrl) {
       createPrivateAudioPlaybackUrl(audio.id)
@@ -61,7 +60,6 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
 
     return () => {
       active = false;
-      objectUrl = null;
     };
   }, [audio.id, audio.arquivoUrl]);
 
