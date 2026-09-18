@@ -10,6 +10,13 @@ export interface UserResultPdfData {
   intention: string;
   closing: string;
   composition: CareComposition | null;
+  publicCare?: {
+    solfeggio?: { hz?: number; chakraProjeto?: string; intencaoProjeto?: string } | null;
+    floralNames?: string[];
+    aromatherapyNames?: string[];
+    crystalNames?: string[];
+    hasExclusiveAudio?: boolean;
+  };
 }
 
 const PAGE_W = 210;
@@ -91,8 +98,36 @@ function buildUserResultPdf(data: UserResultPdfData) {
   section('Intenção para o próximo passo');
   paragraph(data.intention, { size: 11 });
 
-  if (data.composition) {
+  if (data.composition || data.publicCare) {
     section('Seu cuidado neste momento');
+
+    if (!data.composition && data.publicCare) {
+      if (data.publicCare.solfeggio?.hz) {
+        paragraph(
+          `Frequência da sessão: ${data.publicCare.solfeggio.hz} Hz${data.publicCare.solfeggio.chakraProjeto ? ` - ${data.publicCare.solfeggio.chakraProjeto}` : ''}.`,
+          { size: 10 }
+        );
+      }
+
+      if (data.publicCare.floralNames?.length) {
+        paragraph(`Floral sugerido: ${data.publicCare.floralNames.join(', ')}.`, { size: 10 });
+      }
+
+      if (data.publicCare.aromatherapyNames?.length) {
+        paragraph(`Aromaterapia: ${data.publicCare.aromatherapyNames.join(', ')}.`, { size: 10 });
+      }
+
+      if (data.publicCare.crystalNames?.length) {
+        paragraph(`Cristais etéricos indicados: ${data.publicCare.crystalNames.join(', ')}.`, { size: 10 });
+      }
+
+      if (data.publicCare.hasExclusiveAudio) {
+        paragraph(
+          'Sua sessão de áudio é exclusiva e foi composta a partir desta anamnese. O áudio final não é reutilizado para outra pessoa.',
+          { size: 10 }
+        );
+      }
+    }
 
     if (data.composition.solfeggio) {
       paragraph(
