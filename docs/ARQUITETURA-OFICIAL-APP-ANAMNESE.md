@@ -1302,7 +1302,7 @@ Status: **REGRA OFICIAL**
 - **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida**
   - inclui a jornada de 21 dias;
   - processo mais aprofundado;
-  - prazo de entrega: **até 3 dias** após a confirmação da compra e conclusão da anamnese;
+  - prazo de entrega: **entre 3 e 5 dias** após a confirmação da compra e conclusão da anamnese;
   - libera o diagnóstico completo;
   - libera a leitura organizada a partir das respostas da própria pessoa.
 
@@ -1420,15 +1420,14 @@ Exemplo:
 
 
 
-## REGRA DE PRAZO — TODAS AS MODALIDADES
+## REGRA DE PRAZO — MODALIDADES
 
 Status: **REGRA OFICIAL**
 
-O prazo de entrega é de **até 3 dias para todas as modalidades**:
-
-- **R$ 50 — 7 dias / áudio personalizado sem meditação guiada**
-- **R$ 100 — 7 dias / áudio personalizado com meditação guiada**
-- **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida**
+### Prazos
+- **R$ 50 — 7 dias / áudio personalizado sem meditação guiada:** entrega em até **3 dias**.
+- **R$ 100 — 7 dias / áudio personalizado com meditação guiada:** entrega em até **3 dias**.
+- **R$ 180 — 21 Dias para Voltar para Mim — Reintegração da Vida:** entrega entre **3 e 5 dias**.
 
 ### Início do prazo
 O prazo começa após:
@@ -1445,7 +1444,7 @@ O prazo deve aparecer:
 ### Regra de status
 O sistema nunca deve marcar o material como pronto antes da publicação real.
 
-Enquanto estiver em produção, usar mensagem acolhedora e objetiva, como:
-
-**“Seu material personalizado está sendo preparado com base na sua anamnese. O prazo de entrega é de até 3 dias.”**
+Mensagens sugeridas:
+- planos de 7 dias: **“Seu material personalizado está sendo preparado com base na sua anamnese. O prazo de entrega é de até 3 dias.”**
+- jornada de 21 dias: **“Sua jornada personalizada está sendo preparada com base na sua anamnese. O prazo de entrega é de 3 a 5 dias.”**
 
