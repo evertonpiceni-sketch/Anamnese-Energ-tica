@@ -17,7 +17,7 @@ const PAGE_H = 297;
 const MARGIN_X = 20;
 const BOTTOM = 270;
 
-export function downloadUserResultPdf(data: UserResultPdfData) {
+function buildUserResultPdf(data: UserResultPdfData) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
   let y = 22;
 
@@ -156,7 +156,26 @@ export function downloadUserResultPdf(data: UserResultPdfData) {
     .replace(/^-+|-+$/g, '')
     .toLowerCase();
 
-  doc.save(`resultado-anamnese-${safe || 'usuario'}.pdf`);
+  return {
+    doc,
+    fileName: `resultado-anamnese-${safe || 'usuario'}.pdf`,
+  };
+}
+
+export function downloadUserResultPdf(data: UserResultPdfData) {
+  const { doc, fileName } = buildUserResultPdf(data);
+  doc.save(fileName);
+}
+
+export function createUserResultPdfBlob(data: UserResultPdfData): {
+  blob: Blob;
+  fileName: string;
+} {
+  const { doc, fileName } = buildUserResultPdf(data);
+  return {
+    blob: doc.output('blob'),
+    fileName,
+  };
 }
 
 function drawHeader(doc: jsPDF) {
