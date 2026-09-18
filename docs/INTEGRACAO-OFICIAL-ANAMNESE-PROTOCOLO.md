@@ -52,6 +52,29 @@ Podem ser utilizados para:
 
 O app deve permitir acompanhar a execução do áudio e, quando previsto, colher uma percepção simples antes/depois para alimentar a reavaliação.
 
+## 3.1. Solfeggio na sessão
+
+A frequência Solfeggio é parte da composição da sessão.
+
+O motor pode selecionar uma frequência conforme os eixos predominantes da anamnese, utilizando o mapeamento interno aprovado do projeto:
+
+- 396 Hz — Básico — aterramento, segurança e estabilidade;
+- 417 Hz — Sacral — criatividade, fluxo, liberação e recomeço;
+- 528 Hz — Plexo Solar — autoconfiança, poder pessoal e transformação;
+- 639 Hz — Cardíaco — afeto, relações e acolhimento;
+- 741 Hz — Laríngeo — comunicação, expressão e clareza;
+- 852 Hz — Frontal — percepção, clareza e direção;
+- 963 Hz — Coronário — conexão, consciência e integração.
+
+Regras:
+
+- Solfeggio pertence à **sessão/prática**, não à tela inicial nem ao cadastro;
+- o usuário pode ver a frequência indicada durante a sessão;
+- o ADM vê a regra de seleção e a relação com os eixos;
+- o mapeamento é uma convenção terapêutica/energética interna do projeto, não uma afirmação médica;
+- o arquivo sonoro real da frequência deve ser cadastrado separadamente;
+- não considerar uma frequência “tocável” apenas porque o mapeamento está ativo.
+
 ## 4. Florais, aromaterapia e cristais etéricos
 
 A indicação desses recursos deve vir de bibliotecas cadastradas e da correlação interna definida no sistema.
