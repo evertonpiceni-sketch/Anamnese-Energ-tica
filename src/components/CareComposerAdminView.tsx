@@ -148,12 +148,20 @@ export function CareComposerAdminView({ anamnese, analise, backendUserId, backen
         </section>
       </div>
 
-      {composition.audio && (
+      {composition.audio && backendUserId && backendIntakeId ? (
         <AdminAudioUpload
           audio={composition.audio}
           nomePessoa={anamnese.nomePessoa || 'Interagente'}
         />
-      )}
+      ) : composition.audio ? (
+        <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
+          <h2 className="font-semibold text-stone-100">Áudio exclusivo</h2>
+          <p className="mt-2 text-sm leading-6 text-stone-400">
+            Esta composição está em modo de teste/local. O upload para o Storage privado só é liberado
+            quando a anamnese possui usuário e ID de backend válidos.
+          </p>
+        </section>
+      ) : null}
 
       {backendUserId && backendIntakeId && friendlyResult && (
         <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
