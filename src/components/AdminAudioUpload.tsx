@@ -2,11 +2,12 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, FileAudio, Trash2, UploadCloud } from 'lucide-react';
 import { PersonalizedAudioPlan } from '../audio/audioCatalog';
 import {
-  getPersonalizedAudio,
-  removePersonalizedAudio,
-  savePersonalizedAudio,
-  StoredPersonalizedAudio,
-} from '../audio/audioStorage';
+  getAudioFileDuration,
+  getCarePlanByAudioPlanId,
+  removePersonalizedAudioRemote,
+  RemotePersonalizedAudio,
+  uploadPersonalizedAudio,
+} from '../services/audioBackend';
 
 interface AdminAudioUploadProps {
   audio: PersonalizedAudioPlan;
@@ -14,19 +15,20 @@ interface AdminAudioUploadProps {
 }
 
 export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
-  const [stored, setStored] = useState<StoredPersonalizedAudio | null>(null);
+  const [stored, setStored] = useState<RemotePersonalizedAudio | null>(null);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     let active = true;
-    getPersonalizedAudio(audio.id)
+    getCarePlanByAudioPlanId(audio.id)
       .then(record => {
         if (active) setStored(record);
       })
       .catch(() => {
-        if (active) setMessage('Não foi possível verificar o arquivo anexado.');
+        if (active) setMessage('Não foi possível verificar o áudio publicado.');
       });
+
     return () => {
       active = false;
     };
@@ -44,30 +46,42 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
     setMessage('');
 
     try {
-      const record = await savePersonalizedAudio({
-        planId: audio.id,
-        anamneseId: audio.anamneseId,
-        userId: audio.userId,
+      const duration = await getAudioFileDuration(file);
+      const record = await uploadPersonalizedAudio({
+        audio,
         file,
+        durationSeconds: duration,
       });
+
       setStored(record);
-      setMessage('Áudio anexado à anamnese correta.');
-    } catch {
-      setMessage('Falha ao salvar o áudio neste dispositivo.');
+      setMessage('Áudio publicado com segurança para esta anamnese.');
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? `Não foi possível publicar o áudio: ${error.message}`
+          : 'Não foi possível publicar o áudio.'
+      );
     } finally {
       setBusy(false);
     }
   }
 
   async function remove() {
+    if (!stored) return;
+
     setBusy(true);
     setMessage('');
+
     try {
-      await removePersonalizedAudio(audio.id);
+      await removePersonalizedAudioRemote(audio.id);
       setStored(null);
       setMessage('Áudio removido deste plano.');
-    } catch {
-      setMessage('Não foi possível remover o áudio.');
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? `Não foi possível remover o áudio: ${error.message}`
+          : 'Não foi possível remover o áudio.'
+      );
     } finally {
       setBusy(false);
     }
@@ -82,9 +96,10 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
         <div className="min-w-0">
           <h2 className="font-semibold text-stone-100">Anexar áudio exclusivo</h2>
           <p className="mt-1 text-sm leading-6 text-stone-400">
-            Este arquivo ficará vinculado somente a <strong className="text-stone-200">{nomePessoa || 'este usuário'}</strong>,
-            à anamnese <strong className="text-stone-200">{audio.anamneseId}</strong> e ao plano
-            <strong className="ml-1 break-all text-stone-200">{audio.id}</strong>.
+            Este arquivo ficará vinculado somente a{' '}
+            <strong className="text-stone-200">{nomePessoa || 'este usuário'}</strong>, à anamnese{' '}
+            <strong className="text-stone-200">{audio.anamneseId}</strong> e ao plano{' '}
+            <strong className="break-all text-stone-200">{audio.id}</strong>.
           </p>
         </div>
       </div>
@@ -96,7 +111,7 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
             {stored ? 'Substituir o áudio desta sessão' : 'Selecionar MP3, WAV ou outro áudio'}
           </span>
           <span className="text-xs text-stone-500">
-            O arquivo é conferido pelo ID do plano antes de ser disponibilizado ao usuário.
+            O arquivo será enviado ao Storage privado e liberado somente para o usuário desta sessão.
           </span>
           <input
             type="file"
@@ -114,10 +129,15 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
             <div className="flex min-w-0 items-start gap-3">
               <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-400" />
               <div className="min-w-0">
-                <div className="truncate font-medium text-stone-100">{stored.fileName}</div>
-                <div className="mt-1 text-xs text-stone-500">
-                  {(stored.size / (1024 * 1024)).toFixed(1)} MB • anexado em {new Date(stored.uploadedAt).toLocaleString('pt-BR')}
+                <div className="font-medium text-stone-100">Áudio publicado</div>
+                <div className="mt-1 break-all text-xs text-stone-500">
+                  {stored.storagePath}
                 </div>
+                {stored.durationSeconds !== null && (
+                  <div className="mt-1 text-xs text-stone-500">
+                    duração aproximada: {Math.round(stored.durationSeconds / 60)} min
+                  </div>
+                )}
               </div>
             </div>
             <button
@@ -133,13 +153,11 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
         </div>
       )}
 
-      {message && (
-        <div className="mt-4 text-sm text-stone-400">{message}</div>
-      )}
+      {message && <div className="mt-4 text-sm text-stone-400">{message}</div>}
 
       <p className="mt-4 text-xs leading-5 text-stone-500">
-        Nesta fase do protótipo, o arquivo é persistido no navegador deste dispositivo. Para uso em produção entre dispositivos e contas,
-        o mesmo vínculo deverá ser gravado no armazenamento privado do backend.
+        O arquivo não fica público. O player do usuário recebe uma URL temporária assinada e somente a conta
+        vinculada ao plano pode solicitar acesso ao áudio.
       </p>
     </section>
   );
