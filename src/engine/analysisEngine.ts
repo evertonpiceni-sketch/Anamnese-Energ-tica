@@ -288,7 +288,9 @@ function cruzarComBibliotecaMestra(
   analiseQualitativa: AnaliseQualitativaProfunda,
   cadeiasCausais: CadeiaCausalFuncional[]
 ): SistemaPontuado[] {
-  const sistemasValidos = biblioteca.filter((s) => s.status !== 'NAO_UTILIZAR');
+  const sistemasValidos = biblioteca.filter(
+    (s) => s.status !== 'NAO_UTILIZAR' && s.catalogacaoTecnica !== 'PENDENTE'
+  );
 
   const mapaEixos = new Map<EixoId, number>();
   eixosPontuados.forEach((e) => mapaEixos.set(e.eixoId, e.percentual));
