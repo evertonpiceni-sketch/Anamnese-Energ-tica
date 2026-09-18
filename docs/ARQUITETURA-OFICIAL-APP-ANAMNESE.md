@@ -574,8 +574,44 @@ O arquivo enviado fica vinculado a **um único plano de áudio**, que pertence a
 
 O player da área do usuário deve buscar o áudio pelo ID do plano, não pelo nome do arquivo.
 
-### Produção
-No protótipo, o arquivo pode ser persistido localmente no navegador. Na produção, o mesmo vínculo deverá utilizar armazenamento privado/autenticado no backend para permitir acesso seguro entre dispositivos.
+### Produção — IMPLEMENTADO
+O áudio exclusivo não é mais persistido em IndexedDB/localmente.
+
+A implementação oficial utiliza:
+- bucket privado Supabase `personalized-audios`;
+- caminho `<user_id>/<intake_id>/<audio_plan_id>/sessao.<ext>`;
+- vínculo persistente em `care_plans`;
+- `audio_plan_id` único;
+- status de publicação;
+- duração do arquivo quando detectável;
+- caminho do Storage privado;
+- data de publicação.
+
+### Upload pelo ADM
+Somente uma anamnese com `user_id` e `intake_id` reais do backend pode publicar áudio.
+
+O ADM pode:
+- anexar;
+- substituir;
+- remover.
+
+Anamneses de teste/local não podem gravar no Storage de produção.
+
+### Acesso pelo USER
+O bucket permanece privado.
+
+O usuário:
+- não recebe URL pública permanente;
+- consulta apenas o plano que pertence à própria conta;
+- recebe URL assinada temporária para reprodução;
+- não pode listar ou acessar a pasta de outro usuário.
+
+A URL assinada expira e deve ser renovada pelo app quando necessário.
+
+### Regra de vínculo
+**um arquivo → um audio_plan_id → uma anamnese → um usuário**
+
+Substituir um áudio preserva o vínculo do plano e remove o arquivo anterior quando a extensão/caminho mudar.
 
 ---
 
