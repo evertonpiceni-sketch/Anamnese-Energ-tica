@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Clock3, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
-import { ProgrammedAudio } from '../audio/audioCatalog';
+import { PersonalizedAudioPlan } from '../audio/audioCatalog';
 
 const PRACTICE_LOG_KEY = 'anamnese-integrativa-practice-logs-v1';
 
@@ -17,7 +17,7 @@ export interface AudioPracticeLog {
 }
 
 interface ProgrammedAudioCardProps {
-  audio: ProgrammedAudio;
+  audio: PersonalizedAudioPlan;
   userId?: string;
 }
 
@@ -30,7 +30,7 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [completed, setCompleted] = useState(false);
   const [practiceId, setPracticeId] = useState<string | null>(null);
 
-  const available = audio.status === 'ATIVO' && !!audio.arquivoUrl;
+  const available = audio.status === 'GERADO' && !!audio.arquivoUrl;
 
   const durationLabel = useMemo(() => {
     if (!audio.duracaoMinutos) return 'Duração definida quando o arquivo for cadastrado';
@@ -148,7 +148,7 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
           <Headphones className="h-6 w-6" />
         </div>
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#a18443]">Áudio programado indicado</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#a18443]">Áudio exclusivo da sua sessão</div>
           <h3 className="mt-1 font-serif text-2xl text-[#173c2c]">{audio.titulo}</h3>
           <p className="mt-1 text-sm leading-6 text-[#667268]">{audio.subtitulo}</p>
         </div>
@@ -165,9 +165,9 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
 
       {!available ? (
         <div className="mt-6 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5">
-          <div className="font-semibold text-[#6f5d31]">Áudio selecionado pelo motor — arquivo ainda não cadastrado.</div>
+          <div className="font-semibold text-[#6f5d31]">Sua sessão exclusiva está sendo preparada.</div>
           <p className="mt-2 text-sm leading-6 text-[#7b6b46]">
-            A indicação já está funcionando. Assim que o arquivo oficial deste áudio for adicionado ao catálogo, o player será liberado automaticamente.
+            Este áudio será gerado exclusivamente a partir da sua anamnese e da composição desta sessão. Ele não é reutilizado para outra pessoa.
           </p>
         </div>
       ) : (
