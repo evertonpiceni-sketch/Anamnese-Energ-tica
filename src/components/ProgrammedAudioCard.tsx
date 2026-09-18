@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { CheckCircle2, Clock3, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
+import { CheckCircle2, Clock3, Download, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
 import { PersonalizedAudioPlan } from '../audio/audioCatalog';
-import { createPrivateAudioPlaybackUrl } from '../services/audioBackend';
+import { createPrivateAudioPlaybackUrl, downloadPrivatePersonalizedAudio } from '../services/audioBackend';
 
 const PRACTICE_LOG_KEY = 'anamnese-integrativa-practice-logs-v1';
 
@@ -32,6 +32,8 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [practiceId, setPracticeId] = useState<string | null>(null);
   const [remoteAudioUrl, setRemoteAudioUrl] = useState<string | null>(null);
   const [remoteDurationSeconds, setRemoteDurationSeconds] = useState<number | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadMessage, setDownloadMessage] = useState('');
 
   const playbackUrl = audio.arquivoUrl || remoteAudioUrl;
   const available = !!playbackUrl;
@@ -237,7 +239,36 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
             >
               <RotateCcw className="h-4 w-4" /> Reiniciar
             </button>
+            <button
+              type="button"
+              disabled={downloading}
+              onClick={async () => {
+                setDownloading(true);
+                setDownloadMessage('');
+                try {
+                  await downloadPrivatePersonalizedAudio(audio.id, audio.titulo);
+                } catch (error) {
+                  setDownloadMessage(
+                    error instanceof Error
+                      ? error.message
+                      : 'Não foi possível baixar o áudio.'
+                  );
+                } finally {
+                  setDownloading(false);
+                }
+              }}
+              className="inline-flex items-center gap-2 rounded-full border border-[#cdbc91] bg-white/60 px-5 py-3 font-semibold text-[#53675b] disabled:opacity-40"
+            >
+              <Download className="h-4 w-4" />
+              {downloading ? 'Preparando...' : 'Baixar meu áudio'}
+            </button>
           </div>
+
+          {downloadMessage && (
+            <div className="mt-4 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-4 text-sm text-[#6f5d31]">
+              {downloadMessage}
+            </div>
+          )}
 
           {(completed || !playing) && practiceId && (
             <div className="mt-7 border-t border-[#e0d5bb] pt-6">
