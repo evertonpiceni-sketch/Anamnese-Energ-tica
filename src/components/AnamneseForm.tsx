@@ -167,7 +167,7 @@ export function AnamneseForm({
               Questionário de Anamnese Integrativa
             </h1>
             <p className="text-xs text-stone-400 mt-1 max-w-2xl">
-              Mapeamento dos 20 eixos funcionais, percepção somática e escuta profunda para cruzamento direto com a Biblioteca-Mestra (14 Cursos).
+              Mapeamento dos 20 eixos funcionais, percepção somática e escuta profunda para cruzamento direto com a Biblioteca-Mestra, preparada para incorporar todos os cursos e sistemas validados.
             </p>
           </div>
 
