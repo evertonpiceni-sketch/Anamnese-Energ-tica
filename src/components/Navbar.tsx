@@ -1,8 +1,8 @@
-import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, Headphones } from 'lucide-react';
+import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, Headphones, Layers3 } from 'lucide-react';
 
 interface NavbarProps {
-  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'reavaliacao' | 'casos';
-  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'reavaliacao' | 'casos') => void;
+  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'reavaliacao' | 'casos';
+  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'reavaliacao' | 'casos') => void;
   temAnalisePronta: boolean;
   onLimparAnamnese?: () => void;
 }
@@ -133,6 +133,19 @@ export function Navbar({ viewAtiva, onMudarView, temAnalisePronta, onLimparAnamn
             >
               <Headphones className="w-4 h-4" />
               <span className="hidden lg:inline">Áudios</span>
+            </button>
+
+            <button
+              id="nav-btn-complementares"
+              onClick={() => onMudarView('complementares')}
+              className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                viewAtiva === 'complementares'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'text-stone-300 hover:text-white hover:bg-stone-800'
+              }`}
+            >
+              <Layers3 className="w-4 h-4" />
+              <span className="hidden xl:inline">Complementares</span>
             </button>
 
             <button
