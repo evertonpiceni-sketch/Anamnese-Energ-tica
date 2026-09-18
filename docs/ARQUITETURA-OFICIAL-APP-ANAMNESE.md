@@ -1304,8 +1304,6 @@ Status: **REGRA OFICIAL**
   - libera a leitura organizada a partir das respostas da própria pessoa.
 
 ### Regra de acesso
-O **diagnóstico completo + respostas** é liberado somente para compras de **R$ 100 ou mais**.
-
 O plano de R$ 50 libera um **diagnóstico parcial**, com:
 - acolhimento inicial;
 - leitura resumida do momento;
@@ -1316,11 +1314,11 @@ O plano de R$ 50 libera um **diagnóstico parcial**, com:
 - instruções de uso.
 
 O diagnóstico parcial não deve exibir:
-- diagnóstico completo;
 - todas as respostas individualmente;
 - detalhamento integral das respostas;
-- leitura ampliada;
-- conteúdo reservado às modalidades de R$ 100 e R$ 180.
+- leitura ampliada.
+
+Também não deve conter chamadas comerciais ou comparativas sugerindo que uma leitura “melhor”, “mais completa” ou “superior” está disponível mediante pagamento adicional.
 
 ### Regra de autenticidade
 Esta estrutura comercial e de entrega pertence ao projeto da Anamnese Integrativa / Protocolo da Transformação e não deve copiar textos, lógica, nomes, layout ou estrutura do Mini Diagnóstico ou de terceiros.
