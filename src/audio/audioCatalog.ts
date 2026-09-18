@@ -69,7 +69,7 @@ export function criarPlanoAudioPersonalizado(params: {
   const firstName = nomePessoa.trim().split(/\s+/)[0] || 'você';
 
   return {
-    id: `AUDIO-${anamneseId}-${Date.now()}`,
+    id: `AUDIO-${anamneseId}-${hashString(assinaturaComposicao)}`,
     userId,
     anamneseId,
     titulo: `Sessão personalizada de ${firstName}`,
@@ -111,4 +111,14 @@ function construirRoteiroBase(
   }
 
   return etapas;
+}
+
+
+function hashString(value: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(36);
 }
