@@ -259,6 +259,18 @@ export function BibliotecaMestraView({ sistemas, onAtualizarSistemas }: Bibliote
                       <statusConf.icon className="w-3 h-3" />
                       <span>{statusConf.label}</span>
                     </span>
+                    <span
+                      className={`text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                        sistema.catalogacaoTecnica === 'COMPLETA'
+                          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30'
+                          : sistema.catalogacaoTecnica === 'PARCIAL'
+                          ? 'bg-sky-500/10 text-sky-300 border-sky-500/30'
+                          : 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                      }`}
+                      title="Status da catalogação técnica documental"
+                    >
+                      Catálogo {sistema.catalogacaoTecnica || 'PENDENTE'}
+                    </span>
                     {sistema.ehBaseSustentacao && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-400 border border-indigo-500/30">
                         Sistema-Base Neutro
