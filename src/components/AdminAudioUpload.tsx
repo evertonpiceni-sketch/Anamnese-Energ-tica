@@ -8,6 +8,7 @@ import {
   RemotePersonalizedAudio,
   uploadPersonalizedAudio,
 } from '../services/audioBackend';
+import { markAudioGenerationPublished } from '../services/audioGenerationBackend';
 
 interface AdminAudioUploadProps {
   audio: PersonalizedAudioPlan;
@@ -51,6 +52,11 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
         audio,
         file,
         durationSeconds: duration,
+      });
+
+      await markAudioGenerationPublished({
+        audioPlanId: audio.id,
+        finalStoragePath: record.storagePath,
       });
 
       setStored(record);
