@@ -1,0 +1,6 @@
+{
+  "name": "Anamnese Integrativa — Reintegração da Vida",
+  "description": "Sistema de análise de anamnese integrativa com cruzamento na Biblioteca-Mestra, gerando o Resultado da Pessoa e o Relatório Técnico do Everton.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
