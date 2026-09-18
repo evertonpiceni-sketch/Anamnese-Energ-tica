@@ -1,4 +1,5 @@
-import { AudioLines, Flower2, Gem, Layers3, Leaf, ShieldCheck } from 'lucide-react';
+import { useState } from 'react';
+import { AudioLines, Flower2, Gem, Layers3, Leaf, Mail, ShieldCheck } from 'lucide-react';
 import { AnamneseInput } from '../types';
 import { AnaliseCompletaResultado } from '../engine/analysisEngine';
 import { criarPlanoAudioPersonalizado } from '../audio/audioCatalog';
@@ -6,13 +7,25 @@ import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
 import { AdminAudioUpload } from './AdminAudioUpload';
+import { requestResultEmail } from '../services/resultEmail';
 
 interface CareComposerAdminViewProps {
   anamnese: AnamneseInput;
   analise: AnaliseCompletaResultado | null;
+  backendUserId?: string;
+  backendIntakeId?: string;
+  friendlyResult?: {
+    headline: string;
+    intro: string;
+    priorities: string[];
+    intention: string;
+    closing: string;
+  };
 }
 
-export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminViewProps) {
+export function CareComposerAdminView({ anamnese, analise, backendUserId, backendIntakeId, friendlyResult }: CareComposerAdminViewProps) {
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
   if (!analise) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-10">
@@ -30,8 +43,8 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
   const complementary = selectComplementaryCare(axes);
   const solfeggio = selectSolfeggioFrequency(axes);
   const audio = criarPlanoAudioPersonalizado({
-    userId: anamnese.id,
-    anamneseId: anamnese.id,
+    userId: backendUserId || anamnese.id,
+    anamneseId: backendIntakeId || anamnese.id,
     nomePessoa: anamnese.nomePessoa,
     eixos: axes,
     relatorio: analise.relatorioEverton,
@@ -140,6 +153,63 @@ export function CareComposerAdminView({ anamnese, analise }: CareComposerAdminVi
           audio={composition.audio}
           nomePessoa={anamnese.nomePessoa || 'Interagente'}
         />
+      )}
+
+      {backendUserId && backendIntakeId && friendlyResult && (
+        <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-semibold text-stone-100">Enviar resultado por e-mail</h2>
+              <p className="mt-1 text-sm leading-6 text-stone-400">
+                Gera o PDF acolhedor desta anamnese, guarda no espaço privado do usuário e solicita o envio para o e-mail da conta.
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={emailSending}
+              onClick={async () => {
+                if (emailSending) return;
+                setEmailSending(true);
+                setEmailMessage('');
+                try {
+                  const response = await requestResultEmail({
+                    userId: backendUserId,
+                    intakeId: backendIntakeId,
+                    requestedBy: 'admin',
+                    pdfData: {
+                      nome: anamnese.nomePessoa,
+                      data: anamnese.data,
+                      headline: friendlyResult.headline,
+                      intro: friendlyResult.intro,
+                      priorities: friendlyResult.priorities,
+                      intention: friendlyResult.intention,
+                      closing: friendlyResult.closing,
+                      composition,
+                    },
+                  });
+                  setEmailMessage(response.message);
+                } catch (error) {
+                  setEmailMessage(
+                    error instanceof Error
+                      ? `Não foi possível preparar o envio: ${error.message}`
+                      : 'Não foi possível preparar o envio por e-mail.'
+                  );
+                } finally {
+                  setEmailSending(false);
+                }
+              }}
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-stone-950 hover:bg-amber-400 disabled:opacity-50"
+            >
+              <Mail className="h-4 w-4" />
+              {emailSending ? 'Preparando envio...' : 'Enviar resultado'}
+            </button>
+          </div>
+          {emailMessage && (
+            <div className="mt-4 rounded-xl border border-stone-700 bg-stone-950/60 p-4 text-sm text-stone-300">
+              {emailMessage}
+            </div>
+          )}
+        </section>
       )}
 
       <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
