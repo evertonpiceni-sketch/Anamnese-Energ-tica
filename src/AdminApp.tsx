@@ -31,19 +31,50 @@ export const ANAMNESE_LIMPA: AnamneseInput = {
   sensibilidadeEnergetica: 'moderada',
 };
 
+const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
+
+function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: AnaliseCompletaResultado | null } | null {
+  try {
+    const raw = localStorage.getItem(SUBMISSIONS_KEY);
+    if (!raw) return null;
+    const lista = JSON.parse(raw);
+    if (!Array.isArray(lista) || lista.length === 0) return null;
+    const ultima = lista[lista.length - 1];
+    const {
+      resultadoPessoa: _resultadoPessoa,
+      analiseTecnica,
+      enviadoEm: _enviadoEm,
+      status: _status,
+      ...dados
+    } = ultima;
+    return {
+      dados: dados as AnamneseInput,
+      analise: (analiseTecnica as AnaliseCompletaResultado) || null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function AdminApp() {
-  // Inicia diretamente no questionário limpo da anamnese sem resultados prévios
-  const [viewAtiva, setViewAtiva] = useState<ViewMode>('anamnese');
+  const ultimaConcluida = carregarUltimaAnamneseConcluida();
+
+  // O ADM abre a última anamnese concluída quando houver uma no dispositivo.
+  const [viewAtiva, setViewAtiva] = useState<ViewMode>(
+    ultimaConcluida?.analise ? 'relatorio_everton' : 'anamnese'
+  );
   const [biblioteca, setBiblioteca] = useState<SistemaBiblioteca[]>(BIBLIOTECA_MESTRA_INICIAL);
-  
-  // Questionário limpo em branco por padrão
-  const [anamneseAtual, setAnamneseAtual] = useState<AnamneseInput>(() => ({
-    ...ANAMNESE_LIMPA,
-    id: `ANAM-${Date.now().toString().slice(-6)}`,
-  }));
-  
-  // Resultado da análise começa nulo para visualização do questionário limpo
-  const [resultadoAnalise, setResultadoAnalise] = useState<AnaliseCompletaResultado | null>(null);
+
+  const [anamneseAtual, setAnamneseAtual] = useState<AnamneseInput>(() =>
+    ultimaConcluida?.dados || {
+      ...ANAMNESE_LIMPA,
+      id: `ANAM-${Date.now().toString().slice(-6)}`,
+    }
+  );
+
+  const [resultadoAnalise, setResultadoAnalise] = useState<AnaliseCompletaResultado | null>(
+    ultimaConcluida?.analise || null
+  );
 
   const handleSubmeterAnamnese = (dados: AnamneseInput) => {
     setAnamneseAtual(dados);
