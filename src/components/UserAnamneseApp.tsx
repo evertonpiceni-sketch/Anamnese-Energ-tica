@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download, Heart, Leaf, Save, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Download, Heart, Leaf, Mail, Save, ShieldCheck, Sparkles } from 'lucide-react';
 import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
@@ -12,6 +12,7 @@ import { buildCareComposition, CareComposition } from '../care/careComposer';
 import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
 import { saveIntakeSession } from '../services/backend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
+import { requestResultEmail } from '../services/resultEmail';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 
@@ -66,6 +67,9 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
   const [selectedAudio, setSelectedAudio] = useState<PersonalizedAudioPlan | null>(null);
   const [careComposition, setCareComposition] = useState<CareComposition | null>(null);
   const [submissionError, setSubmissionError] = useState('');
+  const [backendIntakeId, setBackendIntakeId] = useState<string | null>(null);
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
 
   useEffect(() => {
     try {
@@ -128,6 +132,8 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
         userId,
         intake: finalData,
       });
+
+      setBackendIntakeId(backendIntakeId);
 
       const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
       const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
@@ -516,7 +522,47 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
                   >
                     <Download className="h-4 w-4" /> Baixar meu resultado em PDF
                   </SecondaryButton>
+                  <SecondaryButton
+                    onClick={async () => {
+                      if (!backendIntakeId || emailSending) return;
+                      setEmailSending(true);
+                      setEmailMessage('');
+                      try {
+                        const response = await requestResultEmail({
+                          userId,
+                          intakeId: backendIntakeId,
+                          requestedBy: 'user',
+                          pdfData: {
+                            nome: form.nomePessoa,
+                            data: form.data,
+                            headline: friendlyResult.headline,
+                            intro: friendlyResult.intro,
+                            priorities: friendlyResult.priorities,
+                            intention: friendlyResult.intention,
+                            closing: friendlyResult.closing,
+                            composition: careComposition,
+                          },
+                        });
+                        setEmailMessage(response.message);
+                      } catch (error) {
+                        setEmailMessage(
+                          error instanceof Error
+                            ? `Não foi possível preparar o envio: ${error.message}`
+                            : 'Não foi possível preparar o envio por e-mail.'
+                        );
+                      } finally {
+                        setEmailSending(false);
+                      }
+                    }}
+                  >
+                    <Mail className="h-4 w-4" /> {emailSending ? 'Preparando envio...' : 'Receber por e-mail'}
+                  </SecondaryButton>
                 </div>
+                {emailMessage && (
+                  <div className="mt-4 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-4 text-sm leading-6 text-[#6f5d31]">
+                    {emailMessage}
+                  </div>
+                )}
               </section>
 
               {selectedAudio && (
@@ -593,7 +639,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
 
               <PracticeHistory />
 
-              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setQuestionIndex(0); setStep('welcome'); }}>
+              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setBackendIntakeId(null); setEmailMessage(''); setQuestionIndex(0); setStep('welcome'); }}>
                 Nova anamnese
               </PrimaryButton>
             </CenteredCard>
