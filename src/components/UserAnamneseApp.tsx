@@ -14,6 +14,7 @@ import { saveIntakeSession } from '../services/backend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
 import { requestResultEmail } from '../services/resultEmail';
 import { UserMomentArea } from './UserMomentArea';
+import { PrivacyPolicy } from './PrivacyPolicy';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 type UserArea = 'anamnese' | 'momento' | 'jornada';
@@ -74,6 +75,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
   const [emailSending, setEmailSending] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
   const [showIdleSupport, setShowIdleSupport] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   useEffect(() => {
     try {
@@ -215,6 +217,10 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
       );
       setStep('review');
     }
+  }
+
+  if (showPrivacy) {
+    return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
   }
 
   return (
@@ -762,7 +768,14 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
       </main>
 
       <footer className="border-t border-[#ddd1b7] bg-[#efe7d6]/70 px-5 py-6 text-center text-xs leading-5 text-[#788078]">
-        Anamnese Integrativa • Um espaço de acolhimento e direcionamento complementar.
+        <div>Anamnese Integrativa • Um espaço de acolhimento e direcionamento complementar.</div>
+        <button
+          type="button"
+          onClick={() => setShowPrivacy(true)}
+          className="mt-2 font-semibold text-[#806c3f] underline underline-offset-4"
+        >
+          Política de Privacidade e LGPD
+        </button>
       </footer>
     </div>
   );
