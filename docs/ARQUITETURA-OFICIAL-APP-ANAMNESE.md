@@ -280,6 +280,42 @@ Botão: **Baixar meu resultado em PDF**
 
 ---
 
+## Tela U09.2 — Envio do resultado por e-mail
+
+### USER
+O usuário pode escolher **Receber por e-mail** no próprio resultado.
+
+Fluxo:
+- gerar a mesma versão acolhedora do PDF;
+- salvar o PDF em armazenamento privado;
+- vincular ao usuário e à anamnese;
+- criar solicitação de envio;
+- enviar exclusivamente para o e-mail autenticado da própria conta.
+
+O usuário comum não pode escolher outro destinatário.
+
+### ADM
+Dentro do Compositor de Cuidado, quando a anamnese possui vínculo backend válido, o ADM pode usar **Enviar resultado**.
+
+O envio:
+- utiliza o mesmo PDF acolhedor do usuário;
+- não envia relatório técnico;
+- não expõe Biblioteca-Mestra, scores, pesos, sistemas internos, símbolos ou comandos;
+- fica registrado em histórico de solicitações com status de envio.
+
+### Segurança
+- PDFs ficam no bucket privado `result-pdfs`;
+- cada usuário só lê os próprios PDFs;
+- a Edge Function exige autenticação;
+- o USER só pode solicitar envio da própria anamnese;
+- o destinatário do USER é sempre o e-mail autenticado;
+- a credencial do provedor de e-mail permanece somente no backend.
+
+### Provedor
+A função de envio deve usar provedor transacional configurado por segredo de ambiente. Enquanto o provedor não estiver configurado, a solicitação permanece registrada sem simular envio bem-sucedido.
+
+---
+
 ## Tela U10 — Player de áudio
 
 ### Objetivo
