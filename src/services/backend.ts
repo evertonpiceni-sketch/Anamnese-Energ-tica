@@ -10,6 +10,9 @@ export async function saveIntakeSession(params: {
   const payload = {
     user_id: userId,
     external_ref: intake.id,
+    person_name: intake.nomePessoa || null,
+    age_text: intake.idade || null,
+    contact_text: intake.contato || null,
     status: 'completed',
     completed_at: new Date().toISOString(),
     answers: intake.respostasObjetivas,
@@ -25,7 +28,7 @@ export async function saveIntakeSession(params: {
 
   const { data, error } = await supabase
     .from('intake_sessions')
-    .insert(payload)
+    .upsert(payload, { onConflict: 'user_id,external_ref' })
     .select('id')
     .single();
 
