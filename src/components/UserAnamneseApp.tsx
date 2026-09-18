@@ -1,9 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Heart, Leaf, Save, ShieldCheck, Sparkles } from 'lucide-react';
-import { AnamneseInput } from '../types';
+import { AnamneseInput, EixoId } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
+import { executarAnaliseIntegrativa, AnaliseCompletaResultado } from '../engine/analysisEngine';
+import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 
-type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'sent';
+type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
+
+type FriendlyResult = {
+  headline: string;
+  intro: string;
+  priorities: string[];
+  intention: string;
+  closing: string;
+};
 
 const STORAGE_KEY = 'anamnese-integrativa-draft-v1';
 const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
@@ -41,6 +51,8 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
   const [step, setStep] = useState<Step>('welcome');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
+  const [analysis, setAnalysis] = useState<AnaliseCompletaResultado | null>(null);
+  const [friendlyResult, setFriendlyResult] = useState<FriendlyResult | null>(null);
 
   useEffect(() => {
     try {
@@ -95,25 +107,35 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
   function submit() {
     const finalData = { ...form, nomePessoa: form.nomePessoa.trim() };
-    try {
-      const existing = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
-      const submissions = Array.isArray(existing) ? existing : [];
-      localStorage.setItem(
-        SUBMISSIONS_KEY,
-        JSON.stringify([
-          ...submissions,
-          { ...finalData, enviadoEm: new Date().toISOString(), status: 'concluida' },
-        ])
-      );
-    } catch {
-      localStorage.setItem(
-        SUBMISSIONS_KEY,
-        JSON.stringify([{ ...finalData, enviadoEm: new Date().toISOString(), status: 'concluida' }])
-      );
-    }
-    onSubmit?.(finalData);
-    localStorage.removeItem(STORAGE_KEY);
-    setStep('sent');
+    setStep('processing');
+
+    window.setTimeout(() => {
+      const technicalAnalysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
+      const friendly = buildFriendlyResult(technicalAnalysis, finalData.nomePessoa);
+
+      setAnalysis(technicalAnalysis);
+      setFriendlyResult(friendly);
+
+      const savedRecord = {
+        ...finalData,
+        enviadoEm: new Date().toISOString(),
+        status: 'concluida',
+        resultadoPessoa: friendly,
+        analiseTecnica: technicalAnalysis,
+      };
+
+      try {
+        const existing = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
+        const submissions = Array.isArray(existing) ? existing : [];
+        localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([...submissions, savedRecord]));
+      } catch {
+        localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([savedRecord]));
+      }
+
+      onSubmit?.(finalData);
+      localStorage.removeItem(STORAGE_KEY);
+      setStep('result');
+    }, 650);
   }
 
   return (
@@ -381,6 +403,49 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
             </div>
           )}
 
+          {step === 'processing' && (
+            <CenteredCard>
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e7eddf] text-[#28533d]">
+                <Sparkles className="h-8 w-8 animate-pulse" />
+              </div>
+              <SmallEyebrow>ORGANIZANDO SEU CUIDADO</SmallEyebrow>
+              <h2 className="font-serif text-3xl text-[#173c2c]">Estamos olhando com atenção para o que você compartilhou.</h2>
+              <p className="leading-7 text-[#5c6d62]">
+                Este momento serve para organizar sua leitura de forma acolhedora. A análise técnica acontece em segundo plano e não será exibida aqui.
+              </p>
+            </CenteredCard>
+          )}
+
+          {step === 'result' && friendlyResult && (
+            <div className="mx-auto max-w-3xl space-y-5">
+              <section className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-7 shadow-xl shadow-[#173f2d]/8 sm:p-10">
+                <SmallEyebrow>SEU MOMENTO</SmallEyebrow>
+                <h2 className="mt-3 font-serif text-3xl leading-tight text-[#173c2c]">{friendlyResult.headline}</h2>
+                <p className="mt-4 text-base leading-7 text-[#5c6d62]">{friendlyResult.intro}</p>
+
+                <div className="mt-7 space-y-3">
+                  {friendlyResult.priorities.map((item) => (
+                    <div key={item} className="flex gap-3 rounded-2xl border border-[#e0d5bb] bg-white/60 p-4">
+                      <Heart className="mt-0.5 h-5 w-5 shrink-0 text-[#b89546]" />
+                      <p className="text-sm leading-6 text-[#50665a]">{item}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 rounded-2xl bg-[#e9efe4] p-5">
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8d7743]">Intenção para o próximo passo</div>
+                  <p className="mt-2 leading-7 text-[#365441]">{friendlyResult.intention}</p>
+                </div>
+
+                <p className="mt-6 text-sm leading-6 text-[#748077]">{friendlyResult.closing}</p>
+
+                <div className="mt-7 flex flex-wrap gap-3">
+                  <PrimaryButton onClick={() => setStep('sent')}>Ver próximos passos</PrimaryButton>
+                </div>
+              </section>
+            </div>
+          )}
+
           {step === 'sent' && (
             <CenteredCard>
               <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e3ecd9] text-[#28533d]">
@@ -392,9 +457,9 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
                 A partir daqui, seu cuidado poderá ser organizado com os recursos mais adequados disponíveis no protocolo. A leitura técnica permanece reservada ao painel administrativo.
               </p>
               <p className="text-sm text-[#7b817b]">
-                Áudios programados, florais, aromaterapia, cristais etéricos e a integração com a jornada de 21 dias serão conectados nas próximas etapas do app.
+                A partir desta leitura, o app poderá conectar os áudios programados, florais, aromaterapia, cristais etéricos e, quando indicado, a jornada de 21 dias. Esses recursos serão exibidos apenas quando estiverem cadastrados e disponíveis para aquele cuidado.
               </p>
-              <PrimaryButton onClick={() => { setForm(emptyIntake()); setQuestionIndex(0); setStep('welcome'); }}>
+              <PrimaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setQuestionIndex(0); setStep('welcome'); }}>
                 Nova anamnese
               </PrimaryButton>
             </CenteredCard>
@@ -462,4 +527,45 @@ function SecondaryButton({ children, onClick }: { children: React.ReactNode; onC
       {children}
     </button>
   );
+}
+
+
+const FRIENDLY_AXIS_COPY: Record<EixoId, string> = {
+  seguranca: 'encontrar mais chão, segurança e estabilidade para seguir no seu ritmo',
+  emocional: 'acolher o que está sendo sentido sem precisar carregar tudo sozinho(a)',
+  autovalor: 'reconhecer seu próprio valor com mais gentileza e menos cobrança',
+  mente: 'criar mais espaço interno, clareza e descanso para a mente',
+  movimento: 'retomar movimento aos poucos, sem transformar cada passo em cobrança',
+  vitalidade: 'recuperar energia e respeitar o ritmo do corpo antes de exigir mais de si',
+  corpo: 'voltar a perceber o corpo como lugar de presença, cuidado e escuta',
+  relacionamentos: 'cuidar das trocas, dos limites e da forma como você se encontra com o outro',
+  prazer: 'reabrir espaço para descanso, prazer e contato com as próprias sensações',
+  criatividade: 'dar mais espaço à sua expressão, ideias e espontaneidade',
+  limpeza: 'soltar pesos que já não precisam ocupar tanto espaço agora',
+  padroes: 'perceber repetições com mais clareza para abrir novas possibilidades de resposta',
+  prosperidade: 'fortalecer segurança e movimento em relação à vida prática e material',
+  poder_pessoal: 'fortalecer limites, escolhas e confiança para sustentar o que é importante para você',
+  proposito: 'reencontrar direção e um próximo passo que faça sentido',
+  espiritualidade: 'reaproximar-se daquilo que traz conexão, sentido e presença',
+  protecao: 'preservar melhor sua energia e criar mais sensação de limite e resguardo',
+  receber: 'permitir-se receber cuidado, apoio e descanso sem precisar compensar imediatamente',
+  recomeco: 'abrir espaço para um novo começo sem exigir que tudo esteja resolvido primeiro',
+  integracao: 'reunir corpo, emoções e pensamentos em uma experiência mais inteira e coerente',
+};
+
+function buildFriendlyResult(analysis: AnaliseCompletaResultado, nome: string): FriendlyResult {
+  const topAxes = analysis.relatorioEverton.eixosOrdenados.slice(0, 3);
+  const priorities = topAxes.map(eixo => FRIENDLY_AXIS_COPY[eixo.eixoId]);
+  const firstName = nome.trim().split(/\s+/)[0];
+
+  return {
+    headline: firstName ? `${firstName}, seu cuidado pode começar por aqui.` : 'Seu cuidado pode começar por aqui.',
+    intro: 'Neste momento, algumas áreas parecem pedir mais presença. Isso não define quem você é; é apenas uma leitura do que aparece com mais força agora.',
+    priorities,
+    intention:
+      analysis.resultadoPessoa.intencaoDaPratica ||
+      'Seguir com gentileza, respeitando seu ritmo e escolhendo um próximo passo possível.',
+    closing:
+      'Esta leitura é complementar e serve para orientar as práticas do protocolo. Ela não substitui avaliação ou tratamento médico ou psicológico quando necessários.',
+  };
 }
