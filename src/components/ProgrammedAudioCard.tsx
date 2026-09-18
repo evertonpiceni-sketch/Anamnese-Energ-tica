@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CheckCircle2, Clock3, Headphones, Pause, Play, RotateCcw } from 'lucide-react';
 import { PersonalizedAudioPlan } from '../audio/audioCatalog';
-import { createPersonalizedAudioObjectUrl } from '../audio/audioStorage';
+import { createPrivateAudioPlaybackUrl } from '../services/audioBackend';
 
 const PRACTICE_LOG_KEY = 'anamnese-integrativa-practice-logs-v1';
 
@@ -30,33 +30,38 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [playing, setPlaying] = useState(false);
   const [completed, setCompleted] = useState(false);
   const [practiceId, setPracticeId] = useState<string | null>(null);
-  const [localAudioUrl, setLocalAudioUrl] = useState<string | null>(null);
+  const [remoteAudioUrl, setRemoteAudioUrl] = useState<string | null>(null);
+  const [remoteDurationSeconds, setRemoteDurationSeconds] = useState<number | null>(null);
 
-  const playbackUrl = audio.arquivoUrl || localAudioUrl;
+  const playbackUrl = audio.arquivoUrl || remoteAudioUrl;
   const available = !!playbackUrl;
 
   const durationLabel = useMemo(() => {
-    if (!audio.duracaoMinutos) return 'Duração definida quando o arquivo for cadastrado';
-    return `${audio.duracaoMinutos} min`;
-  }, [audio.duracaoMinutos]);
+    if (audio.duracaoMinutos) return `${audio.duracaoMinutos} min`;
+    if (remoteDurationSeconds !== null) return `${Math.max(1, Math.round(remoteDurationSeconds / 60))} min`;
+    return 'Duração definida quando o arquivo for cadastrado';
+  }, [audio.duracaoMinutos, remoteDurationSeconds]);
 
   useEffect(() => {
     let active = true;
     let objectUrl: string | null = null;
 
     if (!audio.arquivoUrl) {
-      createPersonalizedAudioObjectUrl(audio.id)
+      createPrivateAudioPlaybackUrl(audio.id)
         .then(result => {
           if (!active || !result) return;
-          objectUrl = result.url;
-          setLocalAudioUrl(result.url);
+          setRemoteAudioUrl(result.url);
+          setRemoteDurationSeconds(result.carePlan.durationSeconds);
         })
-        .catch(() => setLocalAudioUrl(null));
+        .catch(() => {
+          setRemoteAudioUrl(null);
+          setRemoteDurationSeconds(null);
+        });
     }
 
     return () => {
       active = false;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = null;
     };
   }, [audio.id, audio.arquivoUrl]);
 
