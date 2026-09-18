@@ -1712,3 +1712,31 @@ Exemplo de construção:
 Se um recurso não estiver documentado ou validado na Biblioteca-Mestra, ele não deve aparecer no relatório como se sua função fosse conhecida.
 
 O relatório completo deve refletir exatamente a composição aprovada para aquele usuário e aquela anamnese.
+
+
+## BANHOS — FONTE E REGRA DE USO
+
+Status: **REGRA OFICIAL**
+
+Os banhos sugeridos no relatório, na anamnese ou em qualquer etapa do protocolo devem ser retirados da **mesma fonte documental e lógica de cuidado já utilizada pelo Protocolo**.
+
+### Regra central
+- não criar uma biblioteca paralela de banhos;
+- não usar receitas externas sem validação;
+- não improvisar combinações;
+- usar apenas banhos já documentados, aprovados ou claramente derivados das fontes oficiais do protocolo;
+- manter coerência com a intenção do cuidado e com a composição energética aprovada para aquele momento.
+
+### Apresentação ao usuário
+Quando um banho for indicado, explicar de forma acolhedora:
+- nome ou composição;
+- intenção do banho dentro do protocolo;
+- área/campo que ele busca apoiar;
+- modo de uso;
+- frequência sugerida;
+- cuidados relevantes;
+- como ele se integra aos demais recursos do cuidado.
+
+### Segurança e coerência
+Qualquer orientação prática deve respeitar os cuidados já catalogados na fonte do protocolo.
+Nenhum banho deve ser apresentado como tratamento médico ou com promessa garantida de resultado.
