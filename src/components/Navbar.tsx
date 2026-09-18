@@ -1,8 +1,8 @@
-import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, Headphones, Layers3 } from 'lucide-react';
+import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, Headphones, Layers3, SlidersHorizontal } from 'lucide-react';
 
 interface NavbarProps {
-  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'reavaliacao' | 'casos';
-  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'reavaliacao' | 'casos') => void;
+  viewAtiva: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'compositor' | 'reavaliacao' | 'casos';
+  onMudarView: (view: 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'compositor' | 'reavaliacao' | 'casos') => void;
   temAnalisePronta: boolean;
   onLimparAnamnese?: () => void;
 }
@@ -146,6 +146,19 @@ export function Navbar({ viewAtiva, onMudarView, temAnalisePronta, onLimparAnamn
             >
               <Layers3 className="w-4 h-4" />
               <span className="hidden xl:inline">Complementares</span>
+            </button>
+
+            <button
+              id="nav-btn-compositor"
+              onClick={() => onMudarView('compositor')}
+              className={`px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center gap-1.5 ${
+                viewAtiva === 'compositor'
+                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                  : 'text-stone-300 hover:text-white hover:bg-stone-800'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              <span className="hidden xl:inline">Compositor</span>
             </button>
 
             <button
