@@ -9,6 +9,7 @@ import { ProgrammedAudioCard } from './ProgrammedAudioCard';
 import { PracticeHistory } from './PracticeHistory';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
 import { buildCareComposition, CareComposition } from '../care/careComposer';
+import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
 
 type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
 
@@ -122,7 +123,8 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
       const axes = technicalAnalysis.relatorioEverton.eixosOrdenados;
       const audio = escolherAudioProgramado(axes);
       const complementary = selectComplementaryCare(axes);
-      const composition = buildCareComposition(audio, complementary);
+      const solfeggio = selectSolfeggioFrequency(axes);
+      const composition = buildCareComposition(audio, complementary, solfeggio);
 
       setAnalysis(technicalAnalysis);
       setFriendlyResult(friendly);
@@ -461,6 +463,22 @@ export default function UserAnamneseApp({ onSubmit }: UserAnamneseAppProps) {
 
               {selectedAudio && (
                 <ProgrammedAudioCard audio={selectedAudio} userId={form.id} />
+              )}
+
+              {careComposition?.solfeggio && (
+                <section className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-6 shadow-lg shadow-[#173f2d]/8 sm:p-8">
+                  <SmallEyebrow>FREQUÊNCIA DA SESSÃO</SmallEyebrow>
+                  <div className="mt-3 flex items-end gap-3">
+                    <div className="font-serif text-4xl text-[#173c2c]">{careComposition.solfeggio.hz} Hz</div>
+                    <div className="pb-1 text-sm text-[#718076]">{careComposition.solfeggio.chakraProjeto}</div>
+                  </div>
+                  <p className="mt-3 text-sm leading-6 text-[#607067]">
+                    {careComposition.solfeggio.intencaoProjeto}
+                  </p>
+                  <p className="mt-3 text-xs leading-5 text-[#8a8d85]">
+                    Esta frequência faz parte da experiência sonora do protocolo e não substitui cuidados de saúde.
+                  </p>
+                </section>
               )}
 
               {careComposition &&
