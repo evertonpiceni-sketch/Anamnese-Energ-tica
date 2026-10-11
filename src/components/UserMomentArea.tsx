@@ -189,14 +189,18 @@ export function UserMomentArea({ mode, onStartNewIntake }: UserMomentAreaProps) 
 
       {data.carePlan?.audioStatus === 'published' && data.audio ? (
         <ProgrammedAudioCard audio={data.audio} />
-      ) : (
+      ) : data.carePlan ? (
         <>
           <section className="rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5 text-sm leading-6 text-[#715f36]">
-            Seu material personalizado está em preparação. Enquanto isso, este áudio preparativo
-            já está disponível para acompanhar o início da sua jornada.
+            Seu material personalizado está em preparação. Enquanto isso, o áudio preparativo do protocolo
+            fica disponível para acompanhar este período de espera.
           </section>
           <PreparatoryAudioCard />
         </>
+      ) : (
+        <section className="rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5 text-sm leading-6 text-[#715f36]">
+          Sua anamnese foi recebida e o seu plano de cuidado ainda está sendo organizado. O áudio preparativo será liberado junto do início do seu percurso, sem antecipar uma entrega que ainda não foi confirmada.
+        </section>
       )}
 
       {data.carePlan ? (
