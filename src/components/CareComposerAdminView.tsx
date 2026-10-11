@@ -167,18 +167,30 @@ export function CareComposerAdminView({
     setAdminNotes('');
     setReviewMessage('');
 
+    setJourneyDays(null);
+    setJourneyError('');
     if (backendIntakeId) {
-      loadCareCompositionReview(backendIntakeId)
-        .then(review => {
-          if (!active || !review) return;
-          setManual(review.manualComposition);
-          setAdminNotes(review.adminNotes);
-          setReviewStatus(review.status === 'approved' ? 'approved' : 'draft');
+      Promise.all([loadCareCompositionReview(backendIntakeId), getAdminEntitlementForIntake(backendIntakeId)])
+        .then(([review, entitlement]) => {
+          if (!active) return;
+          setJourneyDays(entitlement?.days || null);
+          const loaded = review?.manualComposition || motorDefault;
+          const needsProposal = entitlement && loaded.dailyEnergySchedule === undefined;
+          const systems = [loaded.baseSystemId, loaded.mainSystemId, ...loaded.complementSystemIds]
+            .map(id => BIBLIOTECA_MESTRA.find(item => item.id === id))
+            .filter((item): item is NonNullable<typeof item> => Boolean(item));
+          setManual(needsProposal ? { ...loaded, dailyEnergySchedule: proposeDailyEnergySchedule({
+            days: entitlement.days, systems, axes: analise.relatorioEverton.eixosOrdenados,
+            highSensitivity: ['alta', 'muito_alta'].includes(anamnese.sensibilidadeEnergetica || ''),
+          }) } : loaded);
+          setAdminNotes(review?.adminNotes || '');
+          setReviewStatus(!needsProposal && review?.status === 'approved' ? 'approved' : 'draft');
+          if (needsProposal) setReviewMessage('O motor preparou a proposta para cada dia. Revise as energias e as intenções antes de aprovar a entrega.');
         })
         .catch(() => {
           if (active) {
             setReviewMessage(
-              'Não foi possível carregar uma revisão anterior. A sugestão do motor foi mantida.'
+              'Não foi possível carregar a revisão e confirmar o plano. Reabra esta anamnese antes de aprovar.'
             );
           }
         });
@@ -187,17 +199,7 @@ export function CareComposerAdminView({
     return () => {
       active = false;
     };
-  }, [analise, motorDefault, backendIntakeId]);
-
-  useEffect(() => {
-    let active = true;
-    setJourneyDays(null);
-    setJourneyError('');
-    if (backendIntakeId) getAdminEntitlementForIntake(backendIntakeId)
-      .then(entitlement => { if (active) setJourneyDays(entitlement?.days || null); })
-      .catch(() => { if (active) setJourneyError('Não foi possível confirmar a duração do plano. Tente abrir esta anamnese novamente.'); });
-    return () => { active = false; };
-  }, [backendIntakeId]);
+  }, [analise, motorDefault, backendIntakeId, anamnese.sensibilidadeEnergetica]);
 
   if (!analise || !manual) {
     return (

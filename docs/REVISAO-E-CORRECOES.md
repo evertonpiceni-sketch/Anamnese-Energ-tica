@@ -40,3 +40,11 @@ A pedido de Everton, o motor agora propõe uma programação diferente entre os 
 O relatório mantém cinco páginas narrativas e entrega a programação aprovada em anexo no mesmo documento: seis páginas para 7 dias, oito para 21 dias. Mudanças de duração exigem nova revisão da programação, sem repetição ou truncamento automático. Foram adicionados testes de duração, anexo com 21 dias no PDF e restrições do motor diário.
 
 O logo PNG retorna 404 no deploy antigo; as correções de layout ainda estavam apenas no PR. A entrega inclui publicação efetiva em produção e verificação do logo original. O caminho SVG antigo redireciona ao PNG para compatibilidade com páginas antigas em cache.
+
+## Correção de energias explícitas e símbolos dos chakras
+
+- A página de cuidado lista os nomes das energias da programação revisada (ou da composição revisada quando ainda não há distribuição diária), além do anexo por dia.
+- A ausência de aprovação fica explícita. Não se preenche a entrega com sugestões ainda não revisadas.
+- Os círculos dos chakras foram substituídos pelos símbolos das próprias imagens aprovadas, exibidos como recortes de fundo; não houve redesenho das figuras.
+- Ao abrir uma anamnese com plano confirmado no ADM, o motor prepara a proposta diária quando ainda não existe uma. A revisão existente, incluindo programação parcial, é preservada. A proposta continua rascunho, sem aprovação automática.
+- Validação adicional: nomes de energias, sete símbolos, layout móvel e inicialização do ADM sem escrita ou publicação automática. O teste real não tinha composição aprovada no momento desta correção.
