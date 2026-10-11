@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import AdminApp from './AdminApp';
 import UserAnamneseApp from './components/UserAnamneseApp';
 import { AuthScreen } from './components/AuthScreen';
+import { AdminCommercialPaymentPanel } from './components/AdminCommercialPaymentPanel';
 import { supabase } from './lib/supabase';
 
 type AppRole = 'user' | 'admin';
@@ -117,7 +118,12 @@ export default function App() {
   }
 
   if (role === 'admin') {
-    return <AdminApp onSignOut={signOut} />;
+    return (
+      <>
+        <AdminApp onSignOut={signOut} />
+        <AdminCommercialPaymentPanel />
+      </>
+    );
   }
 
   return <UserAnamneseApp userId={session.user.id} onSignOut={signOut} />;
