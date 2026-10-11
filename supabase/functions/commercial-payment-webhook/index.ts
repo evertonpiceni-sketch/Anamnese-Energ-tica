@@ -35,7 +35,7 @@ Deno.serve(async (req: Request) => {
   const infiniteSlug = String(payload?.invoice_slug || payload?.slug || "").trim();
 
   if (infiniteOrder && infiniteTransaction && infiniteSlug) {
-    const handle = "evertonterapeuta";
+    const handle = "evertonterapeutareiki";
 
     const { data: order, error: orderError } = await admin
       .from("commercial_checkout_orders")
