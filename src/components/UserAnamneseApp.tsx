@@ -30,7 +30,6 @@ type FriendlyResult = {
 };
 
 const STORAGE_KEY = 'anamnese-integrativa-draft-v1';
-const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
 
 const emptyIntake = (): AnamneseInput => ({
   id: `ANAM-${Date.now().toString().slice(-6)}`,
@@ -162,34 +161,12 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
         solfeggio,
       });
       const composition = buildCareComposition(audio, complementary, solfeggio);
-      const completeNarrative = buildFullReportNarrative({ intake: finalData, analysis: technicalAnalysis, composition });
 
       setForm(finalData);
       setAnalysis(technicalAnalysis);
       setFriendlyResult(friendly);
       setSelectedAudio(audio);
       setCareComposition(composition);
-
-      const savedRecord = {
-        ...finalData,
-        backendUserId: userId,
-        backendIntakeId,
-        enviadoEm: new Date().toISOString(),
-        status: 'concluida',
-        resultadoPessoa: friendly,
-        relatorioCompleto: completeNarrative,
-        audioProgramado: audio,
-        composicaoCuidado: composition,
-        analiseTecnica: technicalAnalysis,
-      };
-
-      try {
-        const existing = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '[]');
-        const submissions = Array.isArray(existing) ? existing : [];
-        localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([...submissions, savedRecord]));
-      } catch {
-        localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify([savedRecord]));
-      }
 
       onSubmit?.(finalData);
       localStorage.removeItem(draftStorageKey);
@@ -231,7 +208,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: UserAna
             {step === 'reflection' && <CenteredCard><SmallEyebrow>ESPAÇO DE ESCUTA</SmallEyebrow><h2 className="font-serif text-3xl text-[#173c2c]">Existe algo que você gostaria que fosse acolhido?</h2><p className="leading-7 text-[#647066]">Você pode contar com suas próprias palavras. Este espaço existe para aquilo que não coube nas perguntas anteriores.</p><div className="space-y-5 pt-2"><Field label="O que mais pede cuidado neste momento?"><textarea rows={4} value={form.relatoLivreNecessidade} onChange={e => setField('relatoLivreNecessidade', e.target.value)} className="user-input resize-none" placeholder="Escreva do seu jeito..." /></Field><Field label="Há algo que se repete ou tem sido difícil atravessar?"><textarea rows={3} value={form.relatoLivreDesafios} onChange={e => setField('relatoLivreDesafios', e.target.value)} className="user-input resize-none" placeholder="Opcional" /></Field><Field label="O que você sente que continua vivo e forte em você?"><textarea rows={3} value={form.relatoLivrePreservado} onChange={e => setField('relatoLivrePreservado', e.target.value)} className="user-input resize-none" placeholder="Opcional" /></Field></div><div className="flex flex-wrap gap-3 pt-3"><SecondaryButton onClick={() => { setStep('questions'); setQuestionIndex(PERGUNTAS_ANAMNESE.length - 1); }}>Voltar</SecondaryButton><PrimaryButton onClick={() => setStep('review')}>Revisar minhas respostas</PrimaryButton></div></CenteredCard>}
             {step === 'review' && <div className="mx-auto max-w-3xl space-y-5"><div className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-7 shadow-xl shadow-[#173f2d]/8 sm:p-9"><SmallEyebrow>ANTES DE ENVIAR</SmallEyebrow><h2 className="mt-3 font-serif text-3xl text-[#173c2c]">Confira se isso representa seu momento.</h2><div className="mt-7 grid gap-4 sm:grid-cols-2"><ReviewItem label="Nome" value={form.nomePessoa || 'Não informado'} /><ReviewItem label="Perguntas respondidas" value={`${answered} de ${PERGUNTAS_ANAMNESE.length}`} /></div><div className="mt-4 rounded-2xl border border-[#e0d5bb] bg-white/60 p-5"><div className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#a18443]">O que você compartilhou</div><p className="whitespace-pre-wrap text-sm leading-6 text-[#617066]">{form.relatoLivreNecessidade || 'Você preferiu não acrescentar um relato livre neste momento.'}</p></div>{!allAnswered && <div className="mt-4 rounded-2xl border border-[#dfc785] bg-[#fff5d8] p-4 text-sm text-[#735f2c]">Ainda existem perguntas sem resposta. Volte ao questionário antes de enviar.</div>}{submissionError && <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">Não foi possível salvar sua anamnese no momento. {submissionError}</div>}<div className="mt-7 flex flex-wrap gap-3"><SecondaryButton onClick={() => setStep('reflection')}><ArrowLeft className="h-4 w-4" /> Revisar</SecondaryButton><PrimaryButton disabled={!allAnswered || !canAdvanceProfile} onClick={submit}>Enviar minha anamnese <Sparkles className="h-4 w-4" /></PrimaryButton></div></div></div>}
             {step === 'processing' && <CenteredCard><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e7eddf] text-[#28533d]"><Sparkles className="h-8 w-8 animate-pulse" /></div><SmallEyebrow>ORGANIZANDO SEU CUIDADO</SmallEyebrow><h2 className="font-serif text-3xl text-[#173c2c]">Estamos olhando com atenção para o que você compartilhou.</h2><p className="leading-7 text-[#5c6d62]">Este momento serve para organizar sua leitura de forma acolhedora. A análise técnica acontece em segundo plano e não será exibida aqui.</p></CenteredCard>}
-            {step === 'result' && fullReport && <div className="mx-auto max-w-5xl space-y-7"><FullReportApprovedView report={fullReport} /><section className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-6 shadow-lg shadow-[#173f2d]/8 sm:p-8"><div className="flex flex-wrap gap-3"><PrimaryButton onClick={() => setStep('sent')}>Ver próximos passos</PrimaryButton><SecondaryButton onClick={() => void downloadFullReportPdf(fullReport)}><Download className="h-4 w-4" /> Baixar relatório completo em PDF</SecondaryButton><SecondaryButton onClick={async () => { if (!backendIntakeId || emailSending) return; setEmailSending(true); setEmailMessage(''); try { const response = await requestFullReportEmail({ userId, intakeId: backendIntakeId, requestedBy: 'user', report: fullReport }); setEmailMessage(response.message); } catch (error) { setEmailMessage(error instanceof Error ? `Não foi possível preparar o envio: ${error.message}` : 'Não foi possível preparar o envio por e-mail.'); } finally { setEmailSending(false); } }}><Mail className="h-4 w-4" /> {emailSending ? 'Preparando envio...' : 'Receber relatório por e-mail'}</SecondaryButton></div>{emailMessage && <div className="mt-4 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-4 text-sm leading-6 text-[#6f5d31]">{emailMessage}</div>}</section>{selectedAudio && <ProgrammedAudioCard audio={selectedAudio} userId={form.id} />}</div>}
+            {step === 'result' && fullReport && <div className="mx-auto max-w-5xl space-y-7"><FullReportApprovedView report={fullReport} /><section className="rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0]/95 p-6 shadow-lg shadow-[#173f2d]/8 sm:p-8"><div className="flex flex-wrap gap-3"><PrimaryButton onClick={() => setStep('sent')}>Ver próximos passos</PrimaryButton><SecondaryButton onClick={() => void downloadFullReportPdf(fullReport)}><Download className="h-4 w-4" /> Baixar relatório completo em PDF</SecondaryButton><SecondaryButton onClick={async () => { if (!backendIntakeId || emailSending) return; setEmailSending(true); setEmailMessage(''); try { const response = await requestFullReportEmail({ userId, intakeId: backendIntakeId, requestedBy: 'user', report: fullReport }); setEmailMessage(response.message); } catch (error) { setEmailMessage(error instanceof Error ? `Não foi possível preparar o envio: ${error.message}` : 'Não foi possível preparar o envio por e-mail.'); } finally { setEmailSending(false); } }}><Mail className="h-4 w-4" /> {emailSending ? 'Preparando envio...' : 'Receber relatório por e-mail'}</SecondaryButton></div>{emailMessage && <div className="mt-4 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-4 text-sm leading-6 text-[#6f5d31]">{emailMessage}</div>}</section>{selectedAudio && <ProgrammedAudioCard audio={selectedAudio} userId={userId} />}</div>}
             {step === 'sent' && <CenteredCard><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#e3ecd9] text-[#28533d]"><Heart className="h-8 w-8" /></div><SmallEyebrow>ANAMNESE RECEBIDA</SmallEyebrow><h2 className="font-serif text-3xl text-[#173c2c]">Obrigado por compartilhar seu momento.</h2><p className="leading-7 text-[#5c6d62]">A partir daqui, seu cuidado poderá ser organizado com os recursos mais adequados disponíveis no protocolo. A leitura técnica permanece reservada ao painel administrativo.</p><p className="text-sm text-[#7b817b]">Você poderá acompanhar a publicação do seu cuidado em Meu Momento e Minha Jornada.</p><PracticeHistory /><div className="flex flex-wrap gap-3"><PrimaryButton onClick={() => setUserArea('momento')}>Ir para Meu Momento</PrimaryButton><SecondaryButton onClick={() => { setForm(emptyIntake()); setAnalysis(null); setFriendlyResult(null); setSelectedAudio(null); setCareComposition(null); setBackendIntakeId(null); setEmailMessage(''); setQuestionIndex(0); setStep('welcome'); }}>Nova anamnese</SecondaryButton></div></CenteredCard>}
           </>}
           {userArea === 'momento' && <UserMomentArea mode="momento" onStartNewIntake={() => { setUserArea('anamnese'); setStep('welcome'); }} />}
