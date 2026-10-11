@@ -103,9 +103,15 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
           {userArea === 'anamnese' && (
             <>
               {step === 'welcome' && (
-                <section className="grid min-h-[70vh] items-center gap-10 lg:grid-cols-2">
-                  <div className="space-y-6"><Eyebrow>UM ENCONTRO COM O SEU MOMENTO</Eyebrow><h1 className="font-serif text-5xl leading-tight sm:text-6xl">Como você está <span className="italic text-[#a87828]">de verdade?</span></h1><p className="max-w-xl text-lg leading-8 text-[#52665b]">Suas respostas serão observadas em conjunto para compreender o que se repete, o que se conecta e o que pede cuidado agora.</p><Primary onClick={() => setStep('intro')}>Começar meu cuidado <ArrowRight className="h-5 w-5" /></Primary></div>
-                  <div style={{ backgroundImage: "linear-gradient(rgba(255,250,240,.86),rgba(255,250,240,.7)),url(/natureza-aprovada.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} className="mx-auto rounded-[3rem] border border-[#d6c28b] bg-white/80 p-9 text-center shadow-2xl shadow-[#244735]/10"><img src="/logo-everton-oficial.png" alt="" className="mx-auto h-52 w-52 object-contain" /><div className="mx-auto my-5 h-px w-36 bg-[#c6a350]" /><p className="font-serif text-xl italic text-[#466052]">“Cuidar da sua energia é voltar para você.”</p><div className="mt-6 flex items-start gap-3 text-left text-sm text-[#5f685f]"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-[#b89546]" />A análise técnica permanece reservada. Você recebe uma leitura humana do seu momento.</div></div>
+                <section className="grid min-h-[70vh] items-center gap-10 lg:grid-cols-2"><div className="pointer-events-none absolute -left-24 top-0 -z-10 h-[32rem] w-[32rem] rounded-full bg-[#f1d48a]/35 blur-3xl" aria-hidden="true" />
+                  <div className="space-y-6"><Eyebrow>UM ENCONTRO COM O SEU MOMENTO</Eyebrow><h1 className="font-serif text-5xl leading-tight sm:text-6xl">Como você está <span className="italic text-[#a87828]">de verdade?</span></h1><p className="max-w-xl text-lg leading-8 text-[#52665b]">Antes de tudo, respire. Este é um espaço para ouvir você, acolher o que está vivendo e encontrar um caminho de cuidado no seu ritmo.</p><Primary onClick={() => setStep('intro')}>Começar meu cuidado <ArrowRight className="h-5 w-5" /></Primary></div>
+                  <div className="relative mx-auto min-h-[440px] w-full overflow-hidden rounded-[3rem] border border-[#d6c28b] shadow-2xl shadow-[#244735]/20 sm:min-h-[520px]">
+                    <img src="/natureza-aprovada.jpg" alt="Uma pessoa contemplando o nascer do sol entre montanhas e árvores" className="absolute inset-0 h-full w-full object-cover object-[center_72%]" />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#123526]/95 via-[#123526]/65 to-transparent px-7 pb-8 pt-24 text-[#fff5d8]">
+                      <p className="font-serif text-2xl italic leading-8">Cuidar da sua energia é voltar para você.</p>
+                      <p className="mt-3 text-sm leading-6 text-[#fffaf0]">Você pode começar com uma pausa. O próximo passo vem no seu tempo.</p>
+                    </div>
+                  </div>
                 </section>
               )}
 

@@ -65,3 +65,12 @@ A auditoria do teste identificou 20 respostas válidas, mas o relatório legado 
 Validação adicional: variações isoladas das 20 perguntas produzem leituras distintas; nenhum tema intenso ou chakra é gerado em um formulário zerado; informações ausentes não viram respostas negativas; citações são preservadas; revisão de relatório legado mantém a programação; tentativa de publicar leitura de respostas diferentes é recusada sem escrita.
 
 O gerador usa regras textuais por tema, não um modelo de linguagem que compreenda livremente qualquer relato. O texto aberto é incorporado como declaração da pessoa; a revisão do terapeuta continua necessária para contextualizar e aprovar a composição.
+
+
+### Correção de acolhimento e continuidade da leitura
+
+A versão answers-v3 mantém as respostas e a rastreabilidade nos metadados, mas retira contagens, notas e reprodução da escala do texto entregue. Dificuldades de baixa intensidade não são tratadas como forças. A fé declarada recebe contexto sem pressupor desconexão espiritual quando ela não foi relatada.
+
+O relatório deixou de distribuir temas em cinco páginas fixas. A leitura, os pontos de apoio, as intenções de cuidado, os centros associados e os recursos revisados integram um único documento contínuo, seguido da programação diária quando aprovada. Não há capa vazia nem encerramento em uma página própria. O PDF pagina pelo conteúdo real, preserva largura e tamanho do texto e evita dividir parágrafos e composições diárias entre folhas. A composição aprovada e a duração contratada não são modificadas por esta atualização.
+
+A primeira tela usa a fotografia de natureza aprovada sem a camada branca que apagava suas cores. O texto inicial acolhe a pessoa e permite começar no próprio ritmo, sem apresentar detalhes da análise técnica.

@@ -25,14 +25,14 @@ async function report(page) {
   });
 }
 
-test('approved report preserves manual removals, has five pages and exports the same view', async ({ page }) => {
+test('approved report preserves manual removals, has a continuous reading and exports the same view', async ({ page }) => {
   await page.goto('/');
   const narrative = await report(page);
   expect(narrative.page4.paragraphs.join(' ')).not.toMatch(/Florais —|Cristais etéricos —|Aromaterapia —|Frequência de apoio|Como essa energia/);
   expect(narrative.page5.title).toBe('Os próximos 7 dias');
   expect(narrative.page5.paragraphs.join(' ')).not.toContain('21 dias');
   await render(page, 'FullReportApprovedView', { report: narrative });
-  await expect(page.locator('.report-page')).toHaveCount(5);
+  await expect(page.locator('.report-page')).toHaveCount(1);
   await page.screenshot({ path: '/workspace/scratch/report-desktop.png', fullPage: true });
   const pdf = await page.evaluate(async narrative => {
     const { createFullReportPdfBlob } = await import(/* @vite-ignore */ String('/src/pdf/fullReportPdf.ts'));
@@ -40,7 +40,7 @@ test('approved report preserves manual removals, has five pages and exports the 
     const content = await blob.text();
     return { size: blob.size, pages: (content.match(/\/Type \/Page\b/g) || []).length, hiddenHosts: document.querySelectorAll('[style*="-10000px"]').length };
   }, narrative);
-  expect(pdf.pages).toBe(5); expect(pdf.size).toBeGreaterThan(10000); expect(pdf.hiddenHosts).toBe(0);
+  expect(pdf.pages).toBeGreaterThan(0); expect(pdf.pages).toBeLessThan(5); expect(pdf.size).toBeGreaterThan(10000); expect(pdf.hiddenHosts).toBe(0);
   await page.setViewportSize({ width: 375, height: 812 });
   await page.screenshot({ path: '/workspace/scratch/report-mobile.png', fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
@@ -106,14 +106,14 @@ test('confirmed journeys deliver every approved day in the screen and PDF', asyn
   expect(result.resized.page5.title).toBe('Os próximos 7 dias');
   expect(result.report21.page5.title).toBe('Os próximos 21 dias');
   await render(page, 'FullReportApprovedView', { report: result.report21 });
-  await expect(page.locator('.report-page')).toHaveCount(8);
+  await expect(page.locator('.report-page')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Dia 21', exact: true })).toBeVisible();
   const pdfPages = await page.evaluate(async narrative => {
     const { createFullReportPdfBlob } = await import(/* @vite-ignore */ String('/src/pdf/fullReportPdf.ts'));
     const { blob } = await createFullReportPdfBlob(narrative);
     return ((await blob.text()).match(/\/Type \/Page\b/g) || []).length;
   }, result.report21);
-  expect(pdfPages).toBe(8);
+  expect(pdfPages).toBeGreaterThan(1); expect(pdfPages).toBeLessThan(8);
 });
 
 test('daily motor proposal uses documented resources and respects early stabilization', async ({ page }) => {
@@ -142,13 +142,13 @@ test('report names the reviewed energies and uses the approved chakra artwork', 
   const symbols = page.getByRole('img', { name: /^Símbolo do / });
   await expect(symbols).toHaveCount(7);
   expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-referencia-')))).toBe(true);
-  await page.locator('.report-page').nth(2).screenshot({ path: '/workspace/scratch/chakras-aprovados.png' });
-  await page.locator('.report-page').nth(3).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
+  await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-aprovados.png' });
+  await page.getByRole('region', { name: 'Energias do cuidado' }).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.locator('.report-page').nth(2).screenshot({ path: '/workspace/scratch/chakras-mobile.png' });
+  await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-mobile.png' });
   await render(page, 'FullReportApprovedView', { report: narrative });
-  await expect(page.getByRole('region', { name: 'Energias do cuidado' })).toContainText('aguarda revisão do terapeuta');
+  await expect(page.getByRole('region', { name: 'Energias do cuidado' })).toContainText('Sua composição está sendo revisada');
   await expect(page.getByRole('region', { name: 'Energias do cuidado' }).getByText('Soul Healing', { exact: true })).toHaveCount(0);
 });
 
@@ -193,8 +193,13 @@ test('every question changes the reading and unsupported difficulties are absent
     const partial = { ...intake, respostasObjetivas: { ...intake.respostasObjetivas } }; delete partial.respostasObjetivas.q3_sensacao_ameaca_inseguranca;
     const partialReport = build(partial).full;
     const quoted = build({ ...intake, relatoLivreNecessidade: 'Não sinto ansiedade. Quero reconhecer meu próprio ritmo.', relatoLivrePreservado: 'Minha criatividade continua viva.' }).full;
-    return { zero, variants, partialReport, quoted };
+    const faith = build({ ...intake, intencaoDeclarada: 'CURA', relatoLivrePreservado: 'fé', respostasObjetivas: { ...intake.respostasObjetivas, q4_cansaco_esgotamento: 4, q13_inseguranca_material_prosperidade: 1 } }).full;
+    return { zero, variants, partialReport, quoted, faith };
   });
+  expect(data.faith.page3.preserved.join(' ')).toContain('A fé que você reconhece');
+  expect(data.faith.page3.preserved.join(' ')).not.toMatch(/preocupações financeiras|mais distante|você marcou/i);
+  expect(data.faith.page1.intro).not.toContain('CURA');
+  expect(data.faith.page1.intro).toContain('cansaço');
   expect(data.zero.full.page3.chakras).toHaveLength(0);
   expect(data.zero.basic.priorities).toHaveLength(0);
   expect(data.zero.full.page2.cycle).toBeUndefined();
@@ -204,14 +209,16 @@ test('every question changes the reading and unsupported difficulties are absent
   expect(new Set(data.variants.map(item => item.basic.headline)).size).toBe(20);
   for (const item of data.variants) {
     expect(item.full.answerEvidence.find(x => x.questionId === item.question.id).level).toBe(4);
-    expect(item.full.page2.paragraphs.join(' ')).toContain('você marcou “Está muito presente”');
+    expect(item.full.page2.paragraphs.join(' ')).not.toMatch(/você marcou|de 20 respostas|marcação|pontuação/i);
+    expect(item.full.page3.chakras.map(x => x.text).join(' ')).not.toMatch(/\d\/4/);
     expect(item.full.source.fingerprint).not.toBe(data.zero.full.source.fingerprint);
   }
   const creative = data.variants.find(item => item.question.id === 'q12_trava_expressao_criatividade');
   expect(creative.full.page3.chakras.map(item => item.name).sort()).toEqual(['Laríngeo', 'Sacral']);
   expect(creative.full.page2.cycle).toBeUndefined();
   expect(data.partialReport.answerEvidence).toHaveLength(19);
-  expect(data.partialReport.page2.paragraphs.join(' ')).toContain('Ausência de resposta não será interpretada');
+  expect(data.partialReport.page2.paragraphs.join(' ')).not.toContain('Ausência de resposta');
+  expect(data.zero.full.page3.preserved.join(' ')).not.toMatch(/preocupações financeiras|criatividade|Você não descreveu forças/);
   expect(data.quoted.page2.paragraphs.join(' ')).toContain('Não sinto ansiedade. Quero reconhecer meu próprio ritmo.');
   expect(data.quoted.page3.preserved.join(' ')).toContain('Minha criatividade continua viva.');
   expect(data.quoted.page3.chakras).toHaveLength(0);
@@ -229,7 +236,7 @@ test('refreshing a legacy report changes the reading and preserves reviewed care
     const stored = { ...buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: 7, dailyEnergySchedule: schedule }), source: undefined, page2: { title: 'Diagnóstico da Anamnese', paragraphs: ['Texto genérico de outra pessoa.'] }, page4: { title: 'Cuidado', paragraphs: ['Direção do cuidado: caminho genérico.', 'Florais — Recurso aprovado.'] } };
     return { fresh: refreshReportReading(stored, intake, analysis), schedule };
   });
-  expect(result.fresh.source.generatorVersion).toBe('answers-v2');
+  expect(result.fresh.source.generatorVersion).toBe('answers-v3');
   expect(result.fresh.page2.paragraphs.join(' ')).not.toContain('Texto genérico');
   expect(result.fresh.page4.paragraphs).toContain('Florais — Recurso aprovado.');
   expect(result.fresh.dailyEnergySchedule).toEqual(result.schedule);

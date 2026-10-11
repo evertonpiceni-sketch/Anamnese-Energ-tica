@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom';
 import { FullReportApprovedView } from '../components/FullReportApprovedView';
 import type { FullReportNarrative } from '../result/fullReportNarrative';
 
-/** All complete delivery channels render the same approved five-page component. */
+/** All complete delivery channels render the same continuous approved report, with pagination determined by its actual content. */
 export async function createFullReportPdfBlob(report: FullReportNarrative): Promise<{ blob: Blob; fileName: string }> {
   const { default: html2canvas } = await import('html2canvas-pro');
   const host = document.createElement('div');
@@ -17,17 +17,35 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
     await document.fonts.ready;
     await Promise.all(Array.from(host.querySelectorAll('img')).map(img => img.decode()));
     const pages = Array.from(host.querySelectorAll<HTMLElement>('.report-page'));
-    if (pages.length !== 5 + Math.ceil((report.dailyEnergySchedule?.length || 0) / 7)) throw new Error('O relatório e sua programação diária precisam estar completos.');
+    if (pages.length !== 1) throw new Error('O relatório e sua programação diária precisam estar completos.');
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
-    for (const [index, page] of pages.entries()) {
-      if (index) doc.addPage();
+    let printedPages = 0;
+    for (const page of pages) {
       const canvas = await html2canvas(page, { scale: 2, backgroundColor: '#fffaf0', logging: false, windowWidth: 1280 });
-      const scale = Math.min(210 / canvas.width, 297 / canvas.height);
-      const width = canvas.width * scale;
-      const height = canvas.height * scale;
-      doc.setFillColor(255, 250, 240);
-      doc.rect(0, 0, 210, 297, 'F');
-      doc.addImage(canvas.toDataURL('image/jpeg', .94), 'JPEG', (210 - width) / 2, 0, width, height);
+      const pageBounds = page.getBoundingClientRect();
+      const ratio = canvas.width / pageBounds.width;
+      const maxHeight = Math.floor(canvas.width * 277 / 190);
+      const blocks = Array.from(page.querySelectorAll<HTMLElement>('p, h2, h3, h4, [data-pdf-block], header, footer')).map(element => {
+        const bounds = element.getBoundingClientRect();
+        return { top: Math.floor((bounds.top - pageBounds.top) * ratio), bottom: Math.ceil((bounds.bottom - pageBounds.top) * ratio) };
+      });
+      let offset = 0;
+      while (offset < canvas.height) {
+        let end = Math.min(offset + maxHeight, canvas.height);
+        // Move a break before a paragraph, chakra or daily composition rather than through it.
+        const crossing = blocks.filter(block => block.top < end && block.bottom > end && block.top > offset);
+        if (crossing.length) end = Math.min(...crossing.map(block => block.top));
+        if (end <= offset) end = Math.min(offset + maxHeight, canvas.height);
+        const fragment = document.createElement('canvas');
+        fragment.width = canvas.width;
+        fragment.height = end - offset;
+        fragment.getContext('2d')!.drawImage(canvas, 0, offset, canvas.width, fragment.height, 0, 0, fragment.width, fragment.height);
+        if (printedPages++) doc.addPage();
+        doc.setFillColor(255, 250, 240);
+        doc.rect(0, 0, 210, 297, 'F');
+        doc.addImage(fragment.toDataURL('image/jpeg', .94), 'JPEG', 10, 10, 190, fragment.height * 190 / canvas.width);
+        offset = end;
+      }
     }
     const name = report.nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
     return { blob: doc.output('blob'), fileName: `relatorio-completo-${name || 'resultado'}.pdf` };
