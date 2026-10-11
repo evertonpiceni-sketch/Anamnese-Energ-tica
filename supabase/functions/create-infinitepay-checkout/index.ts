@@ -13,7 +13,7 @@ const json = (status: number, body: unknown) =>
     headers: { ...corsHeaders, "content-type": "application/json; charset=utf-8" },
   });
 
-const INFINITEPAY_HANDLE = "everton-rodrigo-piceni";
+const INFINITEPAY_HANDLE = "evertonterapeuta";
 
 const PRODUCTS: Record<number, { productCode: string; addon: boolean; description: string }> = {
   100: { productCode: "CARE_7_BASIC", addon: false, description: "Plano teste — cuidado personalizado 7 dias" },
