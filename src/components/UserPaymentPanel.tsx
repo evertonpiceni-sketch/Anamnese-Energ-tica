@@ -11,9 +11,9 @@ const INITIAL_OPTIONS: Array<{
   description: string;
 }> = [
   {
-    amountCents: 50,
+    amountCents: 100,
     title: 'Plano teste — 7 dias',
-    price: 'R$ 0,50',
+    price: 'R$ 1,00',
     description: 'Plano válido de teste para conferir o fluxo completo de pagamento e liberação do cuidado básico.',
   },
   {
