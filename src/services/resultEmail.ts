@@ -1,6 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { createUserResultPdfBlob, UserResultPdfData } from '../pdf/userResultPdf';
-import { createFullReportPdfBlob } from '../pdf/fullReportPdf';
+import type { UserResultPdfData } from '../pdf/userResultPdf';
 import { FullReportNarrative } from '../result/fullReportNarrative';
 
 export type ResultEmailStatus =
@@ -82,6 +81,7 @@ export async function requestResultEmail(params: {
   recipientEmail?: string;
 }): EmailResult {
   const { userId, intakeId, pdfData, requestedBy, recipientEmail } = params;
+  const { createUserResultPdfBlob } = await import('../pdf/userResultPdf');
   const { blob } = createUserResultPdfBlob(pdfData);
 
   return registerAndSendResult({
@@ -102,6 +102,7 @@ export async function requestFullReportEmail(params: {
   recipientEmail?: string;
 }): EmailResult {
   const { userId, intakeId, report, requestedBy, recipientEmail } = params;
+  const { createFullReportPdfBlob } = await import('../pdf/fullReportPdf');
   const { blob } = await createFullReportPdfBlob(report);
 
   return registerAndSendResult({

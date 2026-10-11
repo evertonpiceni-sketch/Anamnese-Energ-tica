@@ -1,3 +1,5 @@
+import { getAdminEntitlementForIntake } from '../services/entitlementBackend';
+import { canAccessFullReport } from '../commercial/entitlements';
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
@@ -25,9 +27,9 @@ import { SOLFEGGIO_CATALOG } from '../care/solfeggioCatalog';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { AdminAudioUpload } from './AdminAudioUpload';
 import { AudioGenerationAdminPanel } from './AudioGenerationAdminPanel';
-import { requestResultEmail } from '../services/resultEmail';
+import { requestResultEmail, requestFullReportEmail } from '../services/resultEmail';
 import { buildFullReportNarrative } from '../result/fullReportNarrative';
-import { publishFullReport } from '../services/fullReportBackend';
+import { publishFullReport, loadFullReportForAdmin } from '../services/fullReportBackend';
 import {
   loadCareCompositionReview,
   ManualCareComposition,
@@ -751,7 +753,12 @@ export function CareComposerAdminView({
                 setEmailSending(true);
                 setEmailMessage('');
                 try {
-                  const response = await requestResultEmail({
+                  const publication = await loadFullReportForAdmin(backendIntakeId);
+                  const entitlement = await getAdminEntitlementForIntake(backendIntakeId);
+                  if (canAccessFullReport(entitlement) && !publication) throw new Error('Publique a versão aprovada do relatório completo antes de enviar.');
+                  const response = canAccessFullReport(entitlement) && publication
+                    ? await requestFullReportEmail({ userId: backendUserId, intakeId: backendIntakeId, requestedBy: 'admin', report: publication.report })
+                    : await requestResultEmail({
                     userId: backendUserId,
                     intakeId: backendIntakeId,
                     requestedBy: 'admin',

@@ -14,26 +14,17 @@ const chakraTone = (name: string) => {
 };
 
 function Logo({ large=false, watermark=false }: { large?: boolean; watermark?: boolean }) {
-  return <img src="/logo-everton-oficial.svg" alt="Everton Piceni — Terapias Holísticas e Bem-Estar" className={`${large ? 'h-44 w-44 sm:h-56 sm:w-56' : 'h-16 w-16 sm:h-20 sm:w-20'} object-contain ${watermark ? 'opacity-[.075]' : ''}`} />;
-}
-
-function Botanical({ right=false, bottom=false }: { right?: boolean; bottom?: boolean }) {
-  return <div className={`pointer-events-none absolute ${right ? '-right-10' : '-left-10'} ${bottom ? '-bottom-12' : '-top-12'} h-56 w-56 opacity-30 sm:h-72 sm:w-72`}>
-    <span className="absolute left-14 top-14 h-32 w-12 rotate-[35deg] rounded-[100%_0_100%_0] bg-[#315d42]/50" />
-    <span className="absolute left-28 top-7 h-36 w-12 rotate-[57deg] rounded-[100%_0_100%_0] bg-[#66835b]/40" />
-    <span className="absolute left-5 top-28 h-28 w-11 rotate-[17deg] rounded-[100%_0_100%_0] bg-[#7f986c]/35" />
-  </div>;
+  return <img src="/logo-everton-oficial.png" alt="Everton Piceni — Terapias Holísticas e Bem-Estar" className={`${large ? 'h-44 w-44 sm:h-56 sm:w-56' : 'h-28 w-28 sm:h-40 sm:w-40'} object-contain ${watermark ? 'opacity-[.075]' : ''}`} />;
 }
 
 function Shell({ page, children, cover=false }: { page:number; children:React.ReactNode; cover?:boolean }) {
-  return <section className={`relative overflow-hidden rounded-[2.25rem] border border-[#d9c79b] bg-[#fffaf0] shadow-[0_28px_80px_rgba(35,67,48,.13)] print:break-after-page print:rounded-none print:border-0 print:shadow-none ${cover ? 'min-h-[760px]' : ''}`}>
+  return <section className={`report-page relative overflow-hidden rounded-[2.25rem] border border-[#d9c79b] bg-[#fffaf0] shadow-[0_28px_80px_rgba(35,67,48,.13)] print:break-after-page print:rounded-none print:border-0 print:shadow-none ${cover ? 'min-h-[760px]' : ''}`}>
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(219,181,92,.16),transparent_24%),linear-gradient(145deg,rgba(255,255,255,.72),transparent_52%)]" />
-    <Botanical/><Botanical right bottom/>
     <div className="pointer-events-none absolute -right-20 top-36 h-80 w-80 rounded-full border border-[#c7a451]/20" />
     <div className="pointer-events-none absolute -right-6 top-48 h-52 w-52 rounded-full border border-[#c7a451]/10" />
-    <div className="relative z-10 px-6 py-7 sm:px-11 sm:py-9">
+    <div className="relative z-10 px-6 py-7 sm:px-16 sm:py-9">
       <header className="grid grid-cols-[1fr_auto_1fr] items-start gap-3">
-        <div className="pt-2 text-[8px] font-semibold uppercase leading-5 tracking-[.26em] text-[#486255]"><div>Autenticidade</div><div>Equilíbrio</div><div>Bem-estar</div><div>Sempre</div><div className="mt-3 h-px w-14 bg-[#b9903d]"/></div>
+        <div className="self-end pb-2 text-[8px] font-semibold uppercase leading-5 tracking-[.26em] text-[#486255]"><div>Autenticidade</div><div>Equilíbrio</div><div>Bem-estar</div><div>Sempre</div><div className="mt-3 h-px w-14 bg-[#b9903d]"/></div>
         <Logo />
         <div className="pt-2 text-right text-[8px] uppercase leading-5 tracking-[.25em] text-[#52675b]"><div>Corpo</div><div>Mente</div><div>Energia</div><div>Espírito</div><div className="ml-auto mt-3 h-px w-14 bg-[#b9903d]"/></div>
       </header>
@@ -44,22 +35,11 @@ function Shell({ page, children, cover=false }: { page:number; children:React.Re
 }
 
 function Title({ children, kicker }: { children:React.ReactNode; kicker?:string }) {
-  return <div>{kicker && <div className="mb-3 text-[10px] font-semibold uppercase tracking-[.3em] text-[#a47a2d]">{kicker}</div>}<h2 className="max-w-3xl font-serif text-4xl leading-[1.04] text-[#173c2c] sm:text-[3.35rem]">{children}</h2><div className="my-6 flex items-center gap-3"><div className="h-px flex-1 bg-[#d3b468]"/><span className="text-[#b58a34]">◇</span><div className="h-px w-24 bg-[#d3b468]"/></div></div>;
+  return <div>{kicker && <div className="mb-3 text-[10px] font-semibold uppercase tracking-[.3em] text-[#a47a2d]">{kicker}</div>}<h2 className="max-w-3xl font-serif text-4xl leading-[1.04] text-[#173c2c] sm:text-[3.35rem]">{typeof children === 'string' && children === 'Diagnóstico da Anamnese' ? <>Diagnóstico da <span className="text-[#a87828]">Anamnese</span></> : typeof children === 'string' && children === 'O que suas respostas contam sobre você' ? <>O que suas respostas <span className="text-[#a87828]">contam sobre você</span></> : children}</h2><div className="my-6 flex items-center gap-3"><div className="h-px flex-1 bg-[#d3b468]"/><span className="text-[#b58a34]">✿</span><div className="h-px w-24 bg-[#d3b468]"/></div></div>;
 }
 
 function Text({ items }: { items:string[] }) {
-  return <div className="space-y-5 text-[15px] leading-[1.82] text-[#43584c] sm:text-[16px]">{items.map((p,i)=><p key={i}>{p}</p>)}</div>;
-}
-
-function ResourceCards({ items }: { items:string[] }) {
-  return <div className="mt-7 grid gap-4 sm:grid-cols-2">{items.map((text,i)=>{
-    const [head,...rest]=text.split(':');
-    const hasHead=rest.length>0 && head.length<48;
-    return <article key={i} className="rounded-[1.6rem] border border-[#d9c99e] bg-white/65 p-5 shadow-[0_12px_35px_rgba(39,68,50,.07)]">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-full border border-[#c8a452]/50 bg-[#fbf1d9] font-serif text-lg text-[#a5792d]">{i+1}</div>
-      {hasHead ? <><h4 className="font-serif text-xl text-[#173c2c]">{head}</h4><p className="mt-2 text-sm leading-6 text-[#56685e]">{rest.join(':').trim()}</p></> : <p className="text-sm leading-6 text-[#56685e]">{text}</p>}
-    </article>;
-  })}</div>;
+  return <div className="space-y-5 font-serif text-[16px] leading-[1.6] text-[#43584c] sm:text-[16px]">{items.map((p,i)=><p key={i}>{p}</p>)}</div>;
 }
 
 export function FullReportApprovedView({ report }: Props) {
@@ -84,9 +64,9 @@ export function FullReportApprovedView({ report }: Props) {
 
     <Shell page={2}>
       <Title kicker="O que está acontecendo comigo?">{report.page2.title}</Title>
-      <div className="grid gap-8 lg:grid-cols-[1fr_.34fr]">
+      <div className="grid gap-8">
         <Text items={report.page2.paragraphs}/>
-        <aside className="relative hidden lg:flex items-center justify-center"><div className="absolute inset-0 flex items-center justify-center"><Logo large watermark/></div><div className="relative rounded-[2rem] border border-[#d8c89c] bg-[#fbf3df]/80 p-5 font-serif text-lg italic leading-7 text-[#8d6a2c]">Sua leitura não procura encaixar você em um rótulo. Ela procura reconhecer onde está pesado e por onde o cuidado pode começar.</div></aside>
+
       </div>
       {report.page2.cycle && <div className="mt-8 rounded-[1.7rem] border border-[#d8c89c] bg-[#fbf3df]/80 px-6 py-5"><div className="text-[9px] font-semibold uppercase tracking-[.25em] text-[#6b786f]">Um ciclo percebido nas suas respostas</div><div className="mt-3 font-serif text-lg italic leading-7 text-[#966d24]">{report.page2.cycle}</div></div>}
     </Shell>
@@ -96,14 +76,13 @@ export function FullReportApprovedView({ report }: Props) {
       <Text items={report.page3.paragraphs}/>
       <div className="my-8 rounded-[1.8rem] bg-[#f8efdc]/80 p-6"><h3 className="font-serif text-2xl text-[#173c2c]">O que permanece vivo em você</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{report.page3.preserved.map((item,i)=><div key={i} className="flex gap-3 text-sm leading-6 text-[#53665b]"><span className="text-[#b18432]">✦</span><span>{item}</span></div>)}</div></div>
       <h3 className="font-serif text-3xl text-[#173c2c]">O que os seus chakras nos mostram dentro do protocolo</h3>
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">{report.page3.chakras.map((c,i)=><article key={i} className="relative overflow-hidden rounded-[1.6rem] border border-[#ded0ad] bg-white/65 p-5"><div className="absolute right-4 top-4 h-12 w-12 rounded-full opacity-15" style={{background:chakraTone(c.name)}}/><div className="flex items-center gap-3"><span className="h-4 w-4 rounded-full shadow-[0_0_0_5px_rgba(205,179,112,.13)]" style={{background:chakraTone(c.name)}}/><h4 className="font-serif text-xl text-[#9a6f22]">{c.name}</h4></div><p className="mt-3 text-sm leading-6 text-[#52645a]">{c.text}</p></article>)}</div>
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">{report.page3.chakras.map((c,i)=><article key={i} className="relative border-l border-[#c7a451] px-5 py-2"><div className="absolute right-4 top-4 h-12 w-12 rounded-full opacity-15" style={{background:chakraTone(c.name)}}/><div className="flex items-center gap-3"><span className="h-4 w-4 rounded-full shadow-[0_0_0_5px_rgba(205,179,112,.13)]" style={{background:chakraTone(c.name)}}/><h4 className="font-serif text-xl text-[#9a6f22]">{c.name}</h4></div><p className="mt-3 text-sm leading-6 text-[#52645a]">{c.text}</p></article>)}</div>
       <div className="mt-8 font-serif text-xl italic text-[#a87828]">Antes de pedir mais de você, o cuidado vai devolver sustentação ao que hoje está pedindo espaço.</div>
     </Shell>
 
     <Shell page={4}>
       <Title kicker="Seu cuidado foi pensado para estes pontos">{report.page4.title}</Title>
-      <div className="rounded-[1.8rem] border-l-4 border-[#b88b37] bg-[#f7eedb]/75 px-6 py-5"><p className="font-serif text-xl leading-8 text-[#315243]">Aqui está o direcionamento da sua composição: não apenas o nome dos recursos, mas o motivo de cada escolha e o lugar que cada energia ocupa no seu cuidado.</p></div>
-      <ResourceCards items={report.page4.paragraphs}/>
+      <Text items={report.page4.paragraphs}/>
       <div className="mt-8 flex items-center gap-5 rounded-[1.8rem] bg-[#173c2c] p-6 text-[#f8f0df]"><div className="hidden sm:block"><Logo/></div><p className="font-serif text-lg italic leading-7">A sequência respeita o seu momento: primeiro sustentar, depois aliviar o excesso, fortalecer o que pede apoio e só então favorecer movimento e integração.</p></div>
     </Shell>
 

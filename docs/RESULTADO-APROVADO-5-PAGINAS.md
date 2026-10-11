@@ -14,7 +14,7 @@ A pessoa deve sentir que foi escutada e compreendida antes de perceber quais rec
 
 1. **Relatório Completo — Leitura do Seu Momento**
    - capa com nome da pessoa;
-   - logo oficial `public/logo-everton-oficial.svg`;
+   - logo oficial `public/logo-everton-oficial.png`;
    - identidade clara/creme, verde e dourado suave;
    - frase de acolhimento e apresentação.
 

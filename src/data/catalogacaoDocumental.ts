@@ -719,7 +719,7 @@ const SISTEMA_KUNDALINI: SistemaBiblioteca = {
 };
 
 export function aplicarCatalogacaoDocumental(base: SistemaBiblioteca[]): SistemaBiblioteca[] {
-  const atualizados = base.map((sistema) => ({
+  const atualizados: SistemaBiblioteca[] = base.map((sistema) => ({
     ...sistema,
     ...(CATALOGACAO_DOCUMENTAL[sistema.id] || { catalogacaoTecnica: 'PENDENTE' as const }),
     status: 'FORMAÇÃO_CONFIRMADA' as const,
