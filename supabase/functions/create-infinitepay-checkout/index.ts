@@ -106,17 +106,42 @@ Deno.serve(async (req: Request) => {
   try { data = JSON.parse(raw); } catch { data = { raw }; }
 
   if (!response.ok) {
+    console.error("INFINITEPAY_CHECKOUT_FAILED", {
+      status: response.status,
+      statusText: response.statusText,
+      orderNsu,
+      amountCents,
+      response: data,
+    });
+
     await admin.from("commercial_checkout_orders")
       .update({ status: "failed", updated_at: new Date().toISOString() })
       .eq("id", orderId);
-    return json(502, { error: "infinitepay_checkout_failed", details: data });
+
+    return json(502, {
+      error: "infinitepay_checkout_failed",
+      provider_status: response.status,
+      details: data,
+    });
   }
 
   const checkoutUrl = data?.url || data?.checkout_url || data?.link || data?.payment_url || null;
   const invoiceSlug = data?.slug || data?.invoice_slug || null;
+
+  if (!checkoutUrl) {
+    console.error("INFINITEPAY_CHECKOUT_WITHOUT_URL", { orderNsu, amountCents, response: data });
+  }
+
   await admin.from("commercial_checkout_orders")
-    .update({ status: "pending", checkout_url: checkoutUrl, invoice_slug: invoiceSlug, updated_at: new Date().toISOString() })
+    .update({ status: checkoutUrl ? "pending" : "failed", checkout_url: checkoutUrl, invoice_slug: invoiceSlug, updated_at: new Date().toISOString() })
     .eq("id", orderId);
+
+  if (!checkoutUrl) {
+    return json(502, {
+      error: "infinitepay_checkout_without_url",
+      details: data,
+    });
+  }
 
   return json(200, { ok: true, order_nsu: orderNsu, checkout_url: checkoutUrl, provider_response: data });
 });
