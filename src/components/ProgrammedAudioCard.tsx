@@ -9,7 +9,7 @@ interface ProgrammedAudioCardProps {
   userId?: string;
 }
 
-export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps) {
+export function ProgrammedAudioCard({ audio }: ProgrammedAudioCardProps) {
   const elementRef = useRef<HTMLAudioElement | null>(null);
   const [before, setBefore] = useState<number | null>(null);
   const [after, setAfter] = useState<number | null>(null);
@@ -23,37 +23,41 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
   const [downloading, setDownloading] = useState(false);
   const [downloadMessage, setDownloadMessage] = useState('');
 
-  const playbackUrl = audio.arquivoUrl || remoteAudioUrl;
-  const available = !!playbackUrl;
+  const playbackUrl = remoteAudioUrl;
+  const available = Boolean(playbackUrl);
 
   const durationLabel = useMemo(() => {
     if (audio.duracaoMinutos) return `${audio.duracaoMinutos} min`;
-    if (remoteDurationSeconds !== null) return `${Math.max(1, Math.round(remoteDurationSeconds / 60))} min`;
+    if (remoteDurationSeconds !== null) {
+      return `${Math.max(1, Math.round(remoteDurationSeconds / 60))} min`;
+    }
     return 'Duração definida quando o arquivo for cadastrado';
   }, [audio.duracaoMinutos, remoteDurationSeconds]);
 
   useEffect(() => {
     let active = true;
+    setRemoteAudioUrl(null);
+    setRemoteDurationSeconds(null);
+    setCarePlanId(null);
 
-    if (!audio.arquivoUrl) {
-      createPrivateAudioPlaybackUrl(audio.id)
-        .then(result => {
-          if (!active || !result) return;
-          setRemoteAudioUrl(result.url);
-          setRemoteDurationSeconds(result.carePlan.durationSeconds);
-          setCarePlanId(result.carePlan.carePlanId);
-        })
-        .catch(() => {
-          setRemoteAudioUrl(null);
-          setRemoteDurationSeconds(null);
-          setCarePlanId(null);
-        });
-    }
+    createPrivateAudioPlaybackUrl(audio.id)
+      .then(result => {
+        if (!active || !result) return;
+        setRemoteAudioUrl(result.url);
+        setRemoteDurationSeconds(result.carePlan.durationSeconds);
+        setCarePlanId(result.carePlan.carePlanId);
+      })
+      .catch(() => {
+        if (!active) return;
+        setRemoteAudioUrl(null);
+        setRemoteDurationSeconds(null);
+        setCarePlanId(null);
+      });
 
     return () => {
       active = false;
     };
-  }, [audio.id, audio.arquivoUrl]);
+  }, [audio.id]);
 
   useEffect(() => {
     const element = elementRef.current;
@@ -132,7 +136,9 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
           <Headphones className="h-6 w-6" />
         </div>
         <div className="min-w-0">
-          <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#a18443]">Áudio exclusivo da sua sessão</div>
+          <div className="text-xs font-semibold uppercase tracking-[0.15em] text-[#a18443]">
+            Áudio exclusivo da sua sessão
+          </div>
           <h3 className="mt-1 font-serif text-2xl text-[#173c2c]">{audio.titulo}</h3>
           <p className="mt-1 text-sm leading-6 text-[#667268]">{audio.subtitulo}</p>
         </div>
@@ -149,9 +155,11 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
 
       {!available ? (
         <div className="mt-6 rounded-2xl border border-[#dfcf9d] bg-[#fff6df] p-5">
-          <div className="font-semibold text-[#6f5d31]">Sua sessão exclusiva está sendo preparada.</div>
+          <div className="font-semibold text-[#6f5d31]">
+            Sua sessão exclusiva está sendo preparada.
+          </div>
           <p className="mt-2 text-sm leading-6 text-[#7b6b46]">
-            Este áudio será gerado exclusivamente a partir da sua anamnese e da composição desta sessão. Quando o terapeuta anexar o arquivo no ADM, ele ficará disponível aqui somente para este plano.
+            O arquivo final só fica disponível por acesso privado vinculado à sua conta e a esta anamnese. Nenhuma URL pública é usada para liberar este áudio.
           </p>
         </div>
       ) : (
@@ -159,7 +167,9 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
           <audio ref={elementRef} src={playbackUrl || undefined} preload="metadata" />
 
           <div className="mt-6">
-            <p className="mb-2 text-sm font-semibold text-[#365441]">Antes de ouvir, como você percebe seu estado agora?</p>
+            <p className="mb-2 text-sm font-semibold text-[#365441]">
+              Antes de ouvir, como você percebe seu estado agora?
+            </p>
             <div className="grid grid-cols-5 gap-2">
               {[0, 1, 2, 3, 4].map(value => (
                 <button
@@ -181,7 +191,7 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
           <div className="mt-6 flex flex-wrap items-center gap-3">
             <button
               type="button"
-              onClick={togglePlayback}
+              onClick={() => void togglePlayback()}
               disabled={before === null}
               className="inline-flex items-center gap-2 rounded-full bg-[#173f2d] px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
             >
@@ -228,7 +238,9 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
 
           {(completed || !playing) && practiceId && (
             <div className="mt-7 border-t border-[#e0d5bb] pt-6">
-              <p className="mb-2 text-sm font-semibold text-[#365441]">E agora, como você se percebe?</p>
+              <p className="mb-2 text-sm font-semibold text-[#365441]">
+                E agora, como você se percebe?
+              </p>
               <div className="grid grid-cols-5 gap-2">
                 {[0, 1, 2, 3, 4].map(value => (
                   <button
@@ -248,14 +260,14 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
               <textarea
                 rows={3}
                 value={observation}
-                onChange={e => setObservation(e.target.value)}
+                onChange={event => setObservation(event.target.value)}
                 className="user-input mt-4 resize-none"
                 placeholder="Se quiser, conte o que percebeu depois da prática."
               />
               <button
                 type="button"
                 disabled={after === null}
-                onClick={finishPractice}
+                onClick={() => void finishPractice()}
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-40"
               >
                 <CheckCircle2 className="h-4 w-4" /> Registrar esta prática
@@ -267,4 +279,3 @@ export function ProgrammedAudioCard({ audio, userId }: ProgrammedAudioCardProps)
     </section>
   );
 }
-
