@@ -12,6 +12,18 @@ export interface RemotePracticeLog {
   audioTitle: string | null;
 }
 
+type PracticeLogRow = {
+  id: string;
+  care_plan_id: string;
+  started_at: string;
+  completed_at: string | null;
+  perception_before: number | null;
+  perception_after: number | null;
+  observation: string | null;
+  status: 'started' | 'completed';
+  care_plans: { audio_title: string | null } | Array<{ audio_title: string | null }> | null;
+};
+
 export async function startPractice(params: {
   carePlanId: string;
   before?: number | null;
@@ -81,17 +93,21 @@ export async function listOwnPracticeLogs(limit = 10): Promise<RemotePracticeLog
 
   if (error) throw error;
 
-  return (data || []).map(item => ({
-    id: item.id,
-    carePlanId: item.care_plan_id,
-    startedAt: item.started_at,
-    completedAt: item.completed_at,
-    perceptionBefore: item.perception_before,
-    perceptionAfter: item.perception_after,
-    observation: item.observation,
-    status: item.status,
-    audioTitle: Array.isArray(item.care_plans)
-      ? item.care_plans[0]?.audio_title || null
-      : item.care_plans?.audio_title || null,
-  }));
+  return ((data || []) as PracticeLogRow[]).map(item => {
+    const relatedPlan = Array.isArray(item.care_plans)
+      ? item.care_plans[0] || null
+      : item.care_plans;
+
+    return {
+      id: item.id,
+      carePlanId: item.care_plan_id,
+      startedAt: item.started_at,
+      completedAt: item.completed_at,
+      perceptionBefore: item.perception_before,
+      perceptionAfter: item.perception_after,
+      observation: item.observation,
+      status: item.status,
+      audioTitle: relatedPlan?.audio_title || null,
+    };
+  });
 }
