@@ -36,8 +36,8 @@ jobs:
           if [ "$status" -eq 0 ]; then
             exit 0
           fi
-          unexpected=$(grep -E '^src/.*error TS[0-9]+:' tsc.log | grep -v '^src/data/catalogacaoDocumental.ts(729,22): error TS2345:' || true)
-          known=$(grep -E '^src/data/catalogacaoDocumental.ts(729,22): error TS2345:' tsc.log || true)
+          unexpected=$(grep -E '^src/.*error TS[0-9]+:' tsc.log | grep -v -F 'src/data/catalogacaoDocumental.ts(729,22): error TS2345:' || true)
+          known=$(grep -F 'src/data/catalogacaoDocumental.ts(729,22): error TS2345:' tsc.log || true)
           if [ -n "$unexpected" ] || [ -z "$known" ]; then
             echo "Unexpected TypeScript diagnostics found:"
             echo "$unexpected"
