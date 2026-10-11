@@ -7,7 +7,7 @@ const json = (status: number, body: unknown) =>
     headers: { "content-type": "application/json; charset=utf-8" },
   });
 
-const allowedAmounts = [1500, 5000, 6500, 10000, 18000];
+const allowedAmounts = [50, 1500, 5000, 6500, 10000, 18000];
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
@@ -30,17 +30,12 @@ Deno.serve(async (req: Request) => {
     auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  // InfinitePay envia order_nsu, transaction_nsu e invoice_slug.
-  // Não confiamos apenas no webhook: a venda é confirmada novamente no payment_check oficial.
   const infiniteOrder = String(payload?.order_nsu || "").trim();
   const infiniteTransaction = String(payload?.transaction_nsu || "").trim();
   const infiniteSlug = String(payload?.invoice_slug || payload?.slug || "").trim();
 
   if (infiniteOrder && infiniteTransaction && infiniteSlug) {
-    const handle = Deno.env.get("INFINITEPAY_HANDLE");
-    if (!handle) {
-      return json(503, { success: false, message: "infinitepay_handle_not_configured" });
-    }
+    const handle = "everton-rodrigo-piceni";
 
     const { data: order, error: orderError } = await admin
       .from("commercial_checkout_orders")
@@ -108,7 +103,6 @@ Deno.serve(async (req: Request) => {
     return json(200, { success: true, message: null, entitlement: data });
   }
 
-  // Fluxo interno/manual: sessão administrativa ou segredo privado.
   const expectedSecret = Deno.env.get("PAYMENT_WEBHOOK_SECRET");
   const providedSecret = req.headers.get("x-webhook-secret");
   const authorization = req.headers.get("authorization") || "";
