@@ -10,7 +10,7 @@ const json = (status: number, body: unknown) =>
 const INFINITEPAY_HANDLE = "everton-rodrigo-piceni";
 
 const PRODUCTS: Record<number, { productCode: string; addon: boolean; description: string }> = {
-  50: { productCode: "CARE_7_BASIC", addon: false, description: "Plano teste — cuidado personalizado 7 dias" },
+  100: { productCode: "CARE_7_BASIC", addon: false, description: "Plano teste — cuidado personalizado 7 dias" },
   1500: { productCode: "CARE_7_BASIC", addon: true, description: "Relatório completo — adicional" },
   5000: { productCode: "CARE_7_BASIC", addon: false, description: "Jornada 7 dias — áudio personalizado" },
   6500: { productCode: "CARE_7_BASIC", addon: true, description: "Jornada 7 dias + relatório completo" },
