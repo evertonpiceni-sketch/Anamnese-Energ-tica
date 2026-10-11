@@ -6,6 +6,10 @@ import { executarAnaliseIntegrativa } from '../engine/analysisEngine';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { saveIntakeSession } from '../services/backend';
 import { buildFullReportNarrative, FullReportNarrative } from '../result/fullReportNarrative';
+import { selectComplementaryCare } from '../care/complementaryCatalogs';
+import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
+import { buildCareComposition } from '../care/careComposer';
+import { criarPlanoAudioPersonalizado } from '../audio/audioCatalog';
 import { FullReportApprovedView } from './FullReportApprovedView';
 import { UserMomentArea } from './UserMomentArea';
 import { PrivacyPolicy } from './PrivacyPolicy';
@@ -70,7 +74,19 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
     try {
       await saveIntakeSession({ userId, intake: finalData });
       const analysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
-      const narrative = buildFullReportNarrative({ intake: finalData, analysis, composition: null });
+      const axes = analysis.relatorioEverton.eixosOrdenados;
+      const complementary = selectComplementaryCare(axes);
+      const solfeggio = selectSolfeggioFrequency(axes);
+      const audio = criarPlanoAudioPersonalizado({
+        userId,
+        anamneseId: finalData.id,
+        nomePessoa: finalData.nomePessoa,
+        eixos: axes,
+        relatorio: analysis.relatorioEverton,
+        solfeggio,
+      });
+      const composition = buildCareComposition(audio, complementary, solfeggio);
+      const narrative = buildFullReportNarrative({ intake: finalData, analysis, composition });
       setForm(finalData);
       setFullReading(narrative);
       onSubmit?.(finalData);
