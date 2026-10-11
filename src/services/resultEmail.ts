@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
 import { createUserResultPdfBlob, UserResultPdfData } from '../pdf/userResultPdf';
+import { createFullReportPdfBlob } from '../pdf/fullReportPdf';
+import { FullReportNarrative } from '../result/fullReportNarrative';
 
 export type ResultEmailStatus =
   | 'pending'
@@ -8,17 +10,18 @@ export type ResultEmailStatus =
   | 'failed'
   | 'provider_not_configured';
 
-export async function requestResultEmail(params: {
+type EmailResult = Promise<{ requestId: string; status: ResultEmailStatus; message: string }>;
+
+async function registerAndSendResult(params: {
   userId: string;
   intakeId: string;
-  pdfData: UserResultPdfData;
   requestedBy: 'user' | 'admin';
   recipientEmail?: string;
-}): Promise<{ requestId: string; status: ResultEmailStatus; message: string }> {
-  const { userId, intakeId, pdfData, requestedBy, recipientEmail } = params;
-  const { blob } = createUserResultPdfBlob(pdfData);
-
-  const storagePath = `${userId}/${intakeId}/resultado-anamnese.pdf`;
+  blob: Blob;
+  storageFileName: string;
+}): EmailResult {
+  const { userId, intakeId, requestedBy, recipientEmail, blob, storageFileName } = params;
+  const storagePath = `${userId}/${intakeId}/${storageFileName}`;
 
   const { error: uploadError } = await supabase.storage
     .from('result-pdfs')
@@ -69,4 +72,44 @@ export async function requestResultEmail(params: {
       ? 'Resultado enviado para seu e-mail.'
       : 'Solicitação de envio registrada.',
   };
+}
+
+export async function requestResultEmail(params: {
+  userId: string;
+  intakeId: string;
+  pdfData: UserResultPdfData;
+  requestedBy: 'user' | 'admin';
+  recipientEmail?: string;
+}): EmailResult {
+  const { userId, intakeId, pdfData, requestedBy, recipientEmail } = params;
+  const { blob } = createUserResultPdfBlob(pdfData);
+
+  return registerAndSendResult({
+    userId,
+    intakeId,
+    requestedBy,
+    recipientEmail,
+    blob,
+    storageFileName: 'resultado-anamnese.pdf',
+  });
+}
+
+export async function requestFullReportEmail(params: {
+  userId: string;
+  intakeId: string;
+  report: FullReportNarrative;
+  requestedBy: 'user' | 'admin';
+  recipientEmail?: string;
+}): EmailResult {
+  const { userId, intakeId, report, requestedBy, recipientEmail } = params;
+  const { blob } = await createFullReportPdfBlob(report);
+
+  return registerAndSendResult({
+    userId,
+    intakeId,
+    requestedBy,
+    recipientEmail,
+    blob,
+    storageFileName: 'relatorio-completo-anamnese.pdf',
+  });
 }
