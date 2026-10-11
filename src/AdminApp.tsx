@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AnamneseInput, SistemaBiblioteca } from './types';
 import { BIBLIOTECA_MESTRA_INICIAL } from './data/bibliotecaMestra';
-import { CASOS_DE_TESTE, CasoTeste } from './data/sampleCases';
+import { CasoTeste } from './data/sampleCases';
 import { AnaliseCompletaResultado, executarAnaliseIntegrativa } from './engine/analysisEngine';
 import { Navbar } from './components/Navbar';
 import { AnamneseForm } from './components/AnamneseForm';
@@ -13,7 +13,8 @@ import { AudioLibraryView } from './components/AudioLibraryView';
 import { ComplementaryLibrariesView } from './components/ComplementaryLibrariesView';
 import { CareComposerAdminView } from './components/CareComposerAdminView';
 import { CasosTesteView } from './components/CasosTesteView';
-import { Sparkles, ShieldCheck, Heart, BookOpen, Activity, Play, RotateCcw, LogOut } from 'lucide-react';
+import { Heart, LogOut, RotateCcw, ShieldCheck } from 'lucide-react';
+import { AdminIntakeRecord, getLatestCompletedIntakeForAdmin } from './services/adminIntakeBackend';
 
 type ViewMode = 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'compositor' | 'reavaliacao' | 'casos';
 
@@ -34,71 +35,54 @@ export const ANAMNESE_LIMPA: AnamneseInput = {
   sensibilidadeEnergetica: 'moderada',
 };
 
-const SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
-
-type BackendContext = {
-  backendUserId?: string;
-  backendIntakeId?: string;
-  friendlyResult?: {
-    headline: string;
-    intro: string;
-    priorities: string[];
-    intention: string;
-    closing: string;
+function novaAnamneseLimpa(): AnamneseInput {
+  return {
+    ...ANAMNESE_LIMPA,
+    id: `ANAM-${Date.now().toString().slice(-6)}`,
+    data: new Date().toISOString().split('T')[0],
   };
-};
-
-function carregarUltimaAnamneseConcluida(): { dados: AnamneseInput; analise: AnaliseCompletaResultado | null; backend: BackendContext } | null {
-  try {
-    const raw = localStorage.getItem(SUBMISSIONS_KEY);
-    if (!raw) return null;
-    const lista = JSON.parse(raw);
-    if (!Array.isArray(lista) || lista.length === 0) return null;
-    const ultima = lista[lista.length - 1];
-    const {
-      resultadoPessoa,
-      analiseTecnica,
-      backendUserId,
-      backendIntakeId,
-      enviadoEm: _enviadoEm,
-      status: _status,
-      ...dados
-    } = ultima;
-    return {
-      dados: dados as AnamneseInput,
-      analise: (analiseTecnica as AnaliseCompletaResultado) || null,
-      backend: {
-        backendUserId,
-        backendIntakeId,
-        friendlyResult: resultadoPessoa,
-      },
-    };
-  } catch {
-    return null;
-  }
 }
 
 export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promise<void> }) {
-  const ultimaConcluida = carregarUltimaAnamneseConcluida();
-
-  // O ADM abre a última anamnese concluída quando houver uma no dispositivo.
-  const [viewAtiva, setViewAtiva] = useState<ViewMode>(
-    ultimaConcluida?.analise ? 'relatorio_everton' : 'anamnese'
-  );
+  const [viewAtiva, setViewAtiva] = useState<ViewMode>('anamnese');
   const [biblioteca, setBiblioteca] = useState<SistemaBiblioteca[]>(BIBLIOTECA_MESTRA_INICIAL);
+  const [anamneseAtual, setAnamneseAtual] = useState<AnamneseInput>(novaAnamneseLimpa);
+  const [resultadoAnalise, setResultadoAnalise] = useState<AnaliseCompletaResultado | null>(null);
+  const [backendContext, setBackendContext] = useState<AdminIntakeRecord | null>(null);
+  const [loadingLatest, setLoadingLatest] = useState(true);
+  const [latestLoadError, setLatestLoadError] = useState('');
 
-  const [anamneseAtual, setAnamneseAtual] = useState<AnamneseInput>(() =>
-    ultimaConcluida?.dados || {
-      ...ANAMNESE_LIMPA,
-      id: `ANAM-${Date.now().toString().slice(-6)}`,
-    }
-  );
+  useEffect(() => {
+    let active = true;
 
-  const [resultadoAnalise, setResultadoAnalise] = useState<AnaliseCompletaResultado | null>(
-    ultimaConcluida?.analise || null
-  );
+    getLatestCompletedIntakeForAdmin()
+      .then(record => {
+        if (!active || !record) return;
+        const analise = executarAnaliseIntegrativa(record.intake, BIBLIOTECA_MESTRA_INICIAL);
+        setBackendContext(record);
+        setAnamneseAtual(record.intake);
+        setResultadoAnalise(analise);
+        setViewAtiva('relatorio_everton');
+      })
+      .catch(error => {
+        if (!active) return;
+        setLatestLoadError(
+          error instanceof Error
+            ? error.message
+            : 'Não foi possível carregar a última anamnese concluída do backend.'
+        );
+      })
+      .finally(() => {
+        if (active) setLoadingLatest(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleSubmeterAnamnese = (dados: AnamneseInput) => {
+    setBackendContext(null);
     setAnamneseAtual(dados);
     const analise = executarAnaliseIntegrativa(dados, biblioteca);
     setResultadoAnalise(analise);
@@ -106,6 +90,7 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
   };
 
   const handleCarregarCasoTeste = (caso: CasoTeste) => {
+    setBackendContext(null);
     setAnamneseAtual(caso.dados);
     const analise = executarAnaliseIntegrativa(caso.dados, biblioteca);
     setResultadoAnalise(analise);
@@ -113,20 +98,15 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
   };
 
   const handleLimparAnamnese = () => {
-    const novaLimpa: AnamneseInput = {
-      ...ANAMNESE_LIMPA,
-      id: `ANAM-${Date.now().toString().slice(-6)}`,
-      data: new Date().toISOString().split('T')[0],
-    };
-    setAnamneseAtual(novaLimpa);
+    setBackendContext(null);
+    setAnamneseAtual(novaAnamneseLimpa());
     setResultadoAnalise(null);
     setViewAtiva('anamnese');
   };
 
   const handleAtualizarBiblioteca = (novosSistemas: SistemaBiblioteca[]) => {
     setBiblioteca(novosSistemas);
-    // Se já tiver uma análise, reprocessa com a nova biblioteca
-    if (anamneseAtual) {
+    if (resultadoAnalise) {
       const analise = executarAnaliseIntegrativa(anamneseAtual, novosSistemas);
       setResultadoAnalise(analise);
     }
@@ -134,7 +114,6 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
-      {/* Top Navbar */}
       <Navbar
         viewAtiva={viewAtiva}
         onMudarView={setViewAtiva}
@@ -142,17 +121,20 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
         onLimparAnamnese={handleLimparAnamnese}
       />
 
-      {/* Quick context banner */}
       <div className="bg-stone-900/60 border-b border-stone-800/80 px-4 py-2.5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2 text-stone-300">
+          <div className="flex flex-wrap items-center gap-2 text-stone-300">
             <span
               className={`w-2 h-2 rounded-full ${
                 resultadoAnalise ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
               }`}
             />
             <span className="font-medium">
-              {resultadoAnalise ? 'Análise Integrativa Processada' : 'Questionário Limpo (Sem Resultado Prévio)'}
+              {loadingLatest
+                ? 'Carregando última anamnese do backend...'
+                : resultadoAnalise
+                  ? 'Análise Integrativa Processada'
+                  : 'Questionário Limpo (Sem Resultado Prévio)'}
             </span>
             <span className="text-stone-500">•</span>
             <span className="text-stone-400">
@@ -165,6 +147,11 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
                 <span className="text-stone-400 italic">Novo Formulário em Branco</span>
               )}
             </span>
+            {backendContext && (
+              <span className="rounded-full border border-emerald-800/70 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-300">
+                Backend seguro
+              </span>
+            )}
           </div>
 
           <div className="flex items-center gap-2 self-start sm:self-auto">
@@ -220,9 +207,14 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
             )}
           </div>
         </div>
+
+        {latestLoadError && (
+          <div className="max-w-7xl mx-auto mt-2 rounded-lg border border-amber-800/60 bg-amber-950/30 px-3 py-2 text-[11px] leading-5 text-amber-200">
+            O ADM foi aberto sem reutilizar dados locais do navegador. Não foi possível carregar a última anamnese do backend: {latestLoadError}
+          </div>
+        )}
       </div>
 
-      {/* Main Content Router */}
       <main className="flex-1 pb-16">
         {viewAtiva === 'casos' && (
           <CasosTesteView onCarregarCaso={handleCarregarCasoTeste} />
@@ -298,21 +290,16 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
           />
         )}
 
-        {viewAtiva === 'audios' && (
-          <AudioLibraryView />
-        )}
+        {viewAtiva === 'audios' && <AudioLibraryView />}
 
-        {viewAtiva === 'complementares' && (
-          <ComplementaryLibrariesView />
-        )}
+        {viewAtiva === 'complementares' && <ComplementaryLibrariesView />}
 
         {viewAtiva === 'compositor' && (
           <CareComposerAdminView
             anamnese={anamneseAtual}
             analise={resultadoAnalise}
-            backendUserId={ultimaConcluida?.backend.backendUserId}
-            backendIntakeId={ultimaConcluida?.backend.backendIntakeId}
-            friendlyResult={ultimaConcluida?.backend.friendlyResult}
+            backendUserId={backendContext?.userId}
+            backendIntakeId={backendContext?.intakeId}
           />
         )}
 
@@ -325,7 +312,6 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
         )}
       </main>
 
-      {/* Subtle Footer */}
       <footer className="border-t border-stone-800/80 bg-stone-950 py-6 text-center text-xs text-stone-500 space-y-1">
         <p>
           Anamnese Integrativa — Reintegração da Vida • Motor de Cruzamento com Biblioteca-Mestra
