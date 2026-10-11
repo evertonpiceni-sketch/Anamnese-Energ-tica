@@ -1,3 +1,5 @@
+import { buildAutomaticCare } from '../care/automaticCare';
+import { buildEnergyProgrammingScript } from '../care/energyProgrammingScript';
 import { proposeDailyEnergySchedule, validateDailyEnergySchedule } from '../care/dailyEnergySchedule';
 import { getAdminEntitlementForIntake } from '../services/entitlementBackend';
 import { canAccessFullReport } from '../commercial/entitlements';
@@ -176,16 +178,13 @@ export function CareComposerAdminView({
           setJourneyDays(entitlement?.days || null);
           const loaded = review?.manualComposition || motorDefault;
           const needsProposal = entitlement && loaded.dailyEnergySchedule === undefined;
-          const systems = [loaded.baseSystemId, loaded.mainSystemId, ...loaded.complementSystemIds]
-            .map(id => BIBLIOTECA_MESTRA.find(item => item.id === id))
-            .filter((item): item is NonNullable<typeof item> => Boolean(item));
-          setManual(needsProposal ? { ...loaded, dailyEnergySchedule: proposeDailyEnergySchedule({
-            days: entitlement.days, systems, axes: analise.relatorioEverton.eixosOrdenados,
-            highSensitivity: ['alta', 'muito_alta'].includes(anamnese.sensibilidadeEnergetica || ''),
-          }) } : loaded);
+          const proposed = needsProposal ? buildAutomaticCare(anamnese, entitlement.days).report.dailyEnergySchedule : undefined;
+          setManual(needsProposal ? { ...loaded, dailyEnergySchedule: proposed,
+            ...(!review ? { scriptLines: buildEnergyProgrammingScript(anamnese.nomePessoa || 'Interagente', proposed || []).flatMap(day => day.lines) } : {}),
+          } : loaded);
           setAdminNotes(review?.adminNotes || '');
           setReviewStatus(!needsProposal && review?.status === 'approved' ? 'approved' : 'draft');
-          if (needsProposal) setReviewMessage('O motor preparou a proposta para cada dia. Revise as energias e as intenções antes de aprovar a entrega.');
+          if (needsProposal) setReviewMessage('O motor preparou a proposta para cada dia. O percurso automático já fica disponível ao usuário; os ajustes abaixo são opcionais.');
         })
         .catch(() => {
           if (active) {
@@ -199,7 +198,13 @@ export function CareComposerAdminView({
     return () => {
       active = false;
     };
-  }, [analise, motorDefault, backendIntakeId, anamnese.sensibilidadeEnergetica]);
+  }, [analise, motorDefault, backendIntakeId, anamnese]);
+
+  const automaticCare = useMemo(() => {
+    if (!journeyDays) return null;
+    try { return buildAutomaticCare(anamnese, journeyDays); } catch { return null; }
+  }, [anamnese, journeyDays]);
+  const programmingScript = automaticCare ? buildEnergyProgrammingScript(anamnese.nomePessoa || 'Interagente', automaticCare.report.dailyEnergySchedule || []) : [];
 
   if (!analise || !manual) {
     return (
@@ -425,6 +430,17 @@ export function CareComposerAdminView({
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8">
+      {automaticCare && <section className="mb-6 rounded-2xl border border-emerald-700 bg-stone-900 p-6 text-stone-200">
+        <h2 className="text-xl font-semibold text-emerald-200">Percurso automático entregue ao usuário — {journeyDays} dias</h2>
+        <p className="mt-2 text-sm text-stone-400">Composição gerada a partir desta anamnese. O roteiro prepara a programação; não registra uma sessão como executada.</p>
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">{programmingScript.map(day => <article key={day.day} className="rounded-xl border border-stone-700 p-5">
+          <h3 className="font-semibold text-amber-200">Dia {day.day} — {day.intention}</h3>
+          <p className="mt-2">{day.energyNames.join(' + ')}</p>
+          <p className="mt-3 text-sm leading-6 text-stone-400">{day.reason}</p>
+          <h4 className="mt-4 font-semibold">Roteiro de programação energética</h4>
+          <textarea aria-label={`Roteiro energético do dia ${day.day}`} readOnly value={day.lines.join('\n')} rows={10} className="mt-2 w-full rounded-lg bg-stone-950 p-3 text-sm leading-6"/>
+        </article>)}</div>
+      </section>}
       <div className="mb-6 rounded-2xl border border-stone-800 bg-stone-900 p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div className="flex items-start gap-3">
@@ -437,7 +453,7 @@ export function CareComposerAdminView({
                 {anamnese.nomePessoa || 'Interagente'} • {backendIntakeId || anamnese.id}
               </p>
               <p className="mt-2 text-xs leading-5 text-stone-500">
-                O motor propõe. O Everton revisa. A composição aprovada prevalece.
+                O percurso individual é entregue automaticamente. Aqui você acompanha a programação e pode fazer ajustes opcionais.
               </p>
             </div>
           </div>

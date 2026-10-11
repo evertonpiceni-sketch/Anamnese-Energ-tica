@@ -170,6 +170,7 @@ test('ADM opens with a daily motor draft and preserves an existing review', asyn
   await render(page, 'CareComposerAdminView', props);
   await expect(page.getByText('O motor preparou a proposta para cada dia.', { exact: false })).toBeVisible();
   await expect(page.getByRole('group', { name: 'Dia 7', exact: true })).toBeVisible();
+  expect(await page.getByRole('textbox', { name: 'Roteiro energético do dia 7', exact: true }).inputValue()).toContain('Fonte:');
   expect(writes).toBe(0);
   const draft = { baseSystemId: '', mainSystemId: '', complementSystemIds: [], solfeggioId: null, floralIds: [], aromatherapyIds: [], crystalIds: [], audioIntention: 'Intenção revisada', scriptLines: [], dailyEnergySchedule: [{ day: 1, energyNames: ['Energia preservada'], intention: 'Revisão manual preservada' }] };
   await page.route('**/rest/v1/care_composition_reviews**', route => route.fulfill({ json: { id: 'review', intake_id: 'test-intake', user_id: 'test-user', status: 'draft', manual_composition: draft } }));
@@ -194,8 +195,11 @@ test('every question changes the reading and unsupported difficulties are absent
     const partialReport = build(partial).full;
     const quoted = build({ ...intake, relatoLivreNecessidade: 'Não sinto ansiedade. Quero reconhecer meu próprio ritmo.', relatoLivrePreservado: 'Minha criatividade continua viva.' }).full;
     const faith = build({ ...intake, intencaoDeclarada: 'CURA', relatoLivrePreservado: 'fé', respostasObjetivas: { ...intake.respostasObjetivas, q4_cansaco_esgotamento: 4, q13_inseguranca_material_prosperidade: 1 } }).full;
-    return { zero, variants, partialReport, quoted, faith };
+    const lostStrength = build({ ...intake, relatoLivrePreservado: 'Não tenho vontade. Perdi minha fé.' }).full;
+    return { zero, variants, partialReport, quoted, faith, lostStrength };
   });
+  expect(data.lostStrength.page3.preserved.join(' ')).not.toMatch(/Não tenho vontade|Perdi minha fé/);
+  expect(data.lostStrength.page2.paragraphs.join(' ')).toContain('Não tenho vontade. Perdi minha fé.');
   expect(data.faith.page3.preserved.join(' ')).toContain('A fé que você reconhece');
   expect(data.faith.page3.preserved.join(' ')).not.toMatch(/preocupações financeiras|mais distante|você marcou/i);
   expect(data.faith.page1.intro).not.toContain('CURA');
@@ -335,4 +339,65 @@ test('paid complete reading is shown once, without a repeated basic report or an
   await expect(page.locator('.report-page')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: 'Leitura Básica', exact: true })).toHaveCount(0);
   await expect(page.getByText('aguarda revisão', { exact: false })).toHaveCount(0);
+});
+
+
+test('free text changes contextual care without treating explicit denials as symptoms or inventing strengths', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { executarAnaliseQualitativaProfunda } = await import(/* @vite-ignore */ String('/src/engine/contextualEngine.ts'));
+    const input = { ...CASOS_DE_TESTE[0].dados, relatoLivreNecessidade: '', relatoLivreDesafios: '', relatoLivrePreservado: '', intencaoDeclarada: '' };
+    return {
+      denied: executarAnaliseQualitativaProfunda({ ...input, relatoLivreNecessidade: 'Não tenho medo. Não sinto ansiedade. Não tenho cansaço. Não tenho crise.' }),
+      mixed: executarAnaliseQualitativaProfunda({ ...input, relatoLivreNecessidade: 'Não sinto medo, mas tenho cansaço e esgotamento.' }),
+      exhausted: executarAnaliseQualitativaProfunda({ ...input, relatoLivreNecessidade: 'Tenho cansaço e esgotamento.' }),
+      limits: executarAnaliseQualitativaProfunda({ ...input, relatoLivreDesafios: 'Não consigo dizer não. Preciso colocar limites.' }),
+      noStrength: executarAnaliseQualitativaProfunda({ ...input, relatoLivrePreservado: 'Não tenho vontade. Perdi minha fé.' }),
+    };
+  });
+  expect(result.denied.clustersSemanticos).toHaveLength(0);
+  expect(result.denied.emocoesMencionadas).toHaveLength(0);
+  expect(result.denied.urgenciaEstabilizacaoQualitativa).toBe(false);
+  expect(result.mixed.clustersSemanticos).toEqual(result.exhausted.clustersSemanticos);
+  expect(result.limits.clustersSemanticos.some(item => item.nomeCluster.includes('Limites'))).toBe(true);
+  expect(result.noStrength.fatoresPreservados.recursosInternosPreservados).toHaveLength(0);
+  expect(result.noStrength.fatoresPreservados.potencialExpansao).toBe(false);
+});
+
+test('ADM programming script uses the exact patient daily energies and documented supporting resources', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    const { buildEnergyProgrammingScript } = await import(/* @vite-ignore */ String('/src/care/energyProgrammingScript.ts'));
+    const intake = CASOS_DE_TESTE[0].dados;
+    const schedule = buildAutomaticCare(intake, 7).report.dailyEnergySchedule;
+    return { schedule, script: buildEnergyProgrammingScript(intake.nomePessoa, schedule) };
+  });
+  expect(result.script).toHaveLength(7);
+  result.script.forEach((day, index) => {
+    expect(day.energyNames).toEqual(result.schedule[index].energyNames);
+    expect(day.lines.join('\n')).toContain('Destinatário:');
+    day.energyNames.forEach(name => expect(day.lines.join('\n')).toContain(`Energia: ${name}`));
+    day.resources.forEach(resource => expect(day.lines.join('\n')).toContain(`${resource.category}: ${resource.name}`));
+    expect(day.lines.join('\n')).toContain('Fonte:');
+  });
+});
+
+test('failed preparatory replacement preserves the previous audio and removes only the new upload', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    const { uploadPreparatoryAudio } = await import(/* @vite-ignore */ String('/src/services/preparatoryAudioBackend.ts'));
+    const uploaded = []; const removed = [];
+    supabase.from = () => ({ select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: 'preparatory-default', storage_path: 'preparatory/previous.mp3', status: 'published' }, error: null }) }) }), update: () => ({ eq: () => ({ select: () => ({ single: async () => ({ data: null, error: new Error('publication failed') }) }) }) }) });
+    supabase.storage.from = () => ({ upload: async (path, file, options) => { uploaded.push({ path, upsert: options.upsert }); return { error: null }; }, remove: async paths => { removed.push(...paths); return { error: null }; } });
+    try { await uploadPreparatoryAudio({ file: new File(['test'], 'replacement.mp3', { type: 'audio/mpeg' }) }); } catch { /* expected failure */ }
+    return { uploaded, removed };
+  });
+  expect(result.uploaded).toHaveLength(1);
+  expect(result.uploaded[0].upsert).toBe(false);
+  expect(result.removed).toEqual([result.uploaded[0].path]);
+  expect(result.removed).not.toContain('preparatory/previous.mp3');
 });
