@@ -11,6 +11,12 @@ const INITIAL_OPTIONS: Array<{
   description: string;
 }> = [
   {
+    amountCents: 50,
+    title: 'Plano teste — 7 dias',
+    price: 'R$ 0,50',
+    description: 'Plano válido de teste para conferir o fluxo completo de pagamento e liberação do cuidado básico.',
+  },
+  {
     amountCents: 5000,
     title: 'Cuidado personalizado — 7 dias',
     price: 'R$ 50',
@@ -43,27 +49,25 @@ export function UserPaymentPanel() {
   const [paying, setPaying] = useState<InfinitePayAmountCents | null>(null);
   const [message, setMessage] = useState('');
 
-  async function refresh(silent = false) {
-    if (!silent) setLoading(true);
+  async function refresh() {
+    setLoading(true);
     try {
       setData(await loadUserMoment());
     } catch {
       setData(null);
     } finally {
-      if (!silent) setLoading(false);
+      setLoading(false);
     }
   }
 
   useEffect(() => {
     void refresh();
-
-    const refreshSilently = () => void refresh(true);
-    const interval = window.setInterval(refreshSilently, 15_000);
-    window.addEventListener('focus', refreshSilently);
-
+    const onFocus = () => void refresh();
+    window.addEventListener('focus', onFocus);
+    const timer = window.setInterval(() => void refresh(), 12_000);
     return () => {
-      window.clearInterval(interval);
-      window.removeEventListener('focus', refreshSilently);
+      window.removeEventListener('focus', onFocus);
+      window.clearInterval(timer);
     };
   }, []);
 
@@ -130,6 +134,9 @@ export function UserPaymentPanel() {
                 </h2>
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-[#667268]">
                   O pagamento é processado pela InfinitePay. Seu acesso só é liberado depois da confirmação real do pagamento.
+                </p>
+                <p className="mt-2 max-w-2xl text-xs leading-5 text-[#7a817b]">
+                  Em pagamentos com cartão, podem existir taxas e encargos informados pela InfinitePay antes da confirmação. O pagamento pode ser parcelado em até 6x com juros, conforme as condições apresentadas no checkout.
                 </p>
               </div>
               <button
