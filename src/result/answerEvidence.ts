@@ -55,7 +55,7 @@ export function buildEvidenceChakras(intake: AnamneseInput, evidence: ReturnType
     const themes = support.slice(0, 2).map(item => item.name).join(' e ');
     const bodyReason = regions.length ? ` As sensações que você indicou em ${regions.map(region => region.nome.toLowerCase()).join(' e ')} também fazem parte dessa leitura.` : '';
     const text = themes
-      ? `Conforme a análise das suas respostas, ${themes} se relacionam, na leitura energética do protocolo, ao chakra ${name}. Esses relatos sugerem uma necessidade de fortalecer ${meanings[name]}.${bodyReason}`
+      ? `Os relatos de ${themes} orientam o cuidado com ${meanings[name]}.${bodyReason}`
       : `As sensações que você indicou em ${regions.map(region => region.nome.toLowerCase()).join(' e ')} se relacionam, no protocolo, ao chakra ${name}. O cuidado com esse centro tem como intenção apoiar ${meanings[name]}.`;
     return { name, score: support.reduce((total, item) => total + item.level, 0) + regions.length * 4, text };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score).map(({ name, text }) => ({ name, text }));

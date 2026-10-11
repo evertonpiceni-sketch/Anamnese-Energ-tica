@@ -72,21 +72,10 @@ export function EntitledFullReportCard({
 
   return (
     <section className="space-y-6">
-      <div className="relative overflow-hidden rounded-[2.2rem] border border-[#d5c18b] bg-[linear-gradient(135deg,#fffaf0_0%,#f5edd9_55%,#edf2e8_100%)] p-6 shadow-xl shadow-[#173f2d]/10 sm:p-8">
-        <div className="pointer-events-none absolute -right-16 -top-20 h-56 w-56 rounded-full border border-[#b89546]/20" />
-        <div className="pointer-events-none absolute -bottom-20 left-10 h-44 w-44 rounded-full bg-[#bfd0bc]/20 blur-3xl" />
-        <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div className="max-w-2xl">
-            <div className="text-xs font-semibold tracking-[0.18em] text-[#9a7838]">LEITURA DO SEU MOMENTO</div>
-            <h2 className="mt-2 font-serif text-3xl leading-tight text-[#173c2c]">Sua leitura completa está disponível.</h2>
-            <p className="mt-3 text-sm leading-7 text-[#5d6d63]">
-              Esta é a leitura vinculada à sua anamnese e ao percurso individual preparado para este momento.
-            </p>
-          </div>
+      <div className="flex flex-wrap items-center justify-end gap-3">
           <button type="button" disabled={busy} onClick={async () => { setBusy(true); setMessage(''); try { const { downloadFullReportPdf } = await import('../pdf/fullReportPdf'); await downloadFullReportPdf(report); } catch { setMessage('Não foi possível preparar seu PDF. Tente novamente.'); } finally { setBusy(false); } }} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white shadow-md transition hover:bg-[#22533d]">
             <Download className="h-4 w-4" /> Baixar relatório completo
           </button>
-        </div>
       </div>
 
       <button type="button" disabled={busy} onClick={async () => { if (!publication) return; setBusy(true); setMessage(''); try { const userId = publication.userId || (await supabase.auth.getUser()).data.user?.id; if (!userId) throw new Error('Usuário não autenticado.'); const result = await requestFullReportEmail({ userId, intakeId, report, requestedBy: 'user' }); setMessage(result.message); } catch { setMessage('Não foi possível solicitar o envio agora. Tente novamente.'); } finally { setBusy(false); } }} className="rounded-full border border-[#cdbc91] px-5 py-3 text-sm font-semibold disabled:opacity-50">Receber por e-mail</button>

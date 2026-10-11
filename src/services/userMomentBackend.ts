@@ -215,7 +215,7 @@ export async function loadUserMoment(): Promise<UserMomentData> {
     automaticReport: automatic.report,
     intake: mapIntake(intake),
     entitlement,
-    result: { ...buildBasicUserResult(automatic.analysis, input), solfeggio: selectSolfeggioFrequency(automatic.analysis.relatorioEverton.eixosOrdenados), floral: complementary.florals, aromatherapy: complementary.aromatherapy, ethericCrystals: complementary.ethericCrystals, journeyMode: 'AUTOMATIC', publishedAt: mappedResult?.publishedAt || null },
+    result: { ...buildBasicUserResult(automatic.analysis, input), solfeggio: selectSolfeggioFrequency(automatic.analysis.relatorioEverton.eixosOrdenados), floral: complementary.florals.slice(0, 1), aromatherapy: complementary.aromatherapy, ethericCrystals: complementary.ethericCrystals, journeyMode: 'AUTOMATIC', publishedAt: mappedResult?.publishedAt || null },
     carePlan: mappedPlan,
     audio,
   };
