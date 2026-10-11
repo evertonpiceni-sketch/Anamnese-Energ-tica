@@ -10,10 +10,43 @@ const json = (status: number, body: unknown) =>
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  if (!supabaseUrl || !serviceRoleKey || !anonKey) {
+    return json(503, { error: "supabase_service_not_configured" });
+  }
+
   const expectedSecret = Deno.env.get("PAYMENT_WEBHOOK_SECRET");
   const providedSecret = req.headers.get("x-webhook-secret");
-  if (!expectedSecret) return json(503, { error: "webhook_secret_not_configured" });
-  if (!providedSecret || providedSecret !== expectedSecret) return json(401, { error: "invalid_webhook_secret" });
+  const authorization = req.headers.get("authorization") || "";
+  const bearerToken = authorization.toLowerCase().startsWith("bearer ")
+    ? authorization.slice(7).trim()
+    : "";
+
+  let authorizedAsAdmin = false;
+  if (bearerToken) {
+    const userClient = createClient(supabaseUrl, anonKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${bearerToken}` } },
+    });
+    const { data: userData } = await userClient.auth.getUser(bearerToken);
+    if (userData.user) {
+      const { data: profile } = await userClient
+        .from("profiles")
+        .select("role")
+        .eq("id", userData.user.id)
+        .maybeSingle();
+      authorizedAsAdmin = profile?.role === "admin";
+    }
+  }
+
+  const authorizedBySecret = Boolean(expectedSecret && providedSecret && providedSecret === expectedSecret);
+  if (!authorizedAsAdmin && !authorizedBySecret) {
+    return json(401, {
+      error: expectedSecret ? "unauthorized" : "webhook_secret_not_configured_or_admin_required",
+    });
+  }
 
   let payload: any;
   try {
@@ -22,8 +55,8 @@ Deno.serve(async (req: Request) => {
     return json(400, { error: "invalid_json" });
   }
 
-  const provider = String(payload?.provider || "").trim();
-  const eventId = String(payload?.event_id || "").trim();
+  const provider = String(payload?.provider || (authorizedAsAdmin ? "manual_admin" : "")).trim();
+  const eventId = String(payload?.event_id || (authorizedAsAdmin ? `manual-${crypto.randomUUID()}` : "")).trim();
   const intakeId = String(payload?.intake_id || "").trim();
   const amountCents = Number(payload?.amount_cents);
   const paymentReference = payload?.payment_reference ? String(payload.payment_reference) : null;
@@ -39,10 +72,6 @@ Deno.serve(async (req: Request) => {
     return json(422, { error: "unsupported_commercial_amount" });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!supabaseUrl || !serviceRoleKey) return json(503, { error: "supabase_service_not_configured" });
-
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
@@ -53,7 +82,10 @@ Deno.serve(async (req: Request) => {
     p_intake_id: intakeId,
     p_amount_cents: amountCents,
     p_payment_reference: paymentReference,
-    p_raw_payload: payload,
+    p_raw_payload: {
+      ...payload,
+      accepted_via: authorizedAsAdmin ? "admin_session" : "webhook_secret",
+    },
   });
 
   if (error) {
