@@ -5,13 +5,21 @@ import { listOwnPracticeLogs, RemotePracticeLog } from '../services/practiceBack
 export function PracticeHistory() {
   const [logs, setLogs] = useState<RemotePracticeLog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let active = true;
 
     listOwnPracticeLogs(10)
       .then(items => {
-        if (active) setLogs(items);
+        if (!active) return;
+        setLogs(items);
+        setLoadError(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLogs([]);
+        setLoadError(true);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -26,6 +34,14 @@ export function PracticeHistory() {
     return (
       <div className="rounded-2xl border border-[#e0d5bb] bg-white/55 p-4 text-sm leading-6 text-[#6f786f]">
         Carregando seu histórico de práticas...
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="rounded-2xl border border-[#e0d5bb] bg-white/55 p-4 text-sm leading-6 text-[#6f786f]">
+        Seu histórico não pôde ser carregado agora. Isso não altera a sua jornada nem os registros já salvos.
       </div>
     );
   }
@@ -52,8 +68,8 @@ export function PracticeHistory() {
               <div>
                 <div className="font-medium text-[#365441]">{log.audioTitle || 'Sessão exclusiva'}</div>
                 <div className="mt-1 flex items-center gap-1.5 text-xs text-[#7b817b]">
-                <Clock3 className="h-3.5 w-3.5" />
-                {new Date(log.startedAt).toLocaleString('pt-BR')}
+                  <Clock3 className="h-3.5 w-3.5" />
+                  {new Date(log.startedAt).toLocaleString('pt-BR')}
                 </div>
               </div>
               <div className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#57715f]">
