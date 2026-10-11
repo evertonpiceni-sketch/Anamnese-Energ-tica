@@ -41,38 +41,47 @@ export const CARE_PURPOSES: Record<EixoId, string> = {
 };
 
 const PRACTICES: Record<string, string> = {
-  q1_procrastinacao_inicio: 'Escolha uma tarefa pequena e faça apenas o primeiro movimento: abrir o documento, separar um objeto ou escrever uma linha. Você pode parar aí; começar não precisa significar dar conta de tudo.',
-  q2_mente_acelerada: 'Se os pensamentos estiverem ocupando muito espaço, escreva uma preocupação e um único próximo passo. O que não precisa ser resolvido hoje pode ficar para outro momento.',
-  q3_sensacao_ameaca_inseguranca: 'Acomode-se onde se sinta mais seguro, com os pés apoiados e os olhos abertos se preferir. Observe três coisas ao seu redor e permita que a respiração siga seu ritmo natural. Você pode interromper se ficar desconfortável.',
-  q4_cansaco_esgotamento: 'Escolha uma demanda que possa esperar e reserve uma pausa confortável. Ao terminar, perceba se precisa continuar descansando ou pedir ajuda; essa necessidade também merece ser respeitada.',
-  q5_autocobranca_insuficiencia: 'Lembre de um esforço que fez hoje, mesmo pequeno. Experimente falar consigo como falaria com alguém querido: reconhecer esse esforço não exige que tudo esteja resolvido.',
-  q6_engolir_emocoes: 'Se fizer sentido, complete em uma folha: “Hoje estou sentindo…” e “Agora preciso de…”. Você pode guardar isso para si ou compartilhar com alguém de confiança; não precisa justificar sua emoção.',
-  q7_dificuldade_dizer_nao: 'Pense em um limite pequeno que protegeria seu descanso. Você pode ensaiar uma frase simples, como “Hoje não consigo; preciso de um tempo”, antes de decidir se deseja comunicá-la.',
-  q8_dificuldade_receber: 'Pense em uma ajuda concreta que seria confortável aceitar: uma conversa, companhia ou apoio em uma tarefa. Receber um pouco de cuidado também pode ser um primeiro passo.',
-  q9_sensibilidade_ambientes: 'Depois de um encontro que exija muito de você, reserve alguns minutos em um lugar mais tranquilo. Perceba se silêncio, distância ou companhia ajudam; não é preciso atribuir o desgaste a outra pessoa.',
-  q10_repeticao_ciclos: 'Escolha uma situação que se repete e anote o que acontece antes e como costuma responder. Experimente imaginar uma alternativa pequena; perceber o ciclo já oferece um ponto de partida.',
-  q11_desconexao_corpo_prazer: 'Escolha algo simples e confortável: sentir o apoio da cadeira, ouvir uma música querida ou descansar perto de uma janela. Observe a experiência sem exigir prazer ou entusiasmo; estar presente já pode bastar hoje.',
-  q12_trava_expressao_criatividade: 'Dê dois minutos a uma ideia, desenho ou frase, sem corrigir o resultado. Essa expressão pode ficar só com você; não precisa ser bonita ou útil para ter espaço.',
-  q13_inseguranca_material_prosperidade: 'Escolha uma preocupação prática e separe o que depende de você do que precisa de apoio. Um passo possível pode ser organizar uma informação ou pedir orientação, em vez de resolver tudo hoje.',
-  q14_falta_direcao_proposito: 'Pergunte a si: “O que faria este dia um pouco mais próximo do que importa para mim?”. Escolha uma ação pequena, sem precisar decidir agora todo o seu futuro.',
-  q15_desconexao_espiritual: 'Se desejar, se aproxime de uma referência que já tenha significado para você: uma oração, a natureza, o silêncio ou uma pessoa querida. Você não precisa forçar fé ou uma sensação de conexão.',
-  q16_dificuldade_desapegar: 'Escreva o que gostaria de deixar mais leve e o que ainda precisa ser acolhido antes disso. Não é necessário tomar uma decisão ou encerrar uma relação durante esta pausa.',
-  q17_desejo_recomeco: 'Imagine um começo pequeno o suficiente para caber nesta semana. Anote qual apoio ajudaria você a se aproximar dele; um novo ciclo pode começar com preparação, não com uma grande virada.',
-  q18_sensacao_fragmentacao: 'Pergunte com calma: “O que estou pensando? O que estou sentindo? Do que meu corpo precisa agora?”. Escolha um gesto que respeite essas respostas, sem exigir que tudo se alinhe de imediato.',
-  q19_tensao_corporal_cronica: 'Ajuste sua posição para buscar conforto, sem forçar alongamentos. Perceba onde a tensão está e se o apoio da cadeira ou de uma almofada ajuda. Se houver dor persistente, procure avaliação para esse cuidado.',
-  q20_conflitos_relacionamento: 'Pense em uma conversa que gostaria de ter e escreva primeiro o que sente e precisa. Você pode escolher quando conversar e com quem se sente seguro; não precisa resolver o conflito hoje.',
+  q1_procrastinacao_inicio: 'Escolha algo pequeno que esteja esperando por você. Faça apenas o começo — abrir, separar, escrever uma linha. Depois disso, você pode parar. Hoje, começar já é suficiente.',
+  q2_mente_acelerada: 'Pegue uma folha e escreva apenas uma preocupação que esteja ocupando muito espaço. Ao lado, anote um único passo possível. O restante pode esperar; você não precisa resolver tudo hoje.',
+  q3_sensacao_ameaca_inseguranca: 'Procure um lugar em que seu corpo consiga descansar um pouco. Apoie os pés ou as costas, mantenha os olhos abertos se isso trouxer mais conforto e perceba três coisas ao seu redor. Deixe a respiração acontecer sozinha. Por alguns minutos, você não precisa antecipar nada.',
+  q4_cansaco_esgotamento: 'Escolha uma coisa que possa esperar e ofereça esse tempo ao seu descanso. Ao terminar, pergunte apenas: “o que meu corpo precisa agora?”. Continuar parado, beber água, pedir ajuda ou seguir devagar também são respostas válidas.',
+  q5_autocobranca_insuficiencia: 'Lembre de algo que você conseguiu sustentar hoje, mesmo que pareça pequeno. Fale consigo com a mesma gentileza que teria com alguém querido. Seu esforço também merece ser visto.',
+  q6_engolir_emocoes: 'Complete, sem se corrigir: “Hoje eu estou sentindo...” e “Neste momento, eu preciso de...”. Você pode guardar isso para si. Dar nome ao que sente já pode ser uma forma de se acompanhar.',
+  q7_dificuldade_dizer_nao: 'Pense em um limite pequeno que protegeria um pouco mais seu espaço. Experimente dizer em voz baixa: “Hoje eu preciso de um tempo”. Não é preciso tomar nenhuma decisão agora; apenas reconheça que essa necessidade existe.',
+  q8_dificuldade_receber: 'Pense em um cuidado pequeno que seria confortável receber hoje: companhia, silêncio, ajuda em uma tarefa ou uma mensagem. Permitir que algo chegue até você também faz parte do cuidado.',
+  q9_sensibilidade_ambientes: 'Depois de um encontro ou ambiente que tenha exigido muito de você, escolha alguns minutos de recomposição. Observe se seu corpo pede silêncio, distância, água, descanso ou companhia. Apenas escute essa necessidade.',
+  q10_repeticao_ciclos: 'Escolha uma situação que costuma se repetir. Em vez de procurar uma solução completa, pergunte: “o que eu gostaria de fazer um pouco diferente da próxima vez?”. Uma pequena mudança já abre espaço para outra experiência.',
+  q11_desconexao_corpo_prazer: 'Escolha uma sensação simples e confortável: o apoio da cadeira, a temperatura do ar, uma música querida ou alguns minutos perto de uma janela. Não procure sentir prazer. Apenas permita que o corpo volte a participar do momento.',
+  q12_trava_expressao_criatividade: 'Dê dois minutos a uma ideia sem tentar deixá-la bonita, certa ou útil. Pode ser uma frase, um desenho ou uma palavra. Hoje, sua expressão não precisa chegar a lugar nenhum.',
+  q13_inseguranca_material_prosperidade: 'Escolha uma preocupação prática e separe duas coisas: o que depende de você agora e o que precisa de tempo ou apoio. Faça apenas o próximo passo possível. O restante não precisa caber todo neste dia.',
+  q14_falta_direcao_proposito: 'Pergunte a si mesmo: “o que deixaria este dia um pouco mais próximo do que importa para mim?”. Escolha uma ação pequena. Você não precisa encontrar hoje uma resposta para toda a sua vida.',
+  q15_desconexao_espiritual: 'Aproxime-se de algo que já tenha sido fonte de amparo para você: uma oração, a natureza, o silêncio, uma lembrança ou uma presença querida. Não tente sentir fé. Apenas permita esse encontro.',
+  q16_dificuldade_desapegar: 'Escreva duas frases: “o que está pesado para mim” e “o que ainda precisa ser acolhido antes de eu soltar”. Não é necessário encerrar nada hoje. Às vezes, compreender vem antes de deixar ir.',
+  q17_desejo_recomeco: 'Imagine um começo pequeno o suficiente para caber nesta semana. Em vez de pensar na mudança inteira, escolha apenas aquilo que prepararia o primeiro passo.',
+  q18_sensacao_fragmentacao: 'Pergunte com calma: “o que estou pensando?”, “o que estou sentindo?” e “do que meu corpo precisa agora?”. Não tente fazer as três respostas coincidirem. Apenas reconheça cada uma delas.',
+  q19_tensao_corporal_cronica: 'Ajuste sua posição até encontrar um pouco mais de conforto. Observe onde seu corpo está apoiado e permita que essa região receba o peso por você. Não force alongamentos. Se houver dor persistente, procure avaliação adequada.',
+  q20_conflitos_relacionamento: 'Antes de pensar no que precisa resolver com alguém, escreva o que você sente e o que gostaria de preservar em si nessa relação. A conversa pode esperar até que você se sinta mais preparado.',
 };
 
 export function dailyInvitation(related: Evidence[], axis: EixoId, finalDay: boolean) {
-  if (finalDay) return 'Hoje, olhe com carinho para os dias vividos: o que trouxe algum conforto, o que permaneceu difícil e que apoio você gostaria de continuar recebendo? Se quiser, anote uma percepção para compartilhar com Everton. Você não precisa terminar a jornada se sentindo de uma maneira determinada.';
-  return (related[0] && PRACTICES[related[0].questionId]) || `Reserve uma pausa para ${CARE_PURPOSES[axis]}. Ao terminar, perceba do que precisa agora, sem avaliar esta experiência como sucesso ou fracasso.`;
+  if (finalDay) return 'Hoje, apenas olhe para o caminho vivido. O que trouxe algum conforto? O que ainda ficou difícil? O que você gostaria de continuar recebendo como cuidado? Não é preciso terminar a jornada de uma determinada forma.';
+  return (related[0] && PRACTICES[related[0].questionId]) || `Reserve alguns minutos para ${CARE_PURPOSES[axis]}. Depois, apenas perceba como você está e do que precisa agora. Não existe certo ou errado nesta pausa.`;
 }
 
 export function contextualWelcome(related: Evidence[], axis: EixoId, finalDay: boolean) {
-  if (finalDay) return 'Este dia é um espaço para reunir o cuidado recebido e escutar você novamente. As necessidades que trouxe continuam importantes, mesmo quando uma mudança ainda não foi percebida.';
-  if (!related.length) return `Hoje, o convite é ${CARE_PURPOSES[axis]}. Vamos abrir esse espaço no seu ritmo.`;
+  if (finalDay) return 'Hoje não é um dia de concluir ou medir resultados. É um espaço para olhar com carinho para o caminho vivido e perceber o que você deseja levar adiante.';
+  if (!related.length) return `Hoje vamos abrir um espaço para ${CARE_PURPOSES[axis]}. Sem pressa, sem cobrança e do jeito que for possível para você.`;
   const item = related[0];
-  const experience = item.observation.split('. ')[0].replace(/\.$/, '');
-  const additional = related[1]?.observation.split('. ')[0].replace(/\.$/, '');
-  return `${item.level === 2 ? 'Em alguns momentos, ' + experience.charAt(0).toLowerCase() + experience.slice(1) : experience}.${additional ? ` Também merece espaço o que contou sobre ${related[1].name}.` : ''}`;
+  const additional = related[1];
+  const first = item.name === 'estado de alerta e insegurança'
+    ? 'Você contou que, em alguns momentos, parece difícil relaxar por completo e confiar que pode simplesmente descansar.'
+    : item.name === 'mente acelerada'
+      ? 'Você contou que sua mente continua trabalhando mesmo quando uma parte sua já gostaria de descansar.'
+      : item.name === 'cansaço e esgotamento'
+        ? 'Você contou que o cansaço tem ocupado mais espaço do que gostaria e que nem sempre uma pausa parece suficiente para recuperar sua energia.'
+        : item.name === 'autocobrança e sensação de insuficiência'
+          ? 'Você contou que, muitas vezes, aquilo que faz parece não ser suficiente aos seus próprios olhos.'
+          : `Você trouxe algo importante sobre ${item.name}. Hoje não vamos tentar resolver isso de uma vez; vamos apenas oferecer um pouco mais de espaço e cuidado para esse movimento.`;
+  const second = additional ? ` Também apareceu ${additional.name}, e por isso este dia foi pensado para acolher essas duas experiências sem transformar nenhuma delas em cobrança.` : '';
+  return `${first}${second} Antes de qualquer mudança, a proposta de hoje é que você possa se sentir um pouco mais acompanhado dentro do que está vivendo.`;
 }
