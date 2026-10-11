@@ -58,8 +58,23 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
     const related = evidence.filter(item => item.level >= 2 && (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[target] || 0) > 0).sort((a, b) => ((PERGUNTAS_ANAMNESE.find(question => question.id === b.questionId)?.pesosEixos[target] || 0) * b.level) - ((PERGUNTAS_ANAMNESE.find(question => question.id === a.questionId)?.pesosEixos[target] || 0) * a.level)).slice(0, 2);
     const reason = contextualWelcome(related, target, day.day === days);
     const dayResources: PatientCareResource[] = [
-      ...support.ethericCrystals.slice(0, 1).map(item => ({ id: item.id, category: 'Cristal etérico' as const, name: item.nome, explanation: resourceDescription(item.descricao), guidance: 'Referência energética utilizada na composição; você não precisa adquirir pedras físicas.', source: item.fonteDocumental || '' })),
-      ...(bath ? [{ id: bath.id, category: 'Banho energético' as const, name: bath.nome, explanation: bath.descricaoPublica, guidance: bathReceivingGuidance(bath), programmingInstructions: bathProgrammingInstructions(bath), source: bath.fonteDocumental }] : []),
+      ...support.ethericCrystals.slice(0, 1).map(item => ({
+        id: item.id,
+        category: 'Cristal etérico' as const,
+        name: item.nome,
+        explanation: `Como apoio ao cuidado deste dia, ${item.nome} acompanha a intenção de ${CARE_PURPOSES[target]}. ${resourceDescription(item.descricao)} Ele funciona aqui como uma referência energética da composição; você não precisa adquirir uma pedra física nem sentir algo específico para que a prática faça sentido.`,
+        guidance: 'Você pode apenas deixar essa referência acompanhar a sessão. Não é necessário segurar, comprar ou visualizar um cristal físico.',
+        source: item.fonteDocumental || ''
+      })),
+      ...(bath ? [{
+        id: bath.id,
+        category: 'Banho energético' as const,
+        name: bath.nome,
+        explanation: `${bath.descricaoPublica} Neste protocolo, esse “banho” não é feito com água ou ervas: ele é uma prática de visualização e recepção simbólica de luz, integrada ao mesmo cuidado do dia.`,
+        guidance: bathReceivingGuidance(bath),
+        programmingInstructions: bathProgrammingInstructions(bath),
+        source: bath.fonteDocumental
+      }] : []),
       ...journeyResources,
     ];
     dayResources.forEach(resource => { if (!resources.some(item => item.id === resource.id)) resources.push(resource); });
@@ -69,8 +84,8 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
       const compatibleAxes = documented?.eixosCompatíveis || Object.keys(system.compatibilidadeEixos) as EixoId[];
       const selectedAxis = compatibleAxes.includes(target) ? target : axes.find(axis => compatibleAxes.includes(axis.eixoId))?.eixoId || 'integracao';
       const explanation = name === 'Original Reiki'
-        ? `É a base contínua de sustentação da jornada. Neste dia, acompanha o acolhimento que você acabou de ler, para que possa receber cuidado sem precisar produzir uma sensação ou um resultado.`
-        : `Foi escolhido para ${CARE_PURPOSES[selectedAxis]}. Junto do Reiki, essa intenção se aproxima do que hoje pede atenção em você, respeitando o tempo de acolher antes de mudar.`;
+        ? `O Original Reiki permanece como a base tranquila que sustenta este dia. Ele acompanha o que você acabou de ler sem exigir mudança, desempenho ou uma sensação específica; a proposta é que você possa receber cuidado no seu próprio ritmo.`
+        : `${name} entra neste dia porque sua proposta se aproxima da necessidade de ${CARE_PURPOSES[selectedAxis]}. Junto do Reiki, ele não aparece como uma técnica isolada, mas como parte do mesmo movimento de cuidado: primeiro acolher o que está presente, depois abrir espaço para uma mudança possível.`;
       return { name, explanation, source: documented?.fonteDocumental || system.origemDocumental.idDocumento };
     });
     return { ...day, intention: CARE_INTENTIONS[target], reason, invitation: dailyInvitation(related, target, day.day === days), resources: dayResources, energyDetails };
@@ -78,7 +93,7 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
   const error = validateDailyEnergySchedule(dailyEnergySchedule, days, systems.flatMap(documentedEnergyNames));
   if (error) throw new Error(`Não foi possível compor o percurso individual: ${error}`);
   const report = buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: days, dailyEnergySchedule });
-  const labels = { 'Cristal etérico': 'Cristais etéricos', Floral: 'Florais', Aromaterapia: 'Aromaterapia', 'Banho energético': 'Banho de apoio', Solfeggio: 'Frequência de apoio' };
+  const labels = { 'Cristal etérico': 'Cristais etéricos', Floral: 'Florais', Aromaterapia: 'Aromaterapia', 'Banho energético': 'Banho de luz', Solfeggio: 'Frequência de apoio' };
   const resourceParagraphs = [...new Set(resources.map(item => item.category))].map(category => {
     const items = resources.filter(item => item.category === category);
     return `${labels[category]} — ${items.map(item => item.name).join(', ')}: ${items[0].explanation}`;
