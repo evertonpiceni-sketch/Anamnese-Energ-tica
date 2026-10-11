@@ -81,7 +81,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
   if (showPrivacy) return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
 
   return (
-    <div className="min-h-screen bg-[#f6f1e6] text-[#173c2c]">
+    <div className="min-h-screen text-[#173c2c]">
       <header className="sticky top-0 z-30 border-b border-[#d9caa8]/70 bg-[#fffaf0]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">

@@ -7,6 +7,7 @@ import { PasswordSetupScreen } from './components/PasswordSetupScreen';
 import { AuthScreen } from './components/AuthScreen';
 import { UserPaymentPanel } from './components/UserPaymentPanel';
 import { supabase } from './lib/supabase';
+import { verifyPasswordLink } from './lib/authRecovery';
 
 type AppRole = 'user' | 'admin';
 
@@ -25,6 +26,8 @@ export default function App() {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
+  const [linkError, setLinkError] = useState('');
+  const [linkVerifying, setLinkVerifying] = useState(() => new URLSearchParams(window.location.search).has('token_hash'));
   const [passwordSetup, setPasswordSetup] = useState(() => new URLSearchParams(window.location.search).get('setup') === 'password' || ['recovery', 'invite'].includes(new URLSearchParams(window.location.hash.slice(1)).get('type') || ''));
 
   useEffect(() => {
@@ -70,7 +73,12 @@ export default function App() {
       }
     }
 
-    supabase.auth.getSession().then(({ data, error }) => { if (revision === 0) { if (error) setLoading(false); else void resolveSession(data.session); } }).catch(() => { if (active && revision === 0) setLoading(false); });
+    const initialUrl = new URL(window.location.href);
+    if (initialUrl.searchParams.has('token_hash')) {
+      void verifyPasswordLink(initialUrl.href).then(nextSession => { if (active) { setPasswordSetup(true); setLinkVerifying(false); void resolveSession(nextSession); } }).catch(() => { if (active) { setLinkVerifying(false); setLinkError('O link expirou ou já foi utilizado. Solicite um novo link em “Esqueci minha senha”.'); setLoading(false); } });
+    } else {
+      supabase.auth.getSession().then(({ data, error }) => { if (revision === 0) { if (error) setLoading(false); else void resolveSession(data.session); } }).catch(() => { if (active && revision === 0) setLoading(false); });
+    }
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
       if (event === 'PASSWORD_RECOVERY') setPasswordSetup(true);
@@ -88,9 +96,9 @@ export default function App() {
     await supabase.auth.signOut();
   }
 
-  if (session && passwordSetup) return <PasswordSetupScreen onComplete={() => { setPasswordSetup(false); const url = new URL(window.location.href); url.searchParams.delete('setup'); url.hash = ''; window.history.replaceState({}, '', url); }} />;
+  if (!linkVerifying && session && passwordSetup) return <PasswordSetupScreen onComplete={() => { setPasswordSetup(false); const url = new URL(window.location.href); url.searchParams.delete('setup'); url.hash = ''; window.history.replaceState({}, '', url); }} />;
 
-  if (loading) {
+  if (loading || linkVerifying) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f6f1e6] px-5 text-[#173c2c]">
         <div className="text-center">
@@ -106,7 +114,7 @@ export default function App() {
   }
 
   if (!session) {
-    return <AuthScreen />;
+    return <AuthScreen initialError={linkError} />;
   }
 
   if (profileError || !role) {
