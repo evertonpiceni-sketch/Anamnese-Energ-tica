@@ -1,26 +1,21 @@
 import type { AnamneseInput, EixoId } from '../types';
 import { executarAnaliseIntegrativa } from '../engine/analysisEngine';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
-import { EIXOS_DEFINITIONS } from '../data/axes';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 import { collectAnswerEvidence } from '../result/answerEvidence';
 import { buildFullReportNarrative } from '../result/fullReportNarrative';
 import { selectComplementaryCare } from './complementaryCatalogs';
 import { selectSolfeggioFrequency } from './solfeggioCatalog';
 import { selectBathSupport } from './bathCatalog';
-import { proposeDailyEnergySchedule, validateDailyEnergySchedule, documentedEnergyNames } from './dailyEnergySchedule';
+import { CARE_INTENTIONS, CARE_PURPOSES, contextualWelcome, dailyInvitation } from './patientCareNarrative';
+import { bathReceivingGuidance, bathProgrammingInstructions } from './bathCatalog';
+import { proposeDailyEnergySchedule, validateDailyEnergySchedule, documentedEnergyNames, documentedEnergyResource, isDocumentedCareSystem } from './dailyEnergySchedule';
 
 const resourceDescription = (text: string) => text
   .replace(/^Material de formação relaciona \S+ a /, 'Escolhido como apoio para ')
   .replace(/^Material de formação descreve \S+ em contexto de /, 'Aroma de apoio para ')
   .replace(/ O app limita.*$/, '')
-  .replace(/^(Usado|Usada|Aparece) (no bloco inicial de|no bloco de|no bloco final de|em blocos de) /, 'Referência energética para ');
-const careAim: Partial<Record<EixoId, string>> = {
-  seguranca: 'Encontrar segurança e chão', corpo: 'Retomar contato com o corpo', emocional: 'Dar espaço ao que você sente',
-  mente: 'Abrir espaço para clareza', autovalor: 'Reconhecer seu valor', movimento: 'Encontrar um primeiro passo possível',
-  vitalidade: 'Acolher sua disposição', receber: 'Permitir-se receber cuidado', integracao: 'Reunir o cuidado e perceber seu momento',
-  protecao: 'Cuidar dos seus limites', recomeco: 'Abrir espaço para recomeçar', proposito: 'Escutar o que faz sentido para você',
-};
+  .replace(/^(Usado|Usada|Aparece) (no bloco inicial de|no bloco de|no bloco final de|em blocos de) /, 'Este cristal etérico acompanha ');
 
 export interface PatientCareResource {
   id: string;
@@ -29,6 +24,7 @@ export interface PatientCareResource {
   explanation: string;
   guidance?: string;
   source: string;
+  programmingInstructions?: string[];
 }
 
 /** Select existing documented resources; use the therapist’s explicit floral guidance; never invent activation commands or audio files. */
@@ -37,15 +33,16 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
   const analysis = executarAnaliseIntegrativa(intake);
   const axes = analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0);
   const evidence = collectAnswerEvidence(intake, axes);
-  const systems = BIBLIOTECA_MESTRA.filter(system => system.status !== 'NAO_UTILIZAR' && system.catalogacaoTecnica === 'COMPLETA' && system.origemDocumental?.idDocumento);
+  const systems = BIBLIOTECA_MESTRA.filter(isDocumentedCareSystem);
   const highSensitivity = intake.sensibilidadeEnergetica === 'alta' || intake.sensibilidadeEnergetica === 'muito_alta';
-  const proposed = proposeDailyEnergySchedule({ days, systems, axes, highSensitivity });
+  const needsCompassionateSupport = evidence.some(item => item.level >= 2 && ['q2_mente_acelerada', 'q3_sensacao_ameaca_inseguranca', 'q6_engolir_emocoes', 'q8_dificuldade_receber', 'q20_conflitos_relacionamento'].includes(item.questionId));
+  const proposed = proposeDailyEnergySchedule({ days, systems, axes, highSensitivity, supportiveSystemIds: needsCompassionateSupport ? ['karuna_ki'] : [] });
   const journeyAxes = axes.length ? axes : [{ eixoId: 'integracao' as EixoId, percentual: 100 }];
   const journeySupport = selectComplementaryCare(journeyAxes);
   const frequency = selectSolfeggioFrequency(journeyAxes);
   const journeyReason = (compatibleAxes: EixoId[]) => {
     const related = evidence.filter(item => item.level >= 2 && compatibleAxes.some(axis => (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[axis] || 0) > 0)).slice(0, 2);
-    return related.length ? `A escolha considera ${related.map(item => item.name).join(' e ')}, que apareceram nas suas respostas.` : 'A escolha acompanha a intenção de integração do seu percurso.';
+    return related.length ? `Essa escolha se aproxima do que você contou: ${related[0].observation.split('. ')[0].toLowerCase()}. A intenção é oferecer um apoio constante, enquanto damos espaço às suas necessidades ao longo dos dias.` : 'A intenção é acompanhar seu momento com um apoio constante, enquanto você percebe o que faz sentido para si.';
   };
   const journeyResources: PatientCareResource[] = [
     ...journeySupport.florals.filter(item => item.fonteDocumental).slice(0, 1).map(item => ({ id: item.id, category: 'Floral' as const, name: item.nome, explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`, guidance: `Orientação de Everton Piceni para o floral deste percurso: 10 gotas, duas vezes ao dia, durante os ${days} dias.`, source: item.fonteDocumental || '' })),
@@ -57,25 +54,26 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
     const target = day.focusAxis || 'integracao';
     const dayAxes = [{ eixoId: target, percentual: 100 }, ...axes.filter(axis => axis.eixoId !== target).map(axis => ({ eixoId: axis.eixoId, percentual: axis.percentual / 4 }))];
     const support = selectComplementaryCare(dayAxes);
-    const bath = selectBathSupport(dayAxes);
-    const related = evidence.filter(item => item.level >= 2 && (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[target] || 0) > 0).slice(0, 2);
-    const reason = related.length ? `A escolha deste dia considera ${related.map(item => item.name).join(' e ')}, presentes no que você compartilhou.` : target === 'integracao' ? 'Este dia reúne as intenções dos dias anteriores e abre espaço para perceber como você está.' : 'Este dia prepara um espaço tranquilo para receber o cuidado e acompanhar suas próprias percepções.';
+    const bath = selectBathSupport(dayAxes, { stabilization: day.day <= Math.ceil(days / 3) && (highSensitivity || evidence.some(item => item.level >= 3 && ['q3_sensacao_ameaca_inseguranca', 'q4_cansaco_esgotamento'].includes(item.questionId))) });
+    const related = evidence.filter(item => item.level >= 2 && (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[target] || 0) > 0).sort((a, b) => ((PERGUNTAS_ANAMNESE.find(question => question.id === b.questionId)?.pesosEixos[target] || 0) * b.level) - ((PERGUNTAS_ANAMNESE.find(question => question.id === a.questionId)?.pesosEixos[target] || 0) * a.level)).slice(0, 2);
+    const reason = contextualWelcome(related, target, day.day === days);
     const dayResources: PatientCareResource[] = [
       ...support.ethericCrystals.slice(0, 1).map(item => ({ id: item.id, category: 'Cristal etérico' as const, name: item.nome, explanation: resourceDescription(item.descricao), guidance: 'Referência energética utilizada na composição; você não precisa adquirir pedras físicas.', source: item.fonteDocumental || '' })),
-      ...(bath ? [{ id: bath.id, category: 'Banho energético' as const, name: bath.nome, explanation: bath.descricaoPublica, guidance: 'O Banho do Templo será integrado à programação energética feita pelo terapeuta e recebido durante a sessão de escuta. Não exige banho de água nem preparo de ervas.', source: bath.fonteDocumental }] : []),
+      ...(bath ? [{ id: bath.id, category: 'Banho energético' as const, name: bath.nome, explanation: bath.descricaoPublica, guidance: bathReceivingGuidance(bath), programmingInstructions: bathProgrammingInstructions(bath), source: bath.fonteDocumental }] : []),
       ...journeyResources,
     ];
     dayResources.forEach(resource => { if (!resources.some(item => item.id === resource.id)) resources.push(resource); });
     const energyDetails = day.energyNames.map(name => {
       const system = systems.find(item => documentedEnergyNames(item).includes(name))!;
-      const documented = system.recursosInternos.find(item => item.tipo === 'energia' && item.nome === name);
+      const documented = documentedEnergyResource(system, name);
       const compatibleAxes = documented?.eixosCompatíveis || Object.keys(system.compatibilidadeEixos) as EixoId[];
       const selectedAxis = compatibleAxes.includes(target) ? target : axes.find(axis => compatibleAxes.includes(axis.eixoId))?.eixoId || 'integracao';
-      const aim = EIXOS_DEFINITIONS[selectedAxis]?.nome.toLowerCase() || 'integração';
-      const explanation = name === 'Original Reiki' ? 'É a base de sustentação do percurso, escolhida para acompanhar os outros recursos com presença e integração.' : `Entra neste dia como apoio energético para ${aim}, uma intenção relacionada ao que suas respostas mostram. Pertence ao sistema ${system.nome}.`;
+      const explanation = name === 'Original Reiki'
+        ? `É a base contínua de sustentação da jornada. Neste dia, acompanha o acolhimento que você acabou de ler, para que possa receber cuidado sem precisar produzir uma sensação ou um resultado.`
+        : `Foi escolhido para ${CARE_PURPOSES[selectedAxis]}. Junto do Reiki, essa intenção se aproxima do que hoje pede atenção em você, respeitando o tempo de acolher antes de mudar.`;
       return { name, explanation, source: documented?.fonteDocumental || system.origemDocumental.idDocumento };
     });
-    return { ...day, intention: careAim[target] || EIXOS_DEFINITIONS[target].nome, reason, resources: dayResources, energyDetails };
+    return { ...day, intention: CARE_INTENTIONS[target], reason, invitation: dailyInvitation(related, target, day.day === days), resources: dayResources, energyDetails };
   });
   const error = validateDailyEnergySchedule(dailyEnergySchedule, days, systems.flatMap(documentedEnergyNames));
   if (error) throw new Error(`Não foi possível compor o percurso individual: ${error}`);

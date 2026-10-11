@@ -44,13 +44,15 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
   const wish = intention ? (/^cura[.!\s]*$/i.test(intention) ? 'Seu desejo de se sentir melhor merece acolhimento e um cuidado atento ao que você está vivendo.' : `A intenção que você trouxe — “${intention}” — nos ajuda a manter perto aquilo que importa para você.`) : '';
   const diagnosis = [
 
-    ...leading.slice(0, 3).map(item => item.level === 2 ? `Em alguns momentos, ${item.observation.charAt(0).toLowerCase()}${item.observation.slice(1)}` : item.observation),
+    ...leading.map(item => item.level === 2 ? `Em alguns momentos, ${item.observation.charAt(0).toLowerCase()}${item.observation.slice(1)}` : item.observation),
     ...(need ? [`Você trouxe um pedido importante: “${need}”. Vamos acolhê-lo como parte do seu caminho, com atenção ao que você precisa e ao que é possível agora.`] : []),
     ...(challenge ? [`Ao compartilhar “${challenge}”, você nos permite olhar mais de perto para o que está vivendo. Esse relato merece escuta e cuidado, no seu tempo.`] : []),
     ...(strengthIsLoss ? [`Você também compartilhou: “${strength}”. Há espaço para acolher essa experiência e perceber que apoio faria sentido para você agora.`] : []),
     ...(!present.length ? ['Seu cuidado pode partir do que você deseja cultivar no cotidiano. Há espaço para conversar sobre suas necessidades e encontrar um caminho que faça sentido para você.'] : []),
   ];
   const interactions: string[] = [];
+  if ((level('q3_sensacao_ameaca_inseguranca') ?? 0) >= 3 && (level('q4_cansaco_esgotamento') ?? 0) >= 3) interactions.push('O estado de alerta e o esgotamento aparecem juntos nas suas respostas. Isso nos convida a cuidar de duas necessidades ao mesmo tempo: encontrar mais segurança para pausar e respeitar uma energia que já está reduzida. A sequência começa por sustentação e acolhimento; movimento e novas demandas só entram de forma gradual. Não precisamos transformar o tratamento em mais uma obrigação para você.');
+
   if ((level('q2_mente_acelerada') ?? 0) >= 3 && (level('q1_procrastinacao_inicio') ?? 0) >= 3) interactions.push('Quando a mente fica muito ocupada, dar o primeiro passo pode parecer ainda mais difícil. Esses dois movimentos aparecem no que você contou. Podemos cuidar deles juntos, criando espaço para uma prioridade de cada vez.');
   if ((level('q4_cansaco_esgotamento') ?? 0) >= 3 && (level('q5_autocobranca_insuficiencia') ?? 0) >= 3) interactions.push('O cansaço e a cobrança interna também se encontram no seu relato. Talvez seja delicado permitir uma pausa quando sente que ainda precisa fazer mais. O cuidado pode começar justamente aí: respeitar sua energia disponível e tornar o descanso um espaço de acolhimento.');
   if ((level('q7_dificuldade_dizer_nao') ?? 0) >= 3 && (level('q8_dificuldade_receber') ?? 0) >= 3) interactions.push('Colocar limites e permitir-se receber cuidado parecem ser movimentos delicados para você. Podemos abrir espaço para reconhecer o que consegue oferecer e o apoio que gostaria de aceitar, sem culpa ou pressa.');
@@ -62,8 +64,11 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
   const direction = leading.length
     ? `Vamos começar por ${join(leading.slice(0, 2).map(item => item.intention))}. ${needsStabilization ? 'O ritmo será gentil, dando lugar à segurança e ao descanso antes de acrescentar novas demandas.' : 'Cada movimento pode ser pequeno e respeitar o que você consegue viver agora.'}`
     : 'Vamos encontrar com você uma direção que se aproxime do seu pedido e do que deseja cultivar no cotidiano.';
-  const care = [direction];
+  const care = [direction,
+    leading.length ? 'Para começar, escolha um momento em que possa se acomodar com conforto e sem interrupções. Use os convites de cada dia como possibilidades, não como tarefas obrigatórias. Depois da pausa, perceba uma necessidade concreta: continuar descansando, conversar com alguém, diminuir uma demanda ou dar um passo pequeno. Essa percepção nos ajuda a ajustar o cuidado ao que você vive.' : 'Você pode reservar uma pausa confortável e perceber qual necessidade deseja acolher primeiro. Seus relatos ao longo do percurso ajudam a ajustar o cuidado.',
+  ];
   if (wish) care.push(wish);
+  if (need && /depress[aã]o|ansiedade/i.test(need) && !/(não|nao|sem)\s+(tenho\s+|sinto\s+)?(depress[aã]o|ansiedade)/i.test(need)) care.push('O pedido de cuidado com depressão ou ansiedade que você trouxe merece uma escuta próxima. Se esse sofrimento estiver dificultando seu sono, sua rotina ou sua vontade de viver o dia, procure também apoio psicológico ou médico; você pode receber esse acompanhamento junto do cuidado integrativo. Conte a alguém de confiança como está e compartilhe com Everton o que precisa ser ajustado. Não é preciso atravessar esses momentos sem companhia.');
   if (intake.sensibilidadeEnergetica === 'alta' || intake.sensibilidadeEnergetica === 'muito_alta') care.push('A sensibilidade que você compartilhou será respeitada. O cuidado será conduzido com atenção ao seu conforto e ao ritmo que você precisa.');
   if (composition?.solfeggio) care.push(`Frequência de apoio — ${composition.solfeggio.hz} Hz: a composição inclui este recurso com a intenção de ${composition.solfeggio.intencaoProjeto.toLowerCase()}.`);
   if (composition?.ethericCrystals.length) care.push(`Cristais etéricos — ${join(composition.ethericCrystals.map(item => item.nome))}: recursos da composição revisada, sem necessidade de adquirir pedras físicas.`);

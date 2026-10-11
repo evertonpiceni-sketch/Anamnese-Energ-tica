@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 const AdminApp = lazy(() => import('./AdminApp'));
 const AdminCommercialPaymentPanel = lazy(() => import('./components/AdminCommercialPaymentPanel').then(module => ({ default: module.AdminCommercialPaymentPanel })));
 import UserAnamneseApp from './components/UserAnamneseApp';
+import { PasswordSetupScreen } from './components/PasswordSetupScreen';
 import { AuthScreen } from './components/AuthScreen';
 import { UserPaymentPanel } from './components/UserPaymentPanel';
 import { supabase } from './lib/supabase';
@@ -24,6 +25,7 @@ export default function App() {
   const [role, setRole] = useState<AppRole | null>(null);
   const [loading, setLoading] = useState(true);
   const [profileError, setProfileError] = useState('');
+  const [passwordSetup, setPasswordSetup] = useState(() => new URLSearchParams(window.location.search).get('setup') === 'password' || ['recovery', 'invite'].includes(new URLSearchParams(window.location.hash.slice(1)).get('type') || ''));
 
   useEffect(() => {
     let active = true;
@@ -70,7 +72,8 @@ export default function App() {
 
     supabase.auth.getSession().then(({ data, error }) => { if (revision === 0) { if (error) setLoading(false); else void resolveSession(data.session); } }).catch(() => { if (active && revision === 0) setLoading(false); });
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, nextSession) => {
+      if (event === 'PASSWORD_RECOVERY') setPasswordSetup(true);
       setTimeout(() => { if (active) void resolveSession(nextSession); }, 0);
     });
 
@@ -84,6 +87,8 @@ export default function App() {
     clearLegacySensitiveLocalData();
     await supabase.auth.signOut();
   }
+
+  if (session && passwordSetup) return <PasswordSetupScreen onComplete={() => { setPasswordSetup(false); const url = new URL(window.location.href); url.searchParams.delete('setup'); url.hash = ''; window.history.replaceState({}, '', url); }} />;
 
   if (loading) {
     return (

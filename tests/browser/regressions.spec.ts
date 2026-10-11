@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 
+declare global { interface Window { __recovery: Array<{ email: string; options: { redirectTo: string } }>; __passwordUpdates: number; } }
+
 async function render(page, component: string, props: object) {
   await page.goto('/');
   await page.evaluate(async ({ component, props }) => {
@@ -240,7 +242,7 @@ test('refreshing a legacy report changes the reading and preserves reviewed care
     const stored = { ...buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: 7, dailyEnergySchedule: schedule }), source: undefined, page2: { title: 'Diagnóstico da Anamnese', paragraphs: ['Texto genérico de outra pessoa.'] }, page4: { title: 'Cuidado', paragraphs: ['Direção do cuidado: caminho genérico.', 'Florais — Recurso aprovado.'] } };
     return { fresh: refreshReportReading(stored, intake, analysis), schedule };
   });
-  expect(result.fresh.source.generatorVersion).toBe('answers-v4');
+  expect(result.fresh.source.generatorVersion).toBe('answers-v5');
   expect(result.fresh.page2.paragraphs.join(' ')).not.toContain('Texto genérico');
   expect(result.fresh.page4.paragraphs).toContain('Florais — Recurso aprovado.');
   expect(result.fresh.dailyEnergySchedule).toEqual(result.schedule);
@@ -446,5 +448,86 @@ test('floral aroma and one Solfeggio remain fixed throughout the journey and ADM
   expect(result.script.every(day => day.lines.join('\n').includes('única frequência-base'))).toBe(true);
   await render(page, 'FullReportApprovedView', { report: result.reports[0] });
   await expect(page.getByRole('region', { name: 'Apoios de toda a jornada' })).toContainText('10 gotas, duas vezes ao dia');
-  await expect(page.getByRole('region', { name: 'Programação diária' })).toContainText('recebido durante a sessão de escuta');
+  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toContainText('recebido durante a sessão de escuta');
+});
+
+
+test('contextual care welcomes actual experiences, combines documented Karuna symbols and gives concrete bath instructions', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { PERGUNTAS_ANAMNESE } = await import(/* @vite-ignore */ String('/src/data/questions.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    const { buildEnergyProgrammingScript } = await import(/* @vite-ignore */ String('/src/care/energyProgrammingScript.ts'));
+    const base = { ...CASOS_DE_TESTE[0].dados, relatoLivreNecessidade: '', relatoLivreDesafios: '', relatoLivrePreservado: '', intencaoDeclarada: '', regioesCorporaisPercebidas: [], respostasObjetivas: Object.fromEntries(PERGUNTAS_ANAMNESE.map(q => [q.id, 0])) };
+    const anxious = buildAutomaticCare({ ...base, respostasObjetivas: { ...base.respostasObjetivas, q3_sensacao_ameaca_inseguranca: 4, q2_mente_acelerada: 4, q4_cansaco_esgotamento: 4 }, relatoLivreNecessidade: 'Depressão e ansiedade' }, 7).report;
+    const creative = buildAutomaticCare({ ...base, respostasObjetivas: { ...base.respostasObjetivas, q12_trava_expressao_criatividade: 3 } }, 7).report;
+    return { anxious, creative, script: buildEnergyProgrammingScript('Pessoa', anxious.dailyEnergySchedule) };
+  });
+  expect(result.anxious.page2.paragraphs.join(' ')).toContain('como se algo ruim pudesse acontecer');
+  expect(result.anxious.page2.paragraphs.join(' ')).toContain('inclusive ao acordar');
+  expect(result.creative.page2.paragraphs.join(' ')).not.toMatch(/esgotamento|estado de alerta|depressão/i);
+  expect(result.anxious.dailyEnergySchedule.some(day => day.energyNames.some(name => /^Karuna Ki · (Shanti|Rama|Harth)/.test(name)))).toBe(true);
+  expect(result.anxious.dailyEnergySchedule.some(day => day.energyNames.length >= 3)).toBe(true);
+  expect(result.anxious.dailyEnergySchedule.every(day => day.invitation)).toBe(true);
+  expect(result.script.some(day => day.lines.some(line => line.includes('Eu solicito um banho no Templo de Luz')))).toBe(true);
+  await render(page, 'FullReportApprovedView', { report: result.anxious });
+  await expect(page.locator('.report-page')).not.toContainText('Pertence ao sistema');
+  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toContainText('imagine uma piscina de luz');
+  await expect(page.getByRole('region', { name: 'Programação diária' })).toContainText('Um gesto possível para hoje');
+  await expect(page.locator('.report-page')).not.toContainText('Eu desbloqueio');
+});
+
+test('common connection audio is offered without a paid journey and has app-only playback', async ({ page }) => {
+  await page.goto('/');
+  await page.route('**/rest/v1/**', route => route.fulfill({ json: null }));
+  await page.evaluate(async () => {
+    const { default: React } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/react.js'));
+    const { default: ReactDOM } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/react-dom_client.js'));
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    supabase.auth.getUser = async () => ({ data: { user: { id: 'new-user-without-entitlement' } }, error: null });
+    const originalFrom = supabase.from.bind(supabase);
+    supabase.from = table => table === 'protocol_audio_assets' ? { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { id: 'preparatory-default', title: 'Um momento de conexão com seu cuidado', status: 'published', storage_path: 'preparatory/connection.mp3', duration_seconds: 900, fixed_for_all_users: true, downloadable: false }, error: null }) }) }) } : originalFrom(table);
+    supabase.storage.from = () => ({ createSignedUrl: async () => ({ data: { signedUrl: '/connection-test.mp3' }, error: null }) });
+    const { UserMomentArea } = await import(/* @vite-ignore */ String('/src/components/UserMomentArea.tsx'));
+    document.getElementById('root').remove(); const host = document.createElement('div'); document.body.appendChild(host);
+    ReactDOM.createRoot(host).render(React.createElement(UserMomentArea, { mode: 'momento', onStartNewIntake: () => {} }));
+  });
+  await expect(page.getByRole('heading', { name: 'Um momento de conexão com seu cuidado' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Iniciar áudio' })).toBeDisabled();
+  await page.getByRole('checkbox').check();
+  await expect(page.getByRole('button', { name: 'Iniciar áudio' })).toBeEnabled();
+  await expect(page.locator('audio')).toHaveAttribute('src', '/connection-test.mp3');
+  await expect(page.locator('audio')).not.toHaveAttribute('controls', '');
+  await expect(page.getByRole('link', { name: /baixar|download/i })).toHaveCount(0);
+});
+
+test('forgot password requests the correct recovery redirect and password setup checks confirmation', async ({ page }) => {
+  await render(page, 'AuthScreen', {});
+  await page.evaluate(async () => {
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    window.__recovery = [];
+    supabase.auth.resetPasswordForEmail = async (email, options) => { window.__recovery.push({ email, options }); return { data: {}, error: null }; };
+  });
+  await page.getByRole('button', { name: 'Esqueci minha senha' }).click();
+  await expect(page.getByText('Informe seu e-mail para receber o link de recuperação.')).toBeVisible();
+  await page.getByLabel('E-mail', { exact: true }).fill('example@example.com');
+  await page.getByRole('button', { name: 'Esqueci minha senha' }).click();
+  await expect(page.getByText(/você receberá um link para definir uma nova senha/)).toBeVisible();
+  expect(await page.evaluate(() => window.__recovery)).toEqual([{ email: 'example@example.com', options: { redirectTo: 'https://relatorioenergetico.vercel.app/?setup=password' } }]);
+  await render(page, 'PasswordSetupScreen', { });
+  await page.evaluate(async () => {
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    window.__passwordUpdates = 0;
+    supabase.auth.updateUser = async () => { window.__passwordUpdates++; return { data: {}, error: new Error('temporary failure') }; };
+  });
+  await page.getByLabel('Nova senha').fill('example-secure-123');
+  await page.getByLabel('Confirme a senha').fill('different-secure-123');
+  await page.getByRole('button', { name: 'Salvar senha e continuar' }).click();
+  await expect(page.getByRole('alert')).toContainText('As senhas precisam ser iguais');
+  expect(await page.evaluate(() => window.__passwordUpdates)).toBe(0);
+  await page.getByLabel('Confirme a senha').fill('example-secure-123');
+  await page.getByRole('button', { name: 'Salvar senha e continuar' }).click();
+  await expect(page.getByRole('alert')).toContainText('temporary failure');
+  expect(await page.evaluate(() => window.__passwordUpdates)).toBe(1);
 });

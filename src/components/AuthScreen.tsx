@@ -72,12 +72,24 @@ export function AuthScreen() {
     }
   }
 
+  async function recoverPassword() {
+    setMessage(''); setErrorMessage('');
+    if (!email.trim()) { setErrorMessage('Informe seu e-mail para receber o link de recuperação.'); return; }
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${PRODUCTION_APP_URL}/?setup=password` });
+      if (error) throw error;
+      setMessage('Se houver uma conta com esse e-mail, você receberá um link para definir uma nova senha. Confira também a caixa de spam.');
+    } catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Não foi possível enviar o link agora.'); }
+    finally { setBusy(false); }
+  }
+
   if (showPrivacy) {
     return <PrivacyPolicy onBack={() => setShowPrivacy(false)} />;
   }
 
   return (
-    <div className="min-h-screen bg-[#f6f1e6] px-5 py-10 text-[#173c2c]">
+    <div className="min-h-screen px-5 py-10 text-[#173c2c]">
       <div className="mx-auto flex min-h-[78vh] max-w-5xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0] shadow-2xl shadow-[#173f2d]/10 lg:grid-cols-[.9fr_1.1fr]">
           <div className="relative isolate flex min-h-[300px] flex-col justify-between overflow-hidden bg-[#173f2d] p-7 text-white sm:p-10 lg:min-h-[520px]" style={{ backgroundImage: 'linear-gradient(180deg,rgba(14,48,31,.6),rgba(14,48,31,.94)),url(/natureza-aprovada.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 68%' }}>
@@ -216,6 +228,7 @@ export function AuthScreen() {
                 >
                   {busy ? 'Aguarde...' : mode === 'signin' ? 'Entrar' : 'Criar minha conta'}
                 </button>
+                {mode === 'signin' && <button type="button" disabled={busy} onClick={() => void recoverPassword()} className="w-full text-center text-sm font-semibold text-[#806c3f] underline underline-offset-4 disabled:opacity-50">Esqueci minha senha</button>}
               </form>
 
               <button
