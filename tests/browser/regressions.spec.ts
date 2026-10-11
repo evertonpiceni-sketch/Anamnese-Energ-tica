@@ -130,3 +130,50 @@ test('daily motor proposal uses documented resources and respects early stabiliz
   expect(result.documented).toBe(true);
   expect(result.variations).toBeGreaterThan(1);
 });
+
+test('report names the reviewed energies and uses the approved chakra artwork', async ({ page }) => {
+  await page.goto('/');
+  const narrative = await report(page);
+  const approved = { ...narrative, dailyEnergySchedule: Array.from({ length: 7 }, (_, i) => ({ day: i + 1, energyNames: [i % 2 ? 'Soul Healing' : 'Original Reiki Platinum'], intention: 'Acolher o momento com presença.' })), page3: { ...narrative.page3, chakras: ['Plexo Solar', 'Cardíaco', 'Laríngeo', 'Frontal', 'Raiz', 'Coronário', 'Sacral'].map(name => ({ name, text: 'Centro identificado na leitura individual.' })) } };
+  await render(page, 'FullReportApprovedView', { report: approved });
+  const energies = page.getByRole('region', { name: 'Energias do cuidado' });
+  await expect(energies.getByText('Soul Healing', { exact: true })).toBeVisible();
+  await expect(energies.getByText('Original Reiki Platinum', { exact: true })).toBeVisible();
+  const symbols = page.getByRole('img', { name: /^Símbolo do / });
+  await expect(symbols).toHaveCount(7);
+  expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-referencia-')))).toBe(true);
+  await page.locator('.report-page').nth(2).screenshot({ path: '/workspace/scratch/chakras-aprovados.png' });
+  await page.locator('.report-page').nth(3).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('.report-page').nth(2).screenshot({ path: '/workspace/scratch/chakras-mobile.png' });
+  await render(page, 'FullReportApprovedView', { report: narrative });
+  await expect(page.getByRole('region', { name: 'Energias do cuidado' })).toContainText('aguarda revisão do terapeuta');
+  await expect(page.getByRole('region', { name: 'Energias do cuidado' }).getByText('Soul Healing', { exact: true })).toHaveCount(0);
+});
+
+test('ADM opens with a daily motor draft and preserves an existing review', async ({ page }) => {
+  await page.goto('/');
+  const props = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { BIBLIOTECA_MESTRA } = await import(/* @vite-ignore */ String('/src/data/bibliotecaMestra.ts'));
+    const { executarAnaliseIntegrativa } = await import(/* @vite-ignore */ String('/src/engine/analysisEngine.ts'));
+    const anamnese = CASOS_DE_TESTE[0].dados;
+    return { anamnese, analise: executarAnaliseIntegrativa(anamnese, BIBLIOTECA_MESTRA), backendIntakeId: 'test-intake', backendUserId: 'test-user' };
+  });
+  let writes = 0;
+  await page.route('**/rest/v1/**', async route => {
+    if (route.request().method() !== 'GET') writes++;
+    await route.fulfill({ json: null });
+  });
+  await page.route('**/rest/v1/commercial_entitlements**', route => route.fulfill({ json: { product_code: 'CARE_7_BASIC', paid_amount_cents: 100, full_report_addon_paid: true, status: 'active' } }));
+  await render(page, 'CareComposerAdminView', props);
+  await expect(page.getByText('O motor preparou a proposta para cada dia.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('group', { name: 'Dia 7', exact: true })).toBeVisible();
+  expect(writes).toBe(0);
+  const draft = { baseSystemId: '', mainSystemId: '', complementSystemIds: [], solfeggioId: null, floralIds: [], aromatherapyIds: [], crystalIds: [], audioIntention: 'Intenção revisada', scriptLines: [], dailyEnergySchedule: [{ day: 1, energyNames: ['Energia preservada'], intention: 'Revisão manual preservada' }] };
+  await page.route('**/rest/v1/care_composition_reviews**', route => route.fulfill({ json: { id: 'review', intake_id: 'test-intake', user_id: 'test-user', status: 'draft', manual_composition: draft } }));
+  await render(page, 'CareComposerAdminView', props);
+  await expect(page.getByRole('textbox', { name: 'Intenção do dia' })).toHaveValue('Revisão manual preservada');
+  await expect(page.getByRole('group', { name: 'Dia 7', exact: true })).toHaveCount(0);
+});

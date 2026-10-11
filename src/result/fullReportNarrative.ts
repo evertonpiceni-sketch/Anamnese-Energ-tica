@@ -12,6 +12,7 @@ export interface FullReportNarrative {
   nome: string;
   journeyDays?: 7 | 21;
   dailyEnergySchedule?: DailyEnergyPlan[];
+  energyNames?: string[];
   page1: { title: string; subtitle: string; intro: string };
   page2: { title: string; paragraphs: string[]; cycle?: string };
   page3: { title: string; paragraphs: string[]; preserved: string[]; chakras: Array<{ name: string; text: string }> };
@@ -74,7 +75,8 @@ export function buildFullReportNarrative({intake,analysis,composition,journeyDay
   if(intake.relatoLivreDesafios?.trim()) free.push(`Você também nomeou “${intake.relatoLivreDesafios.trim()}” como algo difícil de atravessar. Esse ponto será observado ao longo do percurso, não para medir desempenho, mas para perceber se ele começa a pesar de outra forma.`);
   const cycle=all.some(x=>x.id==='q1_procrastinacao_inicio'&&x.level>=3)&&all.some(x=>x.id==='q5_autocobranca_insuficiencia'&&x.level>=3)?'muitas demandas → sobrecarga → dificuldade de começar ou decidir → adiamento → alívio curto → cobrança → cansaço → nova tentativa':undefined;
 
-  const narrative: FullReportNarrative = {nome, dailyEnergySchedule,
+  const energyNames = uniq(dailyEnergySchedule?.length ? dailyEnergySchedule.flatMap(day => day.energyNames) : composition?.audio?.recursosEnergeticos.energias || []);
+  const narrative: FullReportNarrative = {nome, dailyEnergySchedule, energyNames,
     page1:{title:'Relatório Completo — Leitura do Seu Momento',subtitle:'Uma leitura feita para que você consiga se reconhecer nela e, principalmente, saiba por onde o cuidado vai começar.',intro:`${nome}, eu quero que você leia estas páginas sem a sensação de estar recebendo um diagnóstico frio. Aqui estão os fios que apareceram nas suas respostas, aquilo que ainda permanece forte em você e o caminho de cuidado pensado para este momento.`},
     page2:{title:'Diagnóstico da Anamnese',paragraphs:[`${nome}, quando suas respostas são colocadas lado a lado, os pontos que mais pedem cuidado aparecem em ${join(priorities)||'um acompanhamento gentil do seu momento, sem sinais intensos nas respostas objetivas'}. Vamos olhar com cuidado para como esses movimentos se encontram na sua vida.`,...rel,...free,'O direcionamento, portanto, não começa exigindo mudança. Começa diminuindo a pressão. A proposta é criar sustentação suficiente para que clareza, confiança e movimento possam voltar a aparecer sem serem arrancados à força.'],cycle},
     page3:{title:'O que suas respostas contam sobre você',paragraphs:['Nem tudo em você está cansado ou fragilizado. Há recursos que continuam presentes e que serão usados a favor do seu processo. Cuidar não é olhar apenas para o que dói; é também lembrar a você aquilo que ainda está vivo.',intake.relatoLivrePreservado?.trim()?`Você mesmo reconheceu algo importante: “${intake.relatoLivrePreservado.trim()}”. Isso será tratado como força do percurso, não como detalhe.`:'O simples fato de você conseguir olhar para o próprio momento já mostra percepção, desejo de mudança e abertura para um cuidado diferente da cobrança.'],preserved:preserved.length?preserved:['capacidade de se observar','desejo verdadeiro de mudança','sensibilidade para perceber o próprio momento','abertura para receber cuidado','possibilidade de recomeçar sem precisar fazer tudo de uma vez'],chakras:chakras.map(name=>({name,text:chakraText(name,active)}))},
