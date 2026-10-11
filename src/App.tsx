@@ -7,6 +7,16 @@ import { supabase } from './lib/supabase';
 
 type AppRole = 'user' | 'admin';
 
+const LEGACY_SUBMISSIONS_KEY = 'anamnese-integrativa-submissions-v1';
+
+function clearLegacySensitiveLocalData() {
+  try {
+    localStorage.removeItem(LEGACY_SUBMISSIONS_KEY);
+  } catch {
+    // Falha de armazenamento local não deve impedir autenticação ou encerramento de sessão.
+  }
+}
+
 export default function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<AppRole | null>(null);
@@ -16,6 +26,8 @@ export default function App() {
   useEffect(() => {
     let active = true;
 
+    clearLegacySensitiveLocalData();
+
     async function resolveSession(nextSession: Session | null) {
       if (!active) return;
       setSession(nextSession);
@@ -23,6 +35,7 @@ export default function App() {
       setProfileError('');
 
       if (!nextSession?.user) {
+        clearLegacySensitiveLocalData();
         setLoading(false);
         return;
       }
@@ -60,6 +73,7 @@ export default function App() {
   }, []);
 
   async function signOut() {
+    clearLegacySensitiveLocalData();
     await supabase.auth.signOut();
   }
 
