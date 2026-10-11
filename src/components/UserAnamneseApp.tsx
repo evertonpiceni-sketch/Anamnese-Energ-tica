@@ -2,25 +2,17 @@ import { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ChevronLeft, ChevronRight, Heart, LayoutDashboard, PlusCircle, Route, ShieldCheck, Sparkles } from 'lucide-react';
 import { AnamneseInput } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
-import { executarAnaliseIntegrativa } from '../engine/analysisEngine';
-import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { saveIntakeSession } from '../services/backend';
-import { buildFullReportNarrative, FullReportNarrative } from '../result/fullReportNarrative';
-import { selectComplementaryCare } from '../care/complementaryCatalogs';
-import { selectSolfeggioFrequency } from '../care/solfeggioCatalog';
-import { buildCareComposition } from '../care/careComposer';
-import { criarPlanoAudioPersonalizado } from '../audio/audioCatalog';
-import { FullReportApprovedView } from './FullReportApprovedView';
 import { UserMomentArea } from './UserMomentArea';
 import { PrivacyPolicy } from './PrivacyPolicy';
 
-type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'result' | 'sent';
+type Step = 'welcome' | 'intro' | 'profile' | 'questions' | 'reflection' | 'review' | 'processing' | 'sent';
 type UserArea = 'anamnese' | 'momento' | 'jornada';
 const STORAGE_KEY = 'anamnese-integrativa-draft-v1';
 const scaleLabels = ['Não acontece comigo', 'Acontece um pouco', 'Acontece às vezes', 'Acontece bastante', 'Está muito presente'];
 
 const emptyIntake = (): AnamneseInput => ({
-  id: `ANAM-${Date.now().toString().slice(-6)}`,
+  id: `ANAM-${crypto.randomUUID()}`,
   data: new Date().toISOString().split('T')[0],
   nomePessoa: '', idade: '', contato: '', historicoEnergetico: '', intencaoDeclarada: '',
   respostasObjetivas: {}, relatoLivreNecessidade: '', relatoLivreDesafios: '', relatoLivrePreservado: '',
@@ -34,11 +26,11 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
   const [userArea, setUserArea] = useState<UserArea>('anamnese');
   const [questionIndex, setQuestionIndex] = useState(0);
   const [form, setForm] = useState<AnamneseInput>(emptyIntake);
-  const [fullReading, setFullReading] = useState<FullReportNarrative | null>(null);
   const [submissionError, setSubmissionError] = useState('');
+  const [draftLoaded, setDraftLoaded] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
-  const answered = Object.keys(form.respostasObjetivas).length;
+  const answered = PERGUNTAS_ANAMNESE.filter(q => Number.isInteger(form.respostasObjetivas[q.id]) && form.respostasObjetivas[q.id] >= 0 && form.respostasObjetivas[q.id] <= 4).length;
   const progress = Math.round((answered / PERGUNTAS_ANAMNESE.length) * 100);
   const currentQuestion = PERGUNTAS_ANAMNESE[questionIndex];
   const canAdvanceProfile = form.nomePessoa.trim().length > 1;
@@ -51,47 +43,35 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
       const saved = localStorage.getItem(draftKey);
       if (!saved) return;
       const parsed = JSON.parse(saved);
-      if (parsed?.form) setForm(parsed.form);
-      if (parsed?.questionIndex !== undefined) setQuestionIndex(parsed.questionIndex);
-      if (parsed?.step && parsed.step !== 'sent' && parsed.step !== 'result') setStep(parsed.step);
-    } catch { /* rascunho inválido */ }
+      if (parsed?.form && typeof parsed.form.nomePessoa === 'string' && parsed.form.respostasObjetivas && typeof parsed.form.respostasObjetivas === 'object' && Array.isArray(parsed.form.regioesCorporaisPercebidas)) setForm({ ...emptyIntake(), ...parsed.form });
+      if (Number.isInteger(parsed?.questionIndex)) setQuestionIndex(Math.max(0, Math.min(PERGUNTAS_ANAMNESE.length - 1, parsed.questionIndex)));
+      if (['welcome','intro','profile','questions','reflection','review'].includes(parsed?.step)) setStep(parsed.step);
+      else if (parsed?.step === 'processing') setStep('review');
+    } catch { /* rascunho inválido */ } finally { setDraftLoaded(true); }
   }, [draftKey]);
 
   useEffect(() => {
-    if (step !== 'sent' && step !== 'result') localStorage.setItem(draftKey, JSON.stringify({ form, step, questionIndex }));
-  }, [draftKey, form, step, questionIndex]);
+    if (!draftLoaded || step === 'sent') return;
+    try { localStorage.setItem(draftKey, JSON.stringify({ form, step, questionIndex })); } catch { /* O formulário continua disponível sem armazenamento local. */ }
+  }, [draftKey, draftLoaded, form, step, questionIndex]);
 
   function setField<K extends keyof AnamneseInput>(key: K, value: AnamneseInput[K]) { setForm(prev => ({ ...prev, [key]: value })); }
   function answer(value: number) { if (currentQuestion) setForm(prev => ({ ...prev, respostasObjetivas: { ...prev.respostasObjetivas, [currentQuestion.id]: value } })); }
-  function resetIntake() { setUserArea('anamnese'); setForm(emptyIntake()); setFullReading(null); setSubmissionError(''); setQuestionIndex(0); setStep('welcome'); }
+  function resetIntake() { setUserArea('anamnese'); setForm(emptyIntake()); setSubmissionError(''); setQuestionIndex(0); setStep('welcome'); }
   function nextQuestion() { if (questionIndex < PERGUNTAS_ANAMNESE.length - 1) setQuestionIndex(i => i + 1); else setStep('reflection'); }
   function previousQuestion() { if (questionIndex > 0) setQuestionIndex(i => i - 1); else setStep('profile'); }
 
   async function submit() {
+    if (step === 'processing' || !allAnswered || !canAdvanceProfile) return;
     const finalData = { ...form, nomePessoa: form.nomePessoa.trim() };
     setSubmissionError('');
     setStep('processing');
     try {
       await saveIntakeSession({ userId, intake: finalData });
-      const analysis = executarAnaliseIntegrativa(finalData, BIBLIOTECA_MESTRA);
-      const axes = analysis.relatorioEverton.eixosOrdenados;
-      const complementary = selectComplementaryCare(axes);
-      const solfeggio = selectSolfeggioFrequency(axes);
-      const audio = criarPlanoAudioPersonalizado({
-        userId,
-        anamneseId: finalData.id,
-        nomePessoa: finalData.nomePessoa,
-        eixos: axes,
-        relatorio: analysis.relatorioEverton,
-        solfeggio,
-      });
-      const composition = buildCareComposition(audio, complementary, solfeggio);
-      const narrative = buildFullReportNarrative({ intake: finalData, analysis, composition });
       setForm(finalData);
-      setFullReading(narrative);
       onSubmit?.(finalData);
-      localStorage.removeItem(draftKey);
-      setStep('result');
+      try { localStorage.removeItem(draftKey); } catch { /* armazenamento indisponível */ }
+      setStep('sent');
     } catch (error) {
       setSubmissionError(error instanceof Error ? error.message : 'Não foi possível salvar sua anamnese com segurança.');
       setStep('review');
@@ -105,7 +85,7 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
       <header className="sticky top-0 z-30 border-b border-[#d9caa8]/70 bg-[#fffaf0]/90 backdrop-blur-xl">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-3">
-            <img src="/logo-everton-oficial.svg" alt="Everton Piceni" className="h-12 w-12 object-contain" />
+            <img src="/logo-everton-oficial.png" alt="Everton Piceni" className="h-12 w-12 object-contain" />
             <div className="hidden sm:block"><div className="font-serif text-lg">Everton Piceni</div><div className="text-[10px] tracking-[.2em] text-[#96773b]">ANAMNESE INTEGRATIVA</div></div>
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">
@@ -119,13 +99,13 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
 
       <main className="relative overflow-hidden">
         <div className="pointer-events-none absolute inset-0"><div className="absolute -left-40 top-16 h-96 w-96 rounded-full bg-[#cbd9c5]/30 blur-3xl" /><div className="absolute -right-40 top-96 h-[28rem] w-[28rem] rounded-full bg-[#e8d4a0]/25 blur-3xl" /></div>
-        <div className={`relative mx-auto px-5 py-10 sm:py-14 ${step === 'result' ? 'max-w-6xl' : 'max-w-5xl'}`}>
+        <div className={`relative mx-auto px-5 py-10 sm:py-14 max-w-5xl`}>
           {userArea === 'anamnese' && (
             <>
               {step === 'welcome' && (
                 <section className="grid min-h-[70vh] items-center gap-10 lg:grid-cols-2">
                   <div className="space-y-6"><Eyebrow>UM ENCONTRO COM O SEU MOMENTO</Eyebrow><h1 className="font-serif text-5xl leading-tight sm:text-6xl">Como você está <span className="italic text-[#a87828]">de verdade?</span></h1><p className="max-w-xl text-lg leading-8 text-[#52665b]">Suas respostas serão observadas em conjunto para compreender o que se repete, o que se conecta e o que pede cuidado agora.</p><Primary onClick={() => setStep('intro')}>Começar meu cuidado <ArrowRight className="h-5 w-5" /></Primary></div>
-                  <div className="mx-auto rounded-[3rem] border border-[#d6c28b] bg-white/45 p-9 text-center shadow-2xl shadow-[#244735]/10"><img src="/logo-everton-oficial.svg" alt="" className="mx-auto h-52 w-52 object-contain" /><div className="mx-auto my-5 h-px w-36 bg-[#c6a350]" /><p className="font-serif text-xl italic text-[#466052]">“Cuidar da sua energia é voltar para você.”</p><div className="mt-6 flex items-start gap-3 text-left text-sm text-[#5f685f]"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-[#b89546]" />A análise técnica permanece reservada. Você recebe uma leitura humana do seu momento.</div></div>
+                  <div style={{ backgroundImage: "linear-gradient(rgba(255,250,240,.86),rgba(255,250,240,.7)),url(/natureza-aprovada.jpg)", backgroundSize: "cover", backgroundPosition: "center" }} className="mx-auto rounded-[3rem] border border-[#d6c28b] bg-white/80 p-9 text-center shadow-2xl shadow-[#244735]/10"><img src="/logo-everton-oficial.png" alt="" className="mx-auto h-52 w-52 object-contain" /><div className="mx-auto my-5 h-px w-36 bg-[#c6a350]" /><p className="font-serif text-xl italic text-[#466052]">“Cuidar da sua energia é voltar para você.”</p><div className="mt-6 flex items-start gap-3 text-left text-sm text-[#5f685f]"><ShieldCheck className="mt-1 h-4 w-4 shrink-0 text-[#b89546]" />A análise técnica permanece reservada. Você recebe uma leitura humana do seu momento.</div></div>
                 </section>
               )}
 
@@ -142,13 +122,9 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
 
               {step === 'reflection' && <Card><Eyebrow>AGORA, COM SUAS PALAVRAS</Eyebrow><h2 className="font-serif text-4xl">O que precisa ser acolhido?</h2><Field label="O que mais pede cuidado neste momento?"><textarea rows={4} value={form.relatoLivreNecessidade} onChange={e => setField('relatoLivreNecessidade', e.target.value)} className="user-input resize-none" /></Field><Field label="Há algo que se repete ou tem sido difícil atravessar?"><textarea rows={3} value={form.relatoLivreDesafios} onChange={e => setField('relatoLivreDesafios', e.target.value)} className="user-input resize-none" /></Field><Field label="O que continua vivo e forte em você?"><textarea rows={3} value={form.relatoLivrePreservado} onChange={e => setField('relatoLivrePreservado', e.target.value)} className="user-input resize-none" /></Field><Nav><Secondary onClick={() => { setStep('questions'); setQuestionIndex(PERGUNTAS_ANAMNESE.length - 1); }}>Voltar</Secondary><Primary onClick={() => setStep('review')}>Revisar</Primary></Nav></Card>}
 
-              {step === 'review' && <Card><Eyebrow>ANTES DE ENVIAR</Eyebrow><h2 className="font-serif text-4xl">Isso representa seu momento?</h2><p className="text-[#617066]">{answered} de {PERGUNTAS_ANAMNESE.length} perguntas respondidas.</p>{form.relatoLivreNecessidade && <blockquote className="border-l border-[#c6a350] pl-5 leading-7 text-[#617066]">{form.relatoLivreNecessidade}</blockquote>}{!allAnswered && <p className="text-sm text-[#806520]">Ainda existem perguntas sem resposta.</p>}{submissionError && <p className="text-sm text-rose-700">{submissionError}</p>}<Nav><Secondary onClick={() => setStep('reflection')}><ArrowLeft className="h-4 w-4" /> Revisar</Secondary><Primary disabled={!allAnswered || !canAdvanceProfile} onClick={submit}>Gerar minha leitura <Sparkles className="h-4 w-4" /></Primary></Nav></Card>}
+              {step === 'review' && <Card><Eyebrow>ANTES DE ENVIAR</Eyebrow><h2 className="font-serif text-4xl">Isso representa seu momento?</h2><p className="text-[#617066]">{answered} de {PERGUNTAS_ANAMNESE.length} perguntas respondidas.</p>{form.relatoLivreNecessidade && <blockquote className="border-l border-[#c6a350] pl-5 leading-7 text-[#617066]">{form.relatoLivreNecessidade}</blockquote>}{!allAnswered && <p className="text-sm text-[#806520]">Ainda existem perguntas sem resposta.</p>}{submissionError && <p className="text-sm text-rose-700">{submissionError}</p>}<Nav><Secondary onClick={() => setStep('reflection')}><ArrowLeft className="h-4 w-4" /> Revisar</Secondary><Primary disabled={!allAnswered || !canAdvanceProfile} onClick={submit}>Enviar minha anamnese <Sparkles className="h-4 w-4" /></Primary></Nav></Card>}
 
-              {step === 'processing' && <section className="flex min-h-[60vh] flex-col items-center justify-center text-center"><Sparkles className="mb-6 h-10 w-10 animate-pulse text-[#a87828]" /><Eyebrow>CRUZANDO SUAS RESPOSTAS</Eyebrow><h2 className="mt-4 font-serif text-4xl">Sua leitura está tomando forma.</h2><p className="mt-4 max-w-xl leading-7 text-[#5c6d62]">Estamos observando repetições, relações entre respostas, forças preservadas e os pontos que pedem mais cuidado.</p></section>}
-
-              {step === 'result' && fullReading && (
-                <div className="space-y-8"><div className="mx-auto max-w-3xl text-center"><Eyebrow>SUA LEITURA ESTÁ PRONTA</Eyebrow><h1 className="mt-3 font-serif text-4xl sm:text-5xl">{firstName}, isto é o que suas respostas contam quando olhamos para elas juntas.</h1><p className="mt-5 leading-7 text-[#65736a]">Esta é a devolutiva completa da sua anamnese, construída a partir das relações entre as suas respostas.</p></div><FullReportApprovedView report={fullReading} /><div className="flex justify-center"><Primary onClick={() => setStep('sent')}>Continuar meu cuidado <ArrowRight className="h-4 w-4" /></Primary></div></div>
-              )}
+              {step === 'processing' && <section className="flex min-h-[60vh] flex-col items-center justify-center text-center"><Sparkles className="mb-6 h-10 w-10 animate-pulse text-[#a87828]" /><Eyebrow>RECEBENDO SUAS RESPOSTAS</Eyebrow><h2 className="mt-4 font-serif text-4xl">Estamos recebendo sua anamnese.</h2><p className="mt-4 max-w-xl leading-7 text-[#5c6d62]">Estamos guardando com cuidado o que você compartilhou para preparar sua leitura.</p></section>}
 
               {step === 'sent' && <Card><div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[#c6a350]"><Heart className="h-7 w-7" /></div><Eyebrow>ANAMNESE RECEBIDA</Eyebrow><h2 className="font-serif text-4xl">A leitura é o começo, não o fim.</h2><p className="leading-7 text-[#5c6d62]">Você poderá acompanhar o que for efetivamente liberado em Meu Momento e Minha Jornada.</p><Nav><Primary onClick={() => setUserArea('momento')}>Ir para Meu Momento</Primary><Secondary onClick={resetIntake}>Nova anamnese</Secondary></Nav></Card>}
             </>

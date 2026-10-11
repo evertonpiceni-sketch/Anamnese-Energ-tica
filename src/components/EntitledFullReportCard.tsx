@@ -4,54 +4,8 @@ import type { CommercialEntitlement } from '../commercial/entitlements';
 import { canAccessFullReport } from '../commercial/entitlements';
 import type { FullReportPublication } from '../services/fullReportBackend';
 import { loadOwnFullReport } from '../services/fullReportBackend';
-import type { FullReportNarrative } from '../result/fullReportNarrative';
-import { buildFullReportNarrative } from '../result/fullReportNarrative';
 import { FullReportApprovedView } from './FullReportApprovedView';
-import { downloadFullReportPdf } from '../pdf/fullReportPdf';
-import { executarAnaliseIntegrativa } from '../engine/analysisEngine';
-import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
-import type { AnamneseInput } from '../types';
-import { supabase } from '../lib/supabase';
-
-type TestIntakeRow = {
-  id: string;
-  external_ref: string | null;
-  person_name: string | null;
-  age_text: string | null;
-  contact_text: string | null;
-  answers: Record<string, number> | null;
-  free_text_need: string | null;
-  free_text_challenges: string | null;
-  free_text_strengths: string | null;
-  body_regions: string[] | null;
-  declared_intention: string | null;
-  service_preferences: string | null;
-  energetic_sensitivity: AnamneseInput['sensibilidadeEnergetica'] | null;
-  completed_at: string | null;
-};
-
-function buildLiveTestReport(row: TestIntakeRow): FullReportNarrative {
-  const intake: AnamneseInput = {
-    id: row.external_ref || row.id,
-    data: row.completed_at?.slice(0, 10) || new Date().toISOString().slice(0, 10),
-    nomePessoa: row.person_name || '',
-    idade: row.age_text || '',
-    contato: row.contact_text || '',
-    historicoEnergetico: '',
-    intencaoDeclarada: row.declared_intention || '',
-    respostasObjetivas: row.answers || {},
-    relatoLivreNecessidade: row.free_text_need || '',
-    relatoLivreDesafios: row.free_text_challenges || '',
-    relatoLivrePreservado: row.free_text_strengths || '',
-    regioesCorporaisPercebidas: row.body_regions || [],
-    preferenciasAtendimento: row.service_preferences || '',
-    sensibilidadeEnergetica: row.energetic_sensitivity || 'moderada',
-  };
-
-  const analysis = executarAnaliseIntegrativa(intake, BIBLIOTECA_MESTRA);
-  return buildFullReportNarrative({ intake, analysis, composition: null });
-}
-
+import { requestFullReportEmail } from '../services/resultEmail';
 export function EntitledFullReportCard({
   intakeId,
   entitlement,
@@ -60,38 +14,21 @@ export function EntitledFullReportCard({
   entitlement: CommercialEntitlement | null;
 }) {
   const allowed = canAccessFullReport(entitlement);
-  const isOneRealTest = entitlement?.paidAmountCents === 100;
   const [publication, setPublication] = useState<FullReportPublication | null>(null);
-  const [testReport, setTestReport] = useState<FullReportNarrative | null>(null);
   const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     let active = true;
     setPublication(null);
-    setTestReport(null);
     setMessage('');
 
     if (!allowed) return () => { active = false; };
 
     setLoading(true);
     loadOwnFullReport(intakeId)
-      .then(async result => {
-        if (!active) return;
-        setPublication(result);
-
-        if (!result && isOneRealTest) {
-          const { data, error } = await supabase
-            .from('intake_sessions')
-            .select('id,external_ref,person_name,age_text,contact_text,answers,free_text_need,free_text_challenges,free_text_strengths,body_regions,declared_intention,service_preferences,energetic_sensitivity,completed_at')
-            .eq('id', intakeId)
-            .maybeSingle();
-
-          if (!active) return;
-          if (error) throw error;
-          if (data) setTestReport(buildLiveTestReport(data as TestIntakeRow));
-        }
-      })
+      .then(result => { if (active) setPublication(result); })
       .catch(error => {
         if (!active) return;
         setMessage(error instanceof Error ? error.message : 'Não foi possível carregar seu relatório completo agora.');
@@ -101,7 +38,7 @@ export function EntitledFullReportCard({
       });
 
     return () => { active = false; };
-  }, [allowed, intakeId, isOneRealTest]);
+  }, [allowed, intakeId]);
 
   if (!allowed) return null;
 
@@ -113,7 +50,7 @@ export function EntitledFullReportCard({
     );
   }
 
-  const report = publication?.report || testReport;
+  const report = publication?.report;
 
   if (!report) {
     return (
@@ -142,17 +79,17 @@ export function EntitledFullReportCard({
             <div className="text-xs font-semibold tracking-[0.18em] text-[#9a7838]">LEITURA DO SEU MOMENTO</div>
             <h2 className="mt-2 font-serif text-3xl leading-tight text-[#173c2c]">Sua leitura completa está disponível.</h2>
             <p className="mt-3 text-sm leading-7 text-[#5d6d63]">
-              {publication
-                ? 'Esta é a leitura vinculada à sua anamnese e à composição aprovada para este momento.'
-                : 'Esta leitura de validação agora usa o mesmo motor da anamnese: cruza suas respostas, relatos, padrões, prioridades e recursos em vez de exibir um texto fixo de teste.'}
+              Esta é a leitura vinculada à sua anamnese e à composição aprovada para este momento.
             </p>
           </div>
-          <button type="button" onClick={() => void downloadFullReportPdf(report)} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white shadow-md transition hover:bg-[#22533d]">
+          <button type="button" disabled={busy} onClick={async () => { setBusy(true); setMessage(''); try { const { downloadFullReportPdf } = await import('../pdf/fullReportPdf'); await downloadFullReportPdf(report); } catch { setMessage('Não foi possível preparar seu PDF. Tente novamente.'); } finally { setBusy(false); } }} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white shadow-md transition hover:bg-[#22533d]">
             <Download className="h-4 w-4" /> Baixar relatório completo
           </button>
         </div>
       </div>
 
+      <button type="button" disabled={busy} onClick={async () => { if (!publication) return; setBusy(true); setMessage(''); try { const result = await requestFullReportEmail({ userId: publication.userId, intakeId, report, requestedBy: 'user' }); setMessage(result.message); } catch { setMessage('Não foi possível solicitar o envio agora. Tente novamente.'); } finally { setBusy(false); } }} className="rounded-full border border-[#cdbc91] px-5 py-3 text-sm font-semibold disabled:opacity-50">Receber por e-mail</button>
+      {message && <p role="status" className="text-sm text-[#715f36]">{message}</p>}
       <FullReportApprovedView report={report} />
     </section>
   );

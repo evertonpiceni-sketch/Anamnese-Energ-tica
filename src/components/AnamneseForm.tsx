@@ -43,7 +43,7 @@ export function AnamneseForm({
 }: AnamneseFormProps) {
   const [formData, setFormData] = useState<AnamneseInput>(
     initialData || {
-      id: `ANAM-${Date.now().toString().slice(-6)}`,
+      id: `ANAM-${crypto.randomUUID()}`,
       data: new Date().toISOString().split('T')[0],
       nomePessoa: '',
       idade: '',
@@ -104,7 +104,7 @@ export function AnamneseForm({
       onLimparFormulario();
     } else {
       setFormData({
-        id: `ANAM-${Date.now().toString().slice(-6)}`,
+        id: `ANAM-${crypto.randomUUID()}`,
         data: new Date().toISOString().split('T')[0],
         nomePessoa: '',
         idade: '',

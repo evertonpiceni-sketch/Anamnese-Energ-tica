@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import AdminApp from './AdminApp';
+const AdminApp = lazy(() => import('./AdminApp'));
+const AdminCommercialPaymentPanel = lazy(() => import('./components/AdminCommercialPaymentPanel').then(module => ({ default: module.AdminCommercialPaymentPanel })));
 import UserAnamneseApp from './components/UserAnamneseApp';
 import { AuthScreen } from './components/AuthScreen';
-import { AdminCommercialPaymentPanel } from './components/AdminCommercialPaymentPanel';
 import { UserPaymentPanel } from './components/UserPaymentPanel';
 import { supabase } from './lib/supabase';
 
@@ -27,11 +27,13 @@ export default function App() {
 
   useEffect(() => {
     let active = true;
+    let revision = 0;
 
     clearLegacySensitiveLocalData();
 
     async function resolveSession(nextSession: Session | null) {
       if (!active) return;
+      const currentRevision = ++revision;
       setSession(nextSession);
       setRole(null);
       setProfileError('');
@@ -44,28 +46,32 @@ export default function App() {
 
       setLoading(true);
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', nextSession.user.id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', nextSession.user.id)
+          .single();
 
-      if (!active) return;
+        if (!active || revision !== currentRevision) return;
 
-      if (error) {
-        setProfileError('Não foi possível carregar as permissões desta conta.');
+        if (error) {
+          setProfileError('Não foi possível carregar as permissões desta conta.');
+          setLoading(false);
+          return;
+        }
+
+        setRole(data?.role === 'admin' ? 'admin' : 'user');
         setLoading(false);
-        return;
+      } catch {
+        if (active && revision === currentRevision) { setProfileError('Não foi possível carregar as permissões desta conta.'); setLoading(false); }
       }
-
-      setRole(data?.role === 'admin' ? 'admin' : 'user');
-      setLoading(false);
     }
 
-    supabase.auth.getSession().then(({ data }) => resolveSession(data.session));
+    supabase.auth.getSession().then(({ data, error }) => { if (revision === 0) { if (error) setLoading(false); else void resolveSession(data.session); } }).catch(() => { if (active && revision === 0) setLoading(false); });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      resolveSession(nextSession);
+      setTimeout(() => { if (active) void resolveSession(nextSession); }, 0);
     });
 
     return () => {
@@ -84,9 +90,9 @@ export default function App() {
       <div className="flex min-h-screen items-center justify-center bg-[#f6f1e6] px-5 text-[#173c2c]">
         <div className="text-center">
           <img
-            src="/logo-everton-oficial.svg"
+            src="/logo-everton-oficial.png"
             alt="Everton Piceni"
-            className="mx-auto h-20 w-20 rounded-full object-cover"
+            className="mx-auto h-20 w-20 object-contain"
           />
           <div className="mt-5 font-serif text-2xl">Preparando seu espaço...</div>
         </div>
@@ -121,15 +127,14 @@ export default function App() {
   if (role === 'admin') {
     return (
       <>
-        <AdminApp onSignOut={signOut} />
-        <AdminCommercialPaymentPanel />
+        <Suspense fallback={<p className="p-8">Preparando sua área...</p>}><AdminApp onSignOut={signOut} /><AdminCommercialPaymentPanel /></Suspense>
       </>
     );
   }
 
   return (
     <>
-      <UserAnamneseApp userId={session.user.id} onSignOut={signOut} />
+      <UserAnamneseApp key={session.user.id} userId={session.user.id} onSignOut={signOut} />
       <UserPaymentPanel />
     </>
   );

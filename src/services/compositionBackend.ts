@@ -1,8 +1,10 @@
+import type { DailyEnergyPlan } from '../care/dailyEnergySchedule';
 import { supabase } from '../lib/supabase';
 
 export type CompositionReviewStatus = 'draft' | 'approved' | 'superseded';
 
 export interface ManualCareComposition {
+  dailyEnergySchedule?: DailyEnergyPlan[];
   baseSystemId: string;
   mainSystemId: string;
   complementSystemIds: string[];

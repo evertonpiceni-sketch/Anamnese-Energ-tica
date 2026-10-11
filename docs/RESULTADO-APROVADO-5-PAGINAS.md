@@ -14,7 +14,7 @@ A pessoa deve sentir que foi escutada e compreendida antes de perceber quais rec
 
 1. **Relatório Completo — Leitura do Seu Momento**
    - capa com nome da pessoa;
-   - logo oficial `public/logo-everton-oficial.svg`;
+   - logo oficial `public/logo-everton-oficial.png`;
    - identidade clara/creme, verde e dourado suave;
    - frase de acolhimento e apresentação.
 
@@ -39,8 +39,9 @@ A pessoa deve sentir que foi escutada e compreendida antes de perceber quais rec
    - banhos só podem vir de fonte documental do protocolo;
    - nenhum recurso entra apenas porque “combina”.
 
-5. **Os próximos 7 ou 21 dias**
-   - explicar as duas possibilidades sem transformar uma delas em padrão automático;
+5. **Os próximos dias do plano confirmado**
+   - usar a duração confirmada pelo pagamento: 7 dias ou 21 dias;
+   - após o pagamento, não oferecer as duas durações no relatório da pessoa;
    - reforçar ritmo, presença, acompanhamento e reavaliação;
    - terminar com fechamento afetuoso, seguro e acolhedor.
 
@@ -75,3 +76,9 @@ A tela do aplicativo, o PDF baixado e o PDF enviado por e-mail devem ser derivad
 Somente usar conteúdo documentado e validado nas bibliotecas do projeto. Não inventar propriedades, ativações, receitas, comandos ou efeitos.
 
 Banhos, florais, aromaterapia, cristais e energias devem manter rastreabilidade documental no catálogo interno, mesmo que a fonte técnica não seja exposta ao usuário final.
+
+## Programação diária — ajuste aprovado em 11/10/2026
+
+O motor propõe uma composição diária individual a partir da anamnese e dos recursos documentados; Everton revisa e aprova no ADM. Cada dia apresenta suas energias e sua intenção. Não repetir a mesma composição em dias consecutivos. A aprovação valida todos os dias do plano e rejeita energias fora dos sistemas selecionados.
+
+A programação aprovada acompanha o relatório como anexo: uma página a cada sete dias, usando a mesma apresentação editorial. A narrativa permanece em cinco páginas; o PDF completo contém seis páginas para 7 dias e oito páginas para 21 dias. Tela, download e preparação do envio por e-mail compartilham o mesmo conteúdo. Se o plano mudar, a programação precisa de nova revisão; não truncar nem repetir dias automaticamente.

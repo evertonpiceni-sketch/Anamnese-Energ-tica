@@ -1,3 +1,5 @@
+import { applyConfirmedJourney } from '../result/confirmedJourney';
+import { getCurrentUserEntitlementForIntake } from './entitlementBackend';
 import { supabase } from '../lib/supabase';
 import type { FullReportNarrative } from '../result/fullReportNarrative';
 
@@ -26,6 +28,8 @@ export async function publishFullReport(params: {
   userId: string;
   report: FullReportNarrative;
 }): Promise<FullReportPublication> {
+  const entitlement = await getCurrentUserEntitlementForIntake(params.intakeId);
+  const report = entitlement ? applyConfirmedJourney(params.report, entitlement.days) : params.report;
   const now = new Date().toISOString();
   const { data, error } = await supabase
     .from('full_report_publications')
@@ -33,7 +37,7 @@ export async function publishFullReport(params: {
       {
         intake_id: params.intakeId,
         user_id: params.userId,
-        report_json: params.report,
+        report_json: report,
         published_at: now,
         updated_at: now,
       },
@@ -56,7 +60,10 @@ export async function loadOwnFullReport(
     .maybeSingle();
 
   if (error) throw error;
-  return data ? mapPublication(data) : null;
+  if (!data) return null;
+  const publication = mapPublication(data);
+  const entitlement = await getCurrentUserEntitlementForIntake(intakeId);
+  return entitlement ? { ...publication, report: applyConfirmedJourney(publication.report, entitlement.days) } : publication;
 }
 
 export async function loadFullReportForAdmin(

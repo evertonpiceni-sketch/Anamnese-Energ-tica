@@ -83,9 +83,9 @@ export function AuthScreen() {
           <div className="hidden bg-[#173f2d] p-10 text-white lg:flex lg:flex-col lg:justify-between">
             <div>
               <img
-                src="/logo-everton-oficial.svg"
+                src="/logo-everton-oficial.png"
                 alt="Everton Piceni"
-                className="h-24 w-24 rounded-full object-cover opacity-95"
+                className="h-36 w-36 rounded-xl bg-[#fffaf0] p-2 object-contain opacity-95"
               />
               <div className="mt-8 text-xs font-semibold tracking-[0.18em] text-[#dfc988]">
                 ANAMNESE INTEGRATIVA
@@ -106,9 +106,9 @@ export function AuthScreen() {
             <div className="mx-auto max-w-md">
               <div className="lg:hidden">
                 <img
-                  src="/logo-everton-oficial.svg"
+                  src="/logo-everton-oficial.png"
                   alt="Everton Piceni"
-                  className="h-20 w-20 rounded-full object-cover"
+                  className="h-20 w-20 object-contain"
                 />
               </div>
 

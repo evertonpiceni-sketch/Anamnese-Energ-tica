@@ -1,3 +1,6 @@
+import { proposeDailyEnergySchedule, validateDailyEnergySchedule } from '../care/dailyEnergySchedule';
+import { getAdminEntitlementForIntake } from '../services/entitlementBackend';
+import { canAccessFullReport } from '../commercial/entitlements';
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import {
@@ -25,9 +28,9 @@ import { SOLFEGGIO_CATALOG } from '../care/solfeggioCatalog';
 import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { AdminAudioUpload } from './AdminAudioUpload';
 import { AudioGenerationAdminPanel } from './AudioGenerationAdminPanel';
-import { requestResultEmail } from '../services/resultEmail';
+import { requestResultEmail, requestFullReportEmail } from '../services/resultEmail';
 import { buildFullReportNarrative } from '../result/fullReportNarrative';
-import { publishFullReport } from '../services/fullReportBackend';
+import { publishFullReport, loadFullReportForAdmin } from '../services/fullReportBackend';
 import {
   loadCareCompositionReview,
   ManualCareComposition,
@@ -137,6 +140,8 @@ export function CareComposerAdminView({
   backendIntakeId,
   friendlyResult,
 }: CareComposerAdminViewProps) {
+  const [journeyDays, setJourneyDays] = useState<7 | 21 | null>(null);
+  const [journeyError, setJourneyError] = useState('');
   const [emailSending, setEmailSending] = useState(false);
   const [emailMessage, setEmailMessage] = useState('');
   const [manual, setManual] = useState<ManualCareComposition | null>(null);
@@ -183,6 +188,16 @@ export function CareComposerAdminView({
       active = false;
     };
   }, [analise, motorDefault, backendIntakeId]);
+
+  useEffect(() => {
+    let active = true;
+    setJourneyDays(null);
+    setJourneyError('');
+    if (backendIntakeId) getAdminEntitlementForIntake(backendIntakeId)
+      .then(entitlement => { if (active) setJourneyDays(entitlement?.days || null); })
+      .catch(() => { if (active) setJourneyError('Não foi possível confirmar a duração do plano. Tente abrir esta anamnese novamente.'); });
+    return () => { active = false; };
+  }, [backendIntakeId]);
 
   if (!analise || !manual) {
     return (
@@ -253,6 +268,7 @@ export function CareComposerAdminView({
       intencao: manual.audioIntention,
       roteiroBase: manual.scriptLines,
       assinaturaExtras: [
+        ...(manual.dailyEnergySchedule || []).map(entry => `dia:${entry.day}:${entry.energyNames.join('|')}:${entry.intention}`),
         ...manual.floralIds.map(id => `floral:${id}`),
         ...manual.aromatherapyIds.map(id => `aroma:${id}`),
         ...manual.crystalIds.map(id => `cristal:${id}`),
@@ -313,6 +329,13 @@ export function CareComposerAdminView({
     setReviewMessage('');
 
     try {
+      const confirmed = await getAdminEntitlementForIntake(backendIntakeId);
+      setJourneyDays(confirmed?.days || null);
+      if (approve && !confirmed) throw new Error('Confirme o plano antes de aprovar a programação diária.');
+      if (approve && confirmed) {
+        const error = validateDailyEnergySchedule(manual.dailyEnergySchedule || [], confirmed.days, overriddenResources.energias);
+        if (error) throw new Error(error);
+      }
       const saved = await saveCareCompositionReview({
         intakeId: backendIntakeId,
         userId: backendUserId,
@@ -365,6 +388,8 @@ export function CareComposerAdminView({
           intake: anamnese,
           analysis: analise,
           composition,
+          journeyDays: confirmed?.days,
+          dailyEnergySchedule: manual.dailyEnergySchedule,
         });
 
         await publishFullReport({
@@ -519,6 +544,24 @@ export function CareComposerAdminView({
           </div>
         </section>
       </div>
+
+      <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
+        <h2 className="text-lg font-semibold text-stone-100">Programação diária — {journeyDays ? `${journeyDays} dias` : 'aguardando plano confirmado'}</h2>
+        <p className="mt-2 text-sm leading-6 text-stone-400">O motor propõe usando apenas as energias documentadas dos sistemas selecionados. Revise cada dia antes de aprovar. A programação será entregue junto ao relatório, na tela e no PDF.</p>
+        {journeyError && <p role="alert" className="mt-3 text-amber-300">{journeyError}</p>}
+        <button type="button" disabled={!journeyDays} onClick={() => {
+          if (!journeyDays) return;
+          markDraft({ ...manual, dailyEnergySchedule: proposeDailyEnergySchedule({ days: journeyDays, systems: selectedSystemsForResources, axes, highSensitivity: ['alta', 'muito_alta'].includes(anamnese.sensibilidadeEnergetica || '') }) });
+        }} className="mt-4 rounded-xl bg-amber-500 px-4 py-2 font-semibold text-stone-950 disabled:opacity-40">Gerar proposta diária do motor</button>
+        <div className="mt-5 grid gap-4 lg:grid-cols-2">{(manual.dailyEnergySchedule || []).map((entry, index) => <fieldset key={entry.day} className="rounded-xl border border-stone-700 p-4">
+          <legend className="px-2 font-semibold text-amber-300">Dia {entry.day}</legend>
+          <div className="space-y-2">{overriddenResources.energias.map(name => <label key={name} className="flex items-start gap-2 text-sm text-stone-200"><input type="checkbox" checked={entry.energyNames.includes(name)} onChange={() => {
+            const energyNames = entry.energyNames.includes(name) ? entry.energyNames.filter(item => item !== name) : [...entry.energyNames, name];
+            markDraft({ ...manual, dailyEnergySchedule: manual.dailyEnergySchedule!.map((item, i) => i === index ? { ...item, energyNames } : item) });
+          }}/>{name}</label>)}</div>
+          <label className="mt-4 block text-sm text-stone-300">Intenção do dia<input value={entry.intention} onChange={event => markDraft({ ...manual, dailyEnergySchedule: manual.dailyEnergySchedule!.map((item, i) => i === index ? { ...item, intention: event.target.value } : item) })} className="mt-2 w-full rounded-lg border border-stone-700 bg-stone-950 p-3 text-stone-100"/></label>
+        </fieldset>)}</div>
+      </section>
 
       <section className="mt-5 rounded-2xl border border-stone-800 bg-stone-900 p-6">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-stone-300">
@@ -751,7 +794,12 @@ export function CareComposerAdminView({
                 setEmailSending(true);
                 setEmailMessage('');
                 try {
-                  const response = await requestResultEmail({
+                  const publication = await loadFullReportForAdmin(backendIntakeId);
+                  const entitlement = await getAdminEntitlementForIntake(backendIntakeId);
+                  if (canAccessFullReport(entitlement) && !publication) throw new Error('Publique a versão aprovada do relatório completo antes de enviar.');
+                  const response = canAccessFullReport(entitlement) && publication
+                    ? await requestFullReportEmail({ userId: backendUserId, intakeId: backendIntakeId, requestedBy: 'admin', report: publication.report })
+                    : await requestResultEmail({
                     userId: backendUserId,
                     intakeId: backendIntakeId,
                     requestedBy: 'admin',

@@ -121,3 +121,19 @@ main section {
   main section { animation: none; }
   * { transition-duration: 0.01ms !important; }
 }
+
+.report-page { overflow-wrap: anywhere; }
+.report-page { background-image:url('/fundo-editorial-aprovado.png'); background-size:100% 100%; background-repeat:no-repeat; }
+:focus-visible { outline: 2px solid #a87828; outline-offset: 4px; }
+@media print {
+  .report-page { break-before:page; box-shadow:none; border-radius:0; }
+  .report-page:first-child { break-before:auto; }
+  .report-page { print-color-adjust:exact; }
+}
+.report-page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, rgba(255,250,240,.72) 13%, rgba(255,250,240,.72) 87%, transparent);
+}
