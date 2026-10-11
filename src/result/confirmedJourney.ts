@@ -11,7 +11,7 @@ export function applyConfirmedJourney(report: FullReportNarrative, days: 7 | 21)
     page5: {
       ...report.page5,
       title: `Os próximos ${days} dias`,
-      paragraphs: [`Sua jornada confirmada é de ${days} dias. ${schedule ? 'A programação que acompanha este relatório apresenta as energias escolhidas para cada dia, respeitando seu momento e a composição aprovada.' : 'Sua programação diária será apresentada após a revisão e publicação da composição.'}`, ...paragraphs.map(replaceDuration)],
+      paragraphs: [`Sua jornada confirmada é de ${days} dias. ${schedule ? 'A programação que acompanha este relatório apresenta as energias escolhidas para cada dia a partir da sua anamnese.' : 'Sua programação diária será preparada automaticamente a partir da sua anamnese.'}`, ...paragraphs.map(replaceDuration)],
     },
     // A different duration must be reviewed; never pad, truncate or repeat an approved schedule.
     dailyEnergySchedule: schedule,

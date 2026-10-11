@@ -137,3 +137,9 @@ main section {
   pointer-events: none;
   background: linear-gradient(to right, transparent, rgba(255,250,240,.72) 13%, rgba(255,250,240,.72) 87%, transparent);
 }
+
+.welcome-hero button { background:#efc76b; color:#173c2c; box-shadow:0 6px 24px rgba(239,199,107,.24); }
+.welcome-hero button:hover { background:#ffdd8c; }
+@media (max-width:1023px) {
+  .welcome-hero > div:nth-child(2) { background:linear-gradient(180deg,rgba(14,48,31,.96),rgba(14,48,31,.82) 52%,rgba(14,48,31,.08)); }
+}

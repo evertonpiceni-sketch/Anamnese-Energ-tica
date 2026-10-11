@@ -1,3 +1,4 @@
+import { canAccessFullReport } from '../commercial/entitlements';
 import { applyConfirmedJourney } from '../result/confirmedJourney';
 import { getCurrentUserEntitlementForIntake } from './entitlementBackend';
 import { supabase } from '../lib/supabase';
@@ -6,7 +7,7 @@ import { narrativeSource } from '../result/answerEvidence';
 import type { AnamneseInput } from '../types';
 import { PERGUNTAS_ANAMNESE } from '../data/questions';
 
-async function loadNarrativeIntake(intakeId: string): Promise<AnamneseInput> {
+export async function loadNarrativeIntake(intakeId: string): Promise<AnamneseInput> {
   const { data, error } = await supabase.from('intake_sessions')
     .select('id,external_ref,person_name,answers,declared_intention,free_text_need,free_text_challenges,free_text_strengths,body_regions,energetic_sensitivity')
     .eq('id', intakeId).single();
@@ -83,25 +84,21 @@ export async function publishFullReport(params: {
 export async function loadOwnFullReport(
   intakeId: string
 ): Promise<FullReportPublication | null> {
-  const { data, error } = await supabase
-    .from('full_report_publications')
-    .select('*')
-    .eq('intake_id', intakeId)
-    .maybeSingle();
-
-  if (error) throw error;
-  if (!data) return null;
-  const publication = mapPublication(data);
-  const intake = await loadNarrativeIntake(intakeId);
-  const expected = narrativeSource(intake);
-  if (publication.report.source?.generatorVersion !== expected.generatorVersion || publication.report.source.fingerprint !== expected.fingerprint || publication.report.source.intakeId !== expected.intakeId) {
-    const [{ executarAnaliseIntegrativa }, { refreshReportReading }] = await Promise.all([
-      import('../engine/analysisEngine'), import('../result/fullReportNarrative'),
-    ]);
-    publication.report = refreshReportReading(publication.report, intake, executarAnaliseIntegrativa(intake));
-  }
   const entitlement = await getCurrentUserEntitlementForIntake(intakeId);
-  return entitlement ? { ...publication, report: applyConfirmedJourney(publication.report, entitlement.days) } : publication;
+  if (!canAccessFullReport(entitlement) || !entitlement) return null;
+  const intake = await loadNarrativeIntake(intakeId);
+  const { buildAutomaticCare } = await import('../care/automaticCare');
+  const automatic = buildAutomaticCare(intake, entitlement.days);
+  const { data, error } = await supabase.from('full_report_publications').select('*').eq('intake_id', intakeId).maybeSingle();
+  if (error) throw error;
+  // An automatically generated result does not pretend that an ADM review occurred.
+  const now = new Date().toISOString();
+  // Explicit ADM adjustments remain usable, but an old or incomplete publication cannot block automatic delivery.
+  const expected = narrativeSource(intake);
+  if (data && data.report_json?.source?.generatorVersion === expected.generatorVersion && data.report_json.source.fingerprint === expected.fingerprint && data.report_json.source.intakeId === expected.intakeId && data.report_json.dailyEnergySchedule?.length === entitlement.days && data.report_json.deliveryMode !== 'automatic') return { ...mapPublication(data), report: applyConfirmedJourney(data.report_json, entitlement.days) };
+  return data ? { ...mapPublication(data), report: automatic.report } : {
+    id: `automatic-${intakeId}`, intakeId, userId: '', report: automatic.report, publishedAt: now, updatedAt: now,
+  };
 }
 
 export async function loadFullReportForAdmin(

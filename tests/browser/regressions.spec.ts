@@ -120,10 +120,10 @@ test('daily motor proposal uses documented resources and respects early stabiliz
   await page.goto('/');
   const result = await page.evaluate(async () => {
     const { BIBLIOTECA_MESTRA } = await import(/* @vite-ignore */ String('/src/data/bibliotecaMestra.ts'));
-    const { proposeDailyEnergySchedule } = await import(/* @vite-ignore */ String('/src/care/dailyEnergySchedule.ts'));
+    const { proposeDailyEnergySchedule, documentedEnergyNames } = await import(/* @vite-ignore */ String('/src/care/dailyEnergySchedule.ts'));
     const systems = BIBLIOTECA_MESTRA.filter(system => system.catalogacaoTecnica === 'COMPLETA');
     const schedule = proposeDailyEnergySchedule({ days: 7, systems, axes: [{ eixoId: 'mente', percentual: 80 }, { eixoId: 'emocional', percentual: 65 }], highSensitivity: true });
-    const allowed = systems.filter(system => !system.ehEstimulanteAtivo).flatMap(system => system.energias);
+    const allowed = systems.filter(system => !system.ehEstimulanteAtivo).flatMap(documentedEnergyNames);
     return { schedule, documented: schedule.every(entry => entry.energyNames.every(name => allowed.includes(name))), variations: new Set(schedule.map(entry => entry.energyNames.join('|'))).size };
   });
   expect(result.schedule).toHaveLength(7);
@@ -141,14 +141,14 @@ test('report names the reviewed energies and uses the approved chakra artwork', 
   await expect(energies.getByText('Original Reiki Platinum', { exact: true })).toBeVisible();
   const symbols = page.getByRole('img', { name: /^Símbolo do / });
   await expect(symbols).toHaveCount(7);
-  expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-referencia-')))).toBe(true);
+  expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-cristalinos.png')))).toBe(true);
   await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-aprovados.png' });
   await page.getByRole('region', { name: 'Energias do cuidado' }).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-mobile.png' });
   await render(page, 'FullReportApprovedView', { report: narrative });
-  await expect(page.getByRole('region', { name: 'Energias do cuidado' })).toContainText('Sua composição está sendo revisada');
+  await expect(page.getByRole('region', { name: 'Energias do cuidado' })).toContainText('Estamos preparando sua composição individual');
   await expect(page.getByRole('region', { name: 'Energias do cuidado' }).getByText('Soul Healing', { exact: true })).toHaveCount(0);
 });
 
@@ -236,7 +236,7 @@ test('refreshing a legacy report changes the reading and preserves reviewed care
     const stored = { ...buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: 7, dailyEnergySchedule: schedule }), source: undefined, page2: { title: 'Diagnóstico da Anamnese', paragraphs: ['Texto genérico de outra pessoa.'] }, page4: { title: 'Cuidado', paragraphs: ['Direção do cuidado: caminho genérico.', 'Florais — Recurso aprovado.'] } };
     return { fresh: refreshReportReading(stored, intake, analysis), schedule };
   });
-  expect(result.fresh.source.generatorVersion).toBe('answers-v3');
+  expect(result.fresh.source.generatorVersion).toBe('answers-v4');
   expect(result.fresh.page2.paragraphs.join(' ')).not.toContain('Texto genérico');
   expect(result.fresh.page4.paragraphs).toContain('Florais — Recurso aprovado.');
   expect(result.fresh.dailyEnergySchedule).toEqual(result.schedule);
@@ -261,4 +261,78 @@ test('publication rejects a report built from different saved answers', async ({
   }, fixture.report);
   expect(message).toContain('não corresponde às respostas salvas');
   expect(writes).toBe(0);
+});
+
+
+test('automatic care delivers seven distinct days and documented complementary resources without ADM approval', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    const { PERGUNTAS_ANAMNESE } = await import(/* @vite-ignore */ String('/src/data/questions.ts'));
+    const cases = CASOS_DE_TESTE.map(sample => buildAutomaticCare(sample.dados, 7));
+    const original = CASOS_DE_TESTE[0].dados;
+    const zeroAnswers = Object.fromEntries(PERGUNTAS_ANAMNESE.map(question => [question.id, 0]));
+    const calm = buildAutomaticCare({ ...original, respostasObjetivas: zeroAnswers, relatoLivreNecessidade: '', relatoLivreDesafios: '', regioesCorporaisPercebidas: [] }, 7);
+    const mental = buildAutomaticCare({ ...original, respostasObjetivas: { ...zeroAnswers, q2_mente_acelerada: 4 }, relatoLivreNecessidade: '', relatoLivreDesafios: '', regioesCorporaisPercebidas: [] }, 7);
+    const emotional = buildAutomaticCare({ ...original, respostasObjetivas: { ...zeroAnswers, q6_engolir_emocoes: 4 }, relatoLivreNecessidade: '', relatoLivreDesafios: '', regioesCorporaisPercebidas: [] }, 7);
+    return { reports: cases.map(item => item.report), resources: cases.map(item => item.resources), calm: calm.report, mental: mental.report, emotional: emotional.report };
+  });
+  for (const report of result.reports) {
+    expect(report.deliveryMode).toBe('automatic');
+    expect(report.dailyEnergySchedule).toHaveLength(7);
+    expect(new Set(report.dailyEnergySchedule.map(day => [...day.energyNames].sort().join('|'))).size).toBe(7);
+    expect(report.dailyEnergySchedule.every(day => day.reason && day.energyDetails.every(item => item.source) && day.resources.every(item => item.source))).toBe(true);
+  }
+  for (const resources of result.resources) expect(new Set(resources.map(item => item.category))).toEqual(new Set(['Cristal etérico', 'Floral', 'Aromaterapia', 'Banho energético', 'Solfeggio']));
+  expect(result.mental.source.fingerprint).not.toBe(result.emotional.source.fingerprint);
+  expect(result.mental.dailyEnergySchedule).not.toEqual(result.emotional.dailyEnergySchedule);
+  expect(result.calm.page3.chakras).toHaveLength(0);
+  expect(result.mental.page3.chakras.map(item => item.name)).toEqual(['Frontal']);
+  expect(result.emotional.page3.chakras.map(item => item.name).sort()).toEqual(['Cardíaco', 'Laríngeo']);
+  await render(page, 'FullReportApprovedView', { report: result.reports[0] });
+  await expect(page.getByRole('heading', { name: 'Dia 7', exact: true })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Recursos da biblioteca' })).toContainText('Cristal etérico');
+  await expect(page.getByText('aguarda revisão', { exact: false })).toHaveCount(0);
+  await expect(page.getByText('Neste cuidado, esse centro está associado', { exact: false })).toHaveCount(0);
+});
+
+test('paid report is generated from saved answers even without a publication or an ADM review', async ({ page }) => {
+  await page.goto('/');
+  const source = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    return CASOS_DE_TESTE[0].dados;
+  });
+  await page.route('**/rest/v1/commercial_entitlements**', route => route.fulfill({ json: { product_code: 'CARE_7_BASIC', paid_amount_cents: 5000, full_report_addon_paid: true, status: 'active' } }));
+  await page.route('**/rest/v1/intake_sessions**', route => route.fulfill({ json: { id: 'saved-intake', external_ref: source.id, person_name: source.nomePessoa, answers: source.respostasObjetivas, declared_intention: source.intencaoDeclarada, free_text_need: source.relatoLivreNecessidade, free_text_challenges: source.relatoLivreDesafios, free_text_strengths: source.relatoLivrePreservado, body_regions: source.regioesCorporaisPercebidas, energetic_sensitivity: source.sensibilidadeEnergetica } }));
+  await page.route('**/rest/v1/full_report_publications**', route => route.fulfill({ json: null }));
+  const publication = await page.evaluate(async () => {
+    const { loadOwnFullReport } = await import(/* @vite-ignore */ String('/src/services/fullReportBackend.ts'));
+    return loadOwnFullReport('saved-intake');
+  });
+  expect(publication.report.deliveryMode).toBe('automatic');
+  expect(publication.report.dailyEnergySchedule).toHaveLength(7);
+  expect(publication.report.source.intakeId).toBe(source.id);
+});
+
+
+test('paid complete reading is shown once, without a repeated basic report or an approval gate', async ({ page }) => {
+  await page.goto('/');
+  const source = await page.evaluate(async () => { const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts')); return CASOS_DE_TESTE[0].dados; });
+  await page.route('**/rest/v1/**', route => route.fulfill({ json: null }));
+  await page.route('**/rest/v1/intake_sessions**', route => route.fulfill({ json: { id: 'paid-intake', external_ref: source.id, person_name: source.nomePessoa, answers: source.respostasObjetivas, declared_intention: source.intencaoDeclarada, free_text_need: source.relatoLivreNecessidade, free_text_challenges: source.relatoLivreDesafios, free_text_strengths: source.relatoLivrePreservado, body_regions: source.regioesCorporaisPercebidas, energetic_sensitivity: source.sensibilidadeEnergetica } }));
+  await page.route('**/rest/v1/commercial_entitlements**', route => route.fulfill({ json: { product_code: 'CARE_7_BASIC', paid_amount_cents: 5000, full_report_addon_paid: true, status: 'active' } }));
+  await page.evaluate(async () => {
+    const { default: React } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/react.js'));
+    const { default: ReactDOM } = await import(/* @vite-ignore */ String('/node_modules/.vite/deps/react-dom_client.js'));
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    supabase.auth.getUser = async () => ({ data: { user: { id: 'test-user' } }, error: null });
+    const { UserMomentArea } = await import(/* @vite-ignore */ String('/src/components/UserMomentArea.tsx'));
+    document.getElementById('root').remove(); const host = document.createElement('div'); document.body.appendChild(host);
+    ReactDOM.createRoot(host).render(React.createElement(UserMomentArea, { mode: 'momento', onStartNewIntake: () => {} }));
+  });
+  await expect(page.getByRole('heading', { name: 'Dia 7', exact: true })).toBeVisible();
+  await expect(page.locator('.report-page')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'Leitura Básica', exact: true })).toHaveCount(0);
+  await expect(page.getByText('aguarda revisão', { exact: false })).toHaveCount(0);
 });

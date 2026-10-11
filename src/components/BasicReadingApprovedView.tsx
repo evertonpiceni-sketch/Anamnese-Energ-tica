@@ -19,6 +19,7 @@ export function BasicReadingApprovedView({ data }: { data: UserMomentData }) {
       <Block number={3} title="Intenção do cuidado"><p>{result.intention}</p></Block>
     </div>
     {data.audio && <div className="mt-4"><Block number={4} title="Sua sessão exclusiva"><p>{data.audio.titulo}</p><p>{data.audio.intencao}</p></Block></div>}
+    {data.automaticReport?.dailyEnergySchedule?.length && <div className="mt-4"><Block number={4} title="Seu cuidado, dia a dia"><ol className="space-y-4">{data.automaticReport.dailyEnergySchedule.map(day => <li key={day.day}><strong>Dia {day.day} · {day.energyNames.join(' · ')}</strong><p>{day.intention}</p><p className="text-sm">{day.reason}</p><p className="text-sm">{day.resources?.map(item => `${item.category}: ${item.name}`).join(' · ')}</p></li>)}</ol></Block></div>}
     <div className="mt-4"><Block number={5} title="Recursos de apoio"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {result.solfeggio?.hz && <p><strong>Frequência da sessão</strong><br/>{result.solfeggio.hz} Hz</p>}
       {result.ethericCrystals.length > 0 && <p><strong>Cristais etéricos</strong><br/>{names(result.ethericCrystals)}<br/><span className="text-sm">Referências energéticas, sem necessidade de pedras físicas.</span></p>}

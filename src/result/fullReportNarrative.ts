@@ -9,6 +9,8 @@ import { collectAnswerEvidence, buildEvidenceChakras, narrativeSource } from './
 
 export interface FullReportNarrative {
   nome: string;
+  deliveryMode?: 'automatic';
+  careResources?: import('../care/automaticCare').PatientCareResource[];
   journeyDays?: 7 | 21;
   dailyEnergySchedule?: DailyEnergyPlan[];
   energyNames?: string[];
