@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabase';
 
-export type InfinitePayAmountCents = 50 | 1500 | 5000 | 6500 | 10000 | 18000;
+export type InfinitePayAmountCents = 100 | 1500 | 5000 | 6500 | 10000 | 18000;
 
 export interface InfinitePayCheckoutResult {
   orderNsu: string;
