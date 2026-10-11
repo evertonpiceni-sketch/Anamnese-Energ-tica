@@ -30,3 +30,13 @@ Supabase de produção consultado em modo de leitura: todas as 19 tabelas públi
 - A existência da função de e-mail não confirma que seu provedor esteja configurado; a pendência original da arquitetura permanece válida.
 - Relatórios já publicados no banco não foram reescritos. A nova narrativa é aplicada em novas publicações pelo ADM; a nova apresentação é aplicada também aos relatórios existentes.
 - Esta revisão não altera migrations nem configurações de produção. A entrega pelo repositório permite revisar as alterações antes da publicação.
+
+## Continuação — duração confirmada, programação diária e produção
+
+O pagamento de teste confirmou 7 dias; título e subtítulo da publicação desse teste foram corrigidos no banco, sem alterar pagamento, permissões ou conteúdo das respostas. Novas leituras e PDFs resolvem a duração pelo entitlement vigente. A publicação do teste ainda não tinha revisão nem composição diária vinculada; não se inventou uma programação aprovada para preencher essa ausência.
+
+A pedido de Everton, o motor agora propõe uma programação diferente entre os dias, limitada às energias documentadas dos sistemas selecionados e às prioridades da anamnese. Sistemas estimulantes são excluídos no início ou diante de alta sensibilidade. Everton revisa a proposta no ADM, altera energias e intenções e aprova. A publicação rejeita dias ausentes, energias fora da composição e repetição da mesma composição em dias consecutivos. Alterar a programação muda a assinatura do plano de áudio, evitando reutilizar o vínculo de uma composição anterior.
+
+O relatório mantém cinco páginas narrativas e entrega a programação aprovada em anexo no mesmo documento: seis páginas para 7 dias, oito para 21 dias. Mudanças de duração exigem nova revisão da programação, sem repetição ou truncamento automático. Foram adicionados testes de duração, anexo com 21 dias no PDF e restrições do motor diário.
+
+O logo PNG retorna 404 no deploy antigo; as correções de layout ainda estavam apenas no PR. A entrega inclui publicação efetiva em produção e verificação do logo original. O caminho SVG antigo redireciona ao PNG para compatibilidade com páginas antigas em cache.

@@ -17,7 +17,7 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
     await document.fonts.ready;
     await Promise.all(Array.from(host.querySelectorAll('img')).map(img => img.decode()));
     const pages = Array.from(host.querySelectorAll<HTMLElement>('.report-page'));
-    if (pages.length !== 5) throw new Error('O relatório precisa conter cinco páginas completas.');
+    if (pages.length !== 5 + Math.ceil((report.dailyEnergySchedule?.length || 0) / 7)) throw new Error('O relatório e sua programação diária precisam estar completos.');
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     for (const [index, page] of pages.entries()) {
       if (index) doc.addPage();

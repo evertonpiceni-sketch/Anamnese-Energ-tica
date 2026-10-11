@@ -1,3 +1,5 @@
+import type { DailyEnergyPlan } from '../care/dailyEnergySchedule';
+import { applyConfirmedJourney } from './confirmedJourney';
 import { CareComposition } from '../care/careComposer';
 import { selectBathSupport } from '../care/bathCatalog';
 import { selectComplementaryCare } from '../care/complementaryCatalogs';
@@ -8,6 +10,8 @@ import { AnamneseInput } from '../types';
 
 export interface FullReportNarrative {
   nome: string;
+  journeyDays?: 7 | 21;
+  dailyEnergySchedule?: DailyEnergyPlan[];
   page1: { title: string; subtitle: string; intro: string };
   page2: { title: string; paragraphs: string[]; cycle?: string };
   page3: { title: string; paragraphs: string[]; preserved: string[]; chakras: Array<{ name: string; text: string }> };
@@ -46,7 +50,7 @@ function chakraText(name:string,a:Answer[]){
   return 'Este centro aparece como parte importante do seu momento e será acompanhado com delicadeza ao longo do percurso.';
 }
 
-export function buildFullReportNarrative({intake,analysis,composition}:{intake:AnamneseInput;analysis:AnaliseCompletaResultado;composition:CareComposition|null}):FullReportNarrative{
+export function buildFullReportNarrative({intake,analysis,composition,journeyDays,dailyEnergySchedule}:{intake:AnamneseInput;analysis:AnaliseCompletaResultado;composition:CareComposition|null;journeyDays?:7|21;dailyEnergySchedule?:DailyEnergyPlan[]}):FullReportNarrative{
   const nome=firstName(intake.nomePessoa); const report=analysis.relatorioEverton; const all=answers(intake); const active=all.filter(x=>x.level>=2); const rel=relationships(active);
   const ranked=report.eixosOrdenados; const priorities=ranked.filter(x=>x.percentual>0).slice(0,4).map(x=>x.nome.toLowerCase());
   const preserved=report.analiseContextualAvancada?.fatoresPreservados.recursosInternosPreservados||[];
@@ -70,11 +74,12 @@ export function buildFullReportNarrative({intake,analysis,composition}:{intake:A
   if(intake.relatoLivreDesafios?.trim()) free.push(`Você também nomeou “${intake.relatoLivreDesafios.trim()}” como algo difícil de atravessar. Esse ponto será observado ao longo do percurso, não para medir desempenho, mas para perceber se ele começa a pesar de outra forma.`);
   const cycle=all.some(x=>x.id==='q1_procrastinacao_inicio'&&x.level>=3)&&all.some(x=>x.id==='q5_autocobranca_insuficiencia'&&x.level>=3)?'muitas demandas → sobrecarga → dificuldade de começar ou decidir → adiamento → alívio curto → cobrança → cansaço → nova tentativa':undefined;
 
-  return {nome,
+  const narrative: FullReportNarrative = {nome, dailyEnergySchedule,
     page1:{title:'Relatório Completo — Leitura do Seu Momento',subtitle:'Uma leitura feita para que você consiga se reconhecer nela e, principalmente, saiba por onde o cuidado vai começar.',intro:`${nome}, eu quero que você leia estas páginas sem a sensação de estar recebendo um diagnóstico frio. Aqui estão os fios que apareceram nas suas respostas, aquilo que ainda permanece forte em você e o caminho de cuidado pensado para este momento.`},
     page2:{title:'Diagnóstico da Anamnese',paragraphs:[`${nome}, quando suas respostas são colocadas lado a lado, os pontos que mais pedem cuidado aparecem em ${join(priorities)||'um acompanhamento gentil do seu momento, sem sinais intensos nas respostas objetivas'}. Vamos olhar com cuidado para como esses movimentos se encontram na sua vida.`,...rel,...free,'O direcionamento, portanto, não começa exigindo mudança. Começa diminuindo a pressão. A proposta é criar sustentação suficiente para que clareza, confiança e movimento possam voltar a aparecer sem serem arrancados à força.'],cycle},
     page3:{title:'O que suas respostas contam sobre você',paragraphs:['Nem tudo em você está cansado ou fragilizado. Há recursos que continuam presentes e que serão usados a favor do seu processo. Cuidar não é olhar apenas para o que dói; é também lembrar a você aquilo que ainda está vivo.',intake.relatoLivrePreservado?.trim()?`Você mesmo reconheceu algo importante: “${intake.relatoLivrePreservado.trim()}”. Isso será tratado como força do percurso, não como detalhe.`:'O simples fato de você conseguir olhar para o próprio momento já mostra percepção, desejo de mudança e abertura para um cuidado diferente da cobrança.'],preserved:preserved.length?preserved:['capacidade de se observar','desejo verdadeiro de mudança','sensibilidade para perceber o próprio momento','abertura para receber cuidado','possibilidade de recomeçar sem precisar fazer tudo de uma vez'],chakras:chakras.map(name=>({name,text:chakraText(name,active)}))},
     page4:{title:'O que vamos trabalhar com você',paragraphs:page4},
-    page5:{title:'Os próximos 7 ou 21 dias',paragraphs:['Você pode escolher um percurso de 7 dias, com espaço para iniciar o cuidado e observar suas primeiras percepções, ou de 21 dias, com mais tempo para continuidade e acompanhamento. A escolha será feita com você, respeitando seu momento e o plano confirmado.','Nos primeiros movimentos, o foco é você se sentir mais sustentado. Isso significa diminuir excesso de pressão, criar momentos reais de pausa e permitir que corpo, emoção e mente voltem a ser percebidos juntos.','Com essa base, o trabalho avança para os centros e temas que apareceram na sua leitura. O áudio personalizado reúne as energias escolhidas para você; os demais recursos entram como apoio ao mesmo direcionamento, e não como uma lista de coisas para cumprir.','Ao longo do percurso, observe menos se você está “fazendo certo” e mais o que muda dentro de você: onde existe um pouco mais de espaço, o que deixa de apertar tanto, o que começa a ficar mais claro e onde ainda existe resistência ou cansaço.','Na reavaliação, essas percepções serão comparadas com o seu ponto de partida. O cuidado poderá então ser ajustado ao que realmente mudou — porque o percurso deve acompanhar você, e não obrigar você a acompanhar um roteiro rígido.'],closingTitle:`Uma última coisa, ${nome}`,closing:['Você não precisa chegar aqui forte.','Não precisa ter todas as respostas.','Não precisa transformar este processo em mais uma cobrança.','Por agora, basta permitir que o cuidado também chegue até você.']}
+    page5:{title:'Seu percurso de cuidado',paragraphs:['A duração e a programação diária serão apresentadas conforme o plano confirmado e a composição aprovada.','Nos primeiros movimentos, o foco é você se sentir mais sustentado. Isso significa diminuir excesso de pressão, criar momentos reais de pausa e permitir que corpo, emoção e mente voltem a ser percebidos juntos.','Com essa base, o trabalho avança para os centros e temas que apareceram na sua leitura. O áudio personalizado reúne as energias escolhidas para você; os demais recursos entram como apoio ao mesmo direcionamento, e não como uma lista de coisas para cumprir.','Ao longo do percurso, observe menos se você está “fazendo certo” e mais o que muda dentro de você: onde existe um pouco mais de espaço, o que deixa de apertar tanto, o que começa a ficar mais claro e onde ainda existe resistência ou cansaço.','Na reavaliação, essas percepções serão comparadas com o seu ponto de partida. O cuidado poderá então ser ajustado ao que realmente mudou — porque o percurso deve acompanhar você, e não obrigar você a acompanhar um roteiro rígido.'],closingTitle:`Uma última coisa, ${nome}`,closing:['Você não precisa chegar aqui forte.','Não precisa ter todas as respostas.','Não precisa transformar este processo em mais uma cobrança.','Por agora, basta permitir que o cuidado também chegue até você.']}
   };
+  return journeyDays ? applyConfirmedJourney(narrative, journeyDays) : narrative;
 }

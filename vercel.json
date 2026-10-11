@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/logo-everton-oficial.svg",
+      "destination": "/logo-everton-oficial.png",
+      "permanent": false
+    }
+  ]
+}
