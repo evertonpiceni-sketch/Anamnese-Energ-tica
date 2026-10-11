@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Sparkles, BookOpen, FileText, Activity, ShieldCheck, PlusCircle, SlidersHorizontal } from 'lucide-react';
 
 interface NavbarProps {
@@ -67,7 +68,7 @@ function NavButton({
 }: {
   active: boolean;
   onClick: () => void;
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   activeClass?: string;
 }) {
