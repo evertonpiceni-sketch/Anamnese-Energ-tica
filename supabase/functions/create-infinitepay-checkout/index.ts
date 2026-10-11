@@ -7,6 +7,8 @@ const json = (status: number, body: unknown) =>
     headers: { "content-type": "application/json; charset=utf-8" },
   });
 
+const INFINITEPAY_HANDLE = "everton-rodrigo-piceni";
+
 const PRODUCTS: Record<number, { productCode: string; addon: boolean; description: string }> = {
   1500: { productCode: "CARE_7_BASIC", addon: true, description: "Relatório completo — adicional" },
   5000: { productCode: "CARE_7_BASIC", addon: false, description: "Jornada 7 dias — áudio personalizado" },
@@ -21,11 +23,9 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRole = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const handle = Deno.env.get("INFINITEPAY_HANDLE");
   const appBaseUrl = Deno.env.get("APP_BASE_URL");
 
   if (!supabaseUrl || !serviceRole || !anonKey) return json(503, { error: "supabase_not_configured" });
-  if (!handle) return json(503, { error: "infinitepay_handle_not_configured" });
 
   const authorization = req.headers.get("authorization") || "";
   const token = authorization.toLowerCase().startsWith("bearer ")
@@ -79,7 +79,7 @@ Deno.serve(async (req: Request) => {
   if (orderError) return json(400, { error: orderError.message });
 
   const body: any = {
-    handle,
+    handle: INFINITEPAY_HANDLE,
     order_nsu: orderNsu,
     webhook_url: `${supabaseUrl}/functions/v1/infinitepay-payment-webhook`,
     items: [{ quantity: 1, price: amountCents, description: product.description }],
