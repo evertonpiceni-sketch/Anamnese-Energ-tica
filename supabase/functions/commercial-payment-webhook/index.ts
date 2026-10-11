@@ -7,7 +7,7 @@ const json = (status: number, body: unknown) =>
     headers: { "content-type": "application/json; charset=utf-8" },
   });
 
-const allowedAmounts = [50, 1500, 5000, 6500, 10000, 18000];
+const allowedAmounts = [100, 1500, 5000, 6500, 10000, 18000];
 
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
