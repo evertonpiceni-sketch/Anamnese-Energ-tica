@@ -10,6 +10,7 @@ const json = (status: number, body: unknown) =>
 const INFINITEPAY_HANDLE = "everton-rodrigo-piceni";
 
 const PRODUCTS: Record<number, { productCode: string; addon: boolean; description: string }> = {
+  50: { productCode: "CARE_7_BASIC", addon: false, description: "Plano teste — cuidado personalizado 7 dias" },
   1500: { productCode: "CARE_7_BASIC", addon: true, description: "Relatório completo — adicional" },
   5000: { productCode: "CARE_7_BASIC", addon: false, description: "Jornada 7 dias — áudio personalizado" },
   6500: { productCode: "CARE_7_BASIC", addon: true, description: "Jornada 7 dias + relatório completo" },
@@ -84,9 +85,7 @@ Deno.serve(async (req: Request) => {
     webhook_url: `${supabaseUrl}/functions/v1/infinitepay-payment-webhook`,
     items: [{ quantity: 1, price: amountCents, description: product.description }],
   };
-  if (appBaseUrl) {
-    body.redirect_url = `${appBaseUrl.replace(/\/$/, "")}/pagamento-concluido`;
-  }
+  if (appBaseUrl) body.redirect_url = `${appBaseUrl.replace(/\/$/, "")}/pagamento-concluido`;
 
   const response = await fetch("https://api.checkout.infinitepay.io/links", {
     method: "POST",
@@ -95,15 +94,10 @@ Deno.serve(async (req: Request) => {
   });
   const raw = await response.text();
   let data: any = {};
-  try {
-    data = JSON.parse(raw);
-  } catch {
-    data = { raw };
-  }
+  try { data = JSON.parse(raw); } catch { data = { raw }; }
 
   if (!response.ok) {
-    await admin
-      .from("commercial_checkout_orders")
+    await admin.from("commercial_checkout_orders")
       .update({ status: "failed", updated_at: new Date().toISOString() })
       .eq("id", orderId);
     return json(502, { error: "infinitepay_checkout_failed", details: data });
@@ -111,20 +105,9 @@ Deno.serve(async (req: Request) => {
 
   const checkoutUrl = data?.url || data?.checkout_url || data?.link || data?.payment_url || null;
   const invoiceSlug = data?.slug || data?.invoice_slug || null;
-  await admin
-    .from("commercial_checkout_orders")
-    .update({
-      status: "pending",
-      checkout_url: checkoutUrl,
-      invoice_slug: invoiceSlug,
-      updated_at: new Date().toISOString(),
-    })
+  await admin.from("commercial_checkout_orders")
+    .update({ status: "pending", checkout_url: checkoutUrl, invoice_slug: invoiceSlug, updated_at: new Date().toISOString() })
     .eq("id", orderId);
 
-  return json(200, {
-    ok: true,
-    order_nsu: orderNsu,
-    checkout_url: checkoutUrl,
-    provider_response: data,
-  });
+  return json(200, { ok: true, order_nsu: orderNsu, checkout_url: checkoutUrl, provider_response: data });
 });
