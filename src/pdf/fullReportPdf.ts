@@ -5,7 +5,7 @@ import { flushSync } from 'react-dom';
 import { FullReportApprovedView } from '../components/FullReportApprovedView';
 import type { FullReportNarrative } from '../result/fullReportNarrative';
 
-/** All complete delivery channels render the same continuous approved report, with pagination determined by its actual content. */
+/** All complete delivery channels render the same approved report structure. */
 export async function createFullReportPdfBlob(report: FullReportNarrative): Promise<{ blob: Blob; fileName: string }> {
   const { default: html2canvas } = await import('html2canvas-pro');
   const host = document.createElement('div');
@@ -18,7 +18,8 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
     await document.fonts.ready;
     await Promise.all(Array.from(host.querySelectorAll('img')).map(img => img.decode()));
     const pages = Array.from(host.querySelectorAll<HTMLElement>('.report-page'));
-    if (pages.length !== 1) throw new Error('O relatório e sua programação diária precisam estar completos.');
+    const expected = 5 + Math.ceil((report.dailyEnergySchedule?.length || 0) / 7);
+    if (pages.length !== expected) throw new Error('O relatório e sua programação diária precisam estar completos antes da exportação.');
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     let printedPages = 0;
     for (const page of pages) {
@@ -33,7 +34,6 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
       let offset = 0;
       while (offset < canvas.height) {
         let end = Math.min(offset + maxHeight, canvas.height);
-        // Move a break before a paragraph, chakra or daily composition rather than through it.
         const crossing = blocks.filter(block => block.top < end && block.bottom > end && block.top > offset);
         if (crossing.length) end = Math.min(...crossing.map(block => block.top));
         if (end <= offset) end = Math.min(offset + maxHeight, canvas.height);
