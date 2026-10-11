@@ -13,67 +13,67 @@ export interface BathSupportResource {
 
 /**
  * Banhos incluídos somente quando há material documental no acervo.
- * A seleção automática aponta o recurso; preparo detalhado e eventuais
- * ativações permanecem sob validação/orientação do terapeuta.
+ * Aqui, “banho” significa uma prática espiritual de imersão/visualização
+ * em luz colorida; não é banho físico com água, ervas ou outros produtos.
  */
 export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
   {
     id: 'templo-negro',
-    nome: 'Banho do Templo Negro',
-    descricaoPublica: 'Escolhido para dar espaço a proteção, limites, aterramento e sensação de segurança.',
+    nome: 'Banho de Luz do Templo Negro',
+    descricaoPublica: 'Como apoio a este momento, a luz negra é usada simbolicamente para envolver o corpo em uma sensação de proteção, limite e recolhimento. A proposta é favorecer um espaço interno mais protegido, especialmente quando você sente que precisa desacelerar e encontrar segurança.',
     eixos: ['seguranca', 'protecao', 'corpo'],
     chakras: ['Raiz'],
-    orientacaoPublica: 'Quando indicado, será apresentado como prática complementar de apoio, seguindo a forma documentada no protocolo e a orientação do terapeuta.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. Você pode apenas descansar e imaginar essa luz envolvendo o corpo, sem precisar sentir ou visualizar nada de forma intensa.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
   {
     id: 'templo-marrom',
-    nome: 'Banho do Templo Marrom',
-    descricaoPublica: 'A intenção deste banho é acompanhar o reencontro com o chão, presença e conexão com a terra quando existe sensação de desconexão ou falta de sustentação.',
+    nome: 'Banho de Luz do Templo Marrom',
+    descricaoPublica: 'A luz marrom acompanha momentos em que o cuidado pede mais chão, presença e sustentação. Ela entra como uma imagem de apoio para ajudar você a se perceber aqui, no corpo e no momento presente, sem exigir que tudo esteja resolvido.',
     eixos: ['seguranca', 'corpo', 'integracao'],
     chakras: ['Raiz'],
-    orientacaoPublica: 'Usar somente quando fizer sentido dentro da composição individual e conforme a orientação cadastrada pelo terapeuta.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. A ideia é imaginar uma luz marrom envolvendo o corpo enquanto você descansa e percebe seus pontos de apoio.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
   {
     id: 'templo-azul',
-    nome: 'Banho do Templo Azul',
-    descricaoPublica: 'Apoio relacionado à expressão, harmonia, perdão e fortalecimento de limites quando a leitura aponta necessidade de dar mais espaço à própria voz.',
+    nome: 'Banho de Luz do Templo Azul',
+    descricaoPublica: 'A luz azul acompanha momentos em que há algo importante para dizer, organizar ou proteger nas relações. Ela é usada como um convite à calma, à expressão mais serena e ao respeito pelos próprios limites.',
     eixos: ['relacionamentos', 'emocional', 'protecao'],
     chakras: ['Laríngeo'],
-    orientacaoPublica: 'A prática só é sugerida quando conversa com a leitura atual e não substitui outros cuidados necessários.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. Você pode imaginar a luz azul ao redor do corpo e da região da garganta, apenas como uma forma de acompanhar sua respiração e sua expressão.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
   {
     id: 'templo-rosa',
-    nome: 'Banho do Templo Rosa',
-    descricaoPublica: 'Apoio para acolhimento, cuidado emocional, harmonia e autocuidado quando o momento pede mais gentileza consigo.',
+    nome: 'Banho de Luz do Templo Rosa',
+    descricaoPublica: 'A luz rosa entra quando o momento pede mais acolhimento, delicadeza e cuidado consigo. A intenção é criar uma pausa em que você possa se tratar com menos cobrança e permitir que o cuidado também chegue até você.',
     eixos: ['emocional', 'autovalor', 'receber', 'integracao'],
     chakras: ['Cardíaco'],
-    orientacaoPublica: 'Quando indicado, entra como parte do mesmo eixo de cuidado emocional, sem ser apresentado como solução isolada.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. Você pode imaginar uma luz rosa suave envolvendo o corpo ou simplesmente descansar com a intenção de receber cuidado.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
   {
     id: 'templo-laranja',
-    nome: 'Banho do Templo Laranja',
-    descricaoPublica: 'Escolhido para acompanhar o retorno delicado à criatividade, ao prazer e às pequenas experiências que aproximam você da vida. Alegria não precisa ser exigida: podemos começar pelo que é confortável agora.',
+    nome: 'Banho de Luz do Templo Laranja',
+    descricaoPublica: 'A luz laranja acompanha um retorno delicado à criatividade, ao prazer e às pequenas experiências que aproximam você da vida. Não existe obrigação de sentir entusiasmo; o convite é apenas abrir espaço para algo um pouco mais vivo e confortável.',
     eixos: ['criatividade', 'prazer', 'vitalidade', 'movimento'],
     chakras: ['Sacral'],
-    orientacaoPublica: 'A indicação deve respeitar o momento da pessoa e não é usada quando a prioridade é primeiro estabilizar e descansar.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. Imagine a luz laranja de forma suave, somente se isso for confortável, sem tentar provocar nenhuma sensação específica.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
   {
     id: 'templo-vermelho',
-    nome: 'Banho do Templo Vermelho',
-    descricaoPublica: 'Apoio relacionado a coragem, força interior, iniciativa e presença quando a leitura mostra que o movimento pode ser fortalecido com segurança.',
+    nome: 'Banho de Luz do Templo Vermelho',
+    descricaoPublica: 'A luz vermelha acompanha momentos em que já existe espaço para fortalecer presença, coragem e iniciativa. Ela entra como um apoio simbólico ao movimento, sem apressar você nem transformar força em cobrança.',
     eixos: ['poder_pessoal', 'movimento', 'vitalidade', 'seguranca'],
     chakras: ['Raiz'],
-    orientacaoPublica: 'Somente sugerir quando houver vitalidade suficiente e quando o cuidado não estiver priorizando desaceleração ou estabilização.',
+    orientacaoPublica: 'É uma visualização de luz, e não um banho físico. Você pode imaginar uma luz vermelha suave envolvendo o corpo, sempre respeitando seu conforto e seu ritmo.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
     status: 'ATIVO',
   },
@@ -103,7 +103,7 @@ export function selectBathSupport(
 /** Source: 12ª Chave Dourada, pp. 30–31. Visualization is a spiritual invitation, not a predicted physical effect. */
 export function bathReceivingGuidance(bath: BathSupportResource): string {
   const color = bath.id.replace('templo-', '');
-  return `O “banho” é uma prática espiritual de imersão em luz colorida. Acomode-se sentado ou deitado; se fizer sentido para você, imagine uma piscina de luz ${color} envolvendo suavemente seu corpo. Pode ser recebido durante a sessão de escuta; o manual também sugere esse momento antes de dormir. Não é necessário visualizar com nitidez, sentir algo especial ou preparar água e ervas. Se preferir, apenas descanse enquanto recebe o cuidado.`;
+  return `Aqui, “banho” não significa água, ervas ou qualquer preparo físico. É uma prática de visualização e recepção simbólica de luz. Acomode-se sentado ou deitado e, se for confortável, imagine uma luz ${color} envolvendo suavemente seu corpo, como se você estivesse repousando dentro dela. Não é necessário visualizar com nitidez nem sentir algo especial. Você também pode simplesmente descansar e deixar essa imagem acompanhar o momento.`;
 }
 
 export function bathProgrammingInstructions(bath: BathSupportResource): string[] {
