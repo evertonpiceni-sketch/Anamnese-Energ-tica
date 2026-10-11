@@ -7,7 +7,7 @@ function Logo({ large=false, watermark=false }: { large?: boolean; watermark?: b
   return <img src="/logo-everton-oficial.png" alt="Everton Piceni — Terapias Holísticas e Bem-Estar" className={`${large ? 'h-44 w-44 sm:h-56 sm:w-56' : 'h-28 w-28 sm:h-40 sm:w-40'} object-contain ${watermark ? 'opacity-[.075]' : ''}`} />;
 }
 
-function Shell({ page, children, cover=false, total=5 }: { total?:number; page:number; children:React.ReactNode; cover?:boolean }) {
+function Shell({ page, children, cover=false, total=1 }: { total?:number; page:number; children:React.ReactNode; cover?:boolean }) {
   return <section className={`report-page relative overflow-hidden rounded-[2.25rem] border border-[#d9c79b] bg-[#fffaf0] shadow-[0_28px_80px_rgba(35,67,48,.13)] print:break-after-page print:rounded-none print:border-0 print:shadow-none ${cover ? 'min-h-[760px]' : ''}`}>
     <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_78%_12%,rgba(219,181,92,.16),transparent_24%),linear-gradient(145deg,rgba(255,255,255,.72),transparent_52%)]" />
     <div className="pointer-events-none absolute -right-20 top-36 h-80 w-80 rounded-full border border-[#c7a451]/20" />
@@ -19,7 +19,7 @@ function Shell({ page, children, cover=false, total=5 }: { total?:number; page:n
         <div className="pt-2 text-right text-[8px] uppercase leading-5 tracking-[.25em] text-[#52675b]"><div>Corpo</div><div>Mente</div><div>Energia</div><div>Espírito</div><div className="ml-auto mt-3 h-px w-14 bg-[#b9903d]"/></div>
       </header>
       <div className="mt-8">{children}</div>
-      <footer className="mt-10 flex items-center justify-between border-t border-[#d9c79b]/70 pt-4 text-[9px] uppercase tracking-[.17em] text-[#78847c]"><span>Everton Piceni · Terapias Holísticas e Bem-Estar</span><span>{page}/{total}</span></footer>
+      <footer className="mt-10 flex items-center justify-between border-t border-[#d9c79b]/70 pt-4 text-[9px] uppercase tracking-[.17em] text-[#78847c]"><span>Everton Piceni · Terapias Holísticas e Bem-Estar</span><span>{total > 1 ? `${page}/${total}` : 'Cuidar da sua energia é voltar para você'}</span></footer>
     </div>
   </section>;
 }
@@ -35,69 +35,35 @@ function Text({ items }: { items:string[] }) {
 export function FullReportApprovedView({ report }: Props) {
   const schedule = report.dailyEnergySchedule || [];
   const energyNames = Array.from(new Set(schedule.length ? schedule.flatMap(day => day.energyNames) : report.energyNames || []));
-  const chunks = Array.from({ length: Math.ceil(schedule.length / 7) }, (_, index) => schedule.slice(index * 7, index * 7 + 7));
-  const totalPages = 5 + chunks.length;
-  return <div className="space-y-8">
-    <Shell total={totalPages} page={1} cover>
-      <div className="grid items-center gap-7 lg:grid-cols-[1.15fr_.85fr]">
-        <div className="py-5 sm:py-10">
-          <div className="mb-4 text-[10px] font-semibold uppercase tracking-[.3em] text-[#a47a2d]">Relatório Completo</div>
-          <h1 className="font-serif text-5xl leading-[.98] text-[#173c2c] sm:text-[4.6rem]">Leitura do <span className="italic text-[#a87828]">Seu Momento</span></h1>
-          <div className="my-7 h-px w-40 bg-[#c9a252]" />
-          <div className="font-serif text-3xl text-[#173c2c] sm:text-4xl">{report.nome}</div>
-          <p className="mt-6 max-w-2xl text-lg leading-8 text-[#4f6358]">{report.page1.intro}</p>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-[#718078]">{report.page1.subtitle}</p>
-          <div className="mt-9 font-serif text-2xl italic leading-8 text-[#a87828]">Cuidar da sua energia é voltar para você.</div>
-        </div>
-        <div className="relative mx-auto flex min-h-[360px] w-full max-w-sm items-center justify-center">
-          <div className="absolute h-72 w-72 rounded-full bg-[radial-gradient(circle,rgba(231,194,102,.28),rgba(255,250,240,0)_67%)]" />
-          <Logo large />
-        </div>
-      </div>
-    </Shell>
-
-    <Shell total={totalPages} page={2}>
-      <Title kicker="O que está acontecendo comigo?">{report.page2.title}</Title>
-      <div className="grid gap-8">
-        <Text items={report.page2.paragraphs}/>
-
-      </div>
-      {report.page2.cycle && <div className="mt-8 rounded-[1.7rem] border border-[#d8c89c] bg-[#fbf3df]/80 px-6 py-5"><div className="text-[9px] font-semibold uppercase tracking-[.25em] text-[#6b786f]">Uma relação a observar nas suas respostas</div><div className="mt-3 font-serif text-lg italic leading-7 text-[#966d24]">{report.page2.cycle}</div></div>}
-    </Shell>
-
-    <Shell total={totalPages} page={3}>
-      <Title kicker="Forças e centros que pedem atenção">{report.page3.title}</Title>
-      <Text items={report.page3.paragraphs}/>
-      <div className="my-8 rounded-[1.8rem] bg-[#f8efdc]/80 p-6"><h3 className="font-serif text-2xl text-[#173c2c]">O que permanece vivo em você</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{report.page3.preserved.map((item,i)=><div key={i} className="flex gap-3 text-sm leading-6 text-[#53665b]"><span className="text-[#b18432]">✦</span><span>{item}</span></div>)}</div></div>
-      <h3 className="font-serif text-3xl text-[#173c2c]">Chakras associados aos temas que você relatou</h3>
-      {!report.page3.chakras.length && <p className="mt-4 font-serif leading-7 text-[#52645a]">As respostas disponíveis não indicam centros específicos para priorizar nesta leitura.</p>}
-      <div className="mt-6 grid gap-6 sm:grid-cols-2">{report.page3.chakras.map((c,i)=><article key={i} className="flex items-start gap-4 border-b border-[#d9c79b]/70 pb-5"><ChakraSymbol name={c.name}/><div><h4 className="font-serif text-xl text-[#9a6f22]">{c.name}</h4><p className="mt-2 font-serif text-sm leading-6 text-[#52645a]">{c.text}</p></div></article>)}</div>
-    </Shell>
-
-    <Shell total={totalPages} page={4}>
-      <Title kicker="Seu cuidado foi pensado para estes pontos">{report.page4.title}</Title>
-      <section className="mb-8 border-y border-[#d9c79b] py-6" aria-label="Energias do cuidado">
-        <h3 className="font-serif text-2xl text-[#173c2c]">Energias que serão trabalhadas</h3>
-        {energyNames.length ? <><ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">{energyNames.map(name => <li key={name} className="font-serif text-lg text-[#9a6f22]">{name}</li>)}</ul><p className="mt-4 font-serif leading-7 text-[#43584c]">{schedule.length ? 'A programação ao final deste relatório mostra em quais dias cada energia será trabalhada e a intenção de cada composição.' : 'Estas são as energias da composição revisada. A distribuição por dia será apresentada após a aprovação da programação.'}</p></> : <p role="status" className="mt-3 font-serif leading-7 text-[#43584c]">A composição energética aguarda revisão do terapeuta. Os nomes das energias e sua distribuição por dia serão incluídos após a aprovação.</p>}
-      </section>
-      <Text items={report.page4.paragraphs}/>
-      <div className="mt-8 flex items-center gap-5 rounded-[1.8rem] bg-[#173c2c] p-6 text-[#f8f0df]"><div className="hidden sm:block"><Logo/></div><p className="font-serif text-lg italic leading-7">{schedule.length ? `No primeiro dia, a intenção revisada é: ${schedule[0].intention}` : 'A ordem e as intenções de cada dia serão definidas na revisão da sua composição, considerando os temas desta leitura.'}</p></div>
-    </Shell>
-
-    <Shell total={totalPages} page={5}>
-      <Title kicker="Um passo de cada vez">{report.page5.title}</Title>
-      <Text items={report.page5.paragraphs}/>
-      <div className="relative mt-9 overflow-hidden rounded-[2rem] border border-[#d5c18e] bg-[linear-gradient(135deg,#f8edcf,#fffaf0_55%,#edf2e8)] p-7 sm:p-9"><div className="absolute -right-10 -bottom-12"><Logo large watermark/></div><div className="relative max-w-2xl"><h3 className="font-serif text-3xl text-[#173c2c]">{report.page5.closingTitle}</h3><div className="mt-5 space-y-3 font-serif text-xl italic leading-8 text-[#8e6929]">{report.page5.closing.map((x,i)=><p key={i}>{x}</p>)}</div></div></div>
-      <div className="mt-8 text-center font-serif text-2xl italic text-[#a87828]">Você não precisa fazer tudo agora. Precisa apenas não se abandonar no caminho.</div>
-    </Shell>
-    {chunks.map((entries, index) => <Shell key={index} page={6 + index} total={totalPages}>
-      <Title kicker={`Sua jornada de ${report.journeyDays || schedule.length} dias`}>Energias trabalhadas a cada dia</Title>
-      <p className="mb-6 font-serif leading-7 text-[#43584c]">Esta programação foi preparada a partir da sua anamnese e revisada para acompanhar cada dia do seu cuidado.</p>
-      <ol className="space-y-4">{entries.map(entry => <li key={entry.day} className="border-b border-[#d9c79b] pb-4">
-        <h3 className="font-serif text-xl text-[#a87828]">Dia {entry.day}</h3>
-        <p className="mt-2 font-serif font-semibold leading-6 text-[#173c2c]">{entry.energyNames.join(' · ')}</p>
+  const resources = report.page4.paragraphs.filter(text => /^(Frequência de apoio|Cristais etéricos|Florais|Aromaterapia|Banho de apoio)/.test(text));
+  const direction = report.page4.paragraphs.filter(text => !resources.includes(text));
+  return <Shell page={1} total={1}>
+    <Title kicker={report.journeyDays ? `Seu cuidado · ${report.journeyDays} dias` : 'Relatório completo'}>Leitura do <span className="italic text-[#a87828]">Seu Momento</span></Title>
+    <Text items={report.page2.paragraphs}/>
+    {report.page3.paragraphs.filter(text => !text.startsWith('No nosso protocolo')).length > 0 && <div className="mt-5"><Text items={report.page3.paragraphs.filter(text => !text.startsWith('No nosso protocolo'))}/></div>}
+    <div className="my-6 border-y border-[#d9c79b]/70 py-5" data-pdf-block><h3 className="mb-3 font-serif text-2xl text-[#173c2c]">O que permanece vivo em você</h3><Text items={report.page3.preserved}/></div>
+    <h3 className="mb-4 font-serif text-3xl text-[#173c2c]">Como vamos cuidar disso com você</h3>
+    <Text items={direction}/>
+    {report.page3.chakras.length > 0 && <section className="mt-6" aria-label="Chakras do cuidado">
+      <h3 className="font-serif text-2xl text-[#173c2c]">Centros energéticos que acompanham este cuidado</h3>
+      <div className="mt-4 grid gap-x-7 gap-y-4 sm:grid-cols-2">{report.page3.chakras.map(c => <article key={c.name} className="flex items-start gap-3" data-pdf-block><ChakraSymbol name={c.name}/><div><h4 className="font-serif text-xl text-[#9a6f22]">{c.name}</h4><p className="mt-1 font-serif text-sm leading-6 text-[#52645a]">{c.text}</p></div></article>)}</div>
+      <p className="mt-4 font-serif text-sm leading-6 text-[#52645a]">Os centros energéticos organizam as intenções do nosso protocolo a partir do que você relatou; esta leitura simbólica não representa uma medição do seu corpo.</p>
+    </section>}
+    <section className="mt-6 border-t border-[#d9c79b] pt-5" aria-label="Energias do cuidado">
+      <h3 className="font-serif text-2xl text-[#173c2c]">Energias que serão trabalhadas</h3>
+      {energyNames.length ? <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">{energyNames.map(name => <li key={name} className="font-serif text-lg text-[#9a6f22]">{name}</li>)}</ul> : <p role="status" className="mt-3 font-serif leading-7 text-[#43584c]">Sua composição está sendo revisada com atenção ao que você contou. As energias e as intenções de cada dia serão apresentadas aqui após essa revisão.</p>}
+      {!!resources.length && <div className="mt-4"><Text items={resources}/></div>}
+    </section>
+    {!!schedule.length && <section className="mt-7" aria-label="Programação diária">
+      <h3 className="font-serif text-3xl text-[#173c2c]">Seu cuidado, dia a dia</h3>
+      <p className="mt-3 font-serif leading-7 text-[#43584c]">Cada composição foi revisada para acompanhar as intenções do seu percurso de {report.journeyDays || schedule.length} dias.</p>
+      <ol className="mt-4 space-y-4">{schedule.map(entry => <li key={entry.day} className="border-b border-[#d9c79b]/70 pb-4" data-pdf-block>
+        <h4 className="font-serif text-xl text-[#a87828]">Dia {entry.day}</h4>
+        <p className="mt-1 font-serif font-semibold leading-6 text-[#173c2c]">{entry.energyNames.join(' · ')}</p>
         <p className="mt-1 font-serif leading-6 text-[#43584c]">{entry.intention}</p>
       </li>)}</ol>
-    </Shell>)}
-  </div>;
+    </section>}
+    <div className="mt-6"><Text items={report.page5.paragraphs.filter(text => text.startsWith('Reserve um momento') || text.startsWith('Não é preciso medir'))}/></div>
+    <p className="mt-6 font-serif text-xl italic leading-8 text-[#a87828]" data-pdf-block>Você não precisa dar conta de tudo para merecer cuidado. Há espaço para pausar, receber apoio e seguir um passo de cada vez.</p>
+  </Shell>;
 }
