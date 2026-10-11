@@ -13,6 +13,7 @@ import {
 import { ProgrammedAudioCard } from './ProgrammedAudioCard';
 import { PreparatoryAudioCard } from './PreparatoryAudioCard';
 import { PracticeHistory } from './PracticeHistory';
+import { EntitledFullReportCard } from './EntitledFullReportCard';
 import { loadUserMoment, UserMomentData } from '../services/userMomentBackend';
 import { downloadUserResultPdf } from '../pdf/userResultPdf';
 
@@ -203,6 +204,13 @@ export function UserMomentArea({ mode, onStartNewIntake }: UserMomentAreaProps) 
             </>
           )}
         </section>
+
+        {data.entitlement && (
+          <EntitledFullReportCard
+            intakeId={data.intake.id}
+            entitlement={data.entitlement}
+          />
+        )}
 
         <button
           type="button"
