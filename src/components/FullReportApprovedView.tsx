@@ -1,133 +1,29 @@
 import { FullReportNarrative } from '../result/fullReportNarrative';
 
-interface FullReportApprovedViewProps {
-  report: FullReportNarrative;
+interface FullReportApprovedViewProps { report: FullReportNarrative; }
+
+function Botanical({ side }: { side: 'left' | 'right' }) {
+  return <div className={`pointer-events-none absolute ${side === 'left' ? '-left-10 bottom-16 rotate-[-18deg]' : '-right-12 top-44 rotate-[22deg]'} opacity-[0.12]`}><div className="h-44 w-1 rounded-full bg-[#416a4e]"/><div className="absolute left-[-22px] top-5 h-14 w-9 rotate-[-35deg] rounded-[100%_0_100%_0] bg-[#416a4e]"/><div className="absolute left-2 top-20 h-16 w-10 rotate-[28deg] rounded-[0_100%_0_100%] bg-[#416a4e]"/><div className="absolute left-[-25px] top-32 h-12 w-8 rotate-[-28deg] rounded-[100%_0_100%_0] bg-[#416a4e]"/></div>;
 }
 
 function PageShell({ children, page }: { children: React.ReactNode; page: number }) {
-  return (
-    <section className="relative overflow-hidden rounded-[2.4rem] border border-[#dccba6] bg-[#fffaf0] p-7 shadow-xl shadow-[#244735]/8 sm:p-10 print:break-after-page print:rounded-none print:border-0 print:shadow-none">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_80%_12%,rgba(213,190,126,0.15),transparent_25%),radial-gradient(circle_at_8%_92%,rgba(57,101,70,0.11),transparent_29%),linear-gradient(135deg,rgba(255,255,255,0.2),transparent_60%)]" />
-      <div className="pointer-events-none absolute -left-20 -top-16 h-52 w-52 rounded-full border border-[#75906f]/12 bg-[#b9c9ad]/8 blur-[1px]" />
-      <div className="pointer-events-none absolute -bottom-24 -right-16 h-72 w-72 rounded-full border border-[#c9aa62]/12 bg-[#ddc98f]/7" />
-      <div className="pointer-events-none absolute right-[-7%] top-[32%] h-56 w-56 rounded-full border border-[#c7a451]/15" />
-
-      <div className="relative z-10">
-        <header className="mb-9 grid grid-cols-[1fr_auto_1fr] items-start gap-4">
-          <div className="pt-5 text-[9px] font-semibold uppercase leading-5 tracking-[0.27em] text-[#496457]">
-            <div>Autenticidade</div>
-            <div>Equilíbrio</div>
-            <div>Bem-estar</div>
-            <div>Sempre</div>
-            <div className="mt-3 h-px w-14 bg-[#b89447]" />
-          </div>
-
-          <div className="text-center">
-            <img
-              src="/logo-everton-oficial.svg"
-              alt="Everton Piceni"
-              className="mx-auto h-28 w-28 object-contain opacity-100 sm:h-36 sm:w-36"
-            />
-            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-[#173c2c]">Terapias Holísticas e Bem-Estar</div>
-            <div className="mt-1 text-[8px] uppercase tracking-[0.32em] text-[#9a7a38]">Corpo · Mente · Energia · Espírito</div>
-            <div className="mx-auto mt-3 h-px w-44 bg-[#c6a350]" />
-            <div className="mt-2 text-[8px] uppercase tracking-[0.24em] text-[#66766d]">Cuidar da sua energia é voltar para você</div>
-          </div>
-
-          <div className="pt-5 text-right text-[9px] uppercase leading-5 tracking-[0.27em] text-[#4b6156]">
-            <div>Corpo</div>
-            <div>Mente</div>
-            <div>Energia</div>
-            <div>Espírito</div>
-            <div className="ml-auto mt-3 h-px w-14 bg-[#b89447]" />
-            <div className="mt-3 font-serif text-sm normal-case italic leading-5 tracking-normal text-[#496457]">Mais equilíbrio<br />para uma vida<br />com sentido.</div>
-          </div>
-        </header>
-
-        {children}
-
-        <footer className="mt-10 flex items-end justify-between gap-4 border-t border-[#ddcfae] pt-4 text-[9px] uppercase tracking-[0.22em] text-[#6f786f]">
-          <span>Everton Piceni · Terapias Holísticas e Bem-Estar</span>
-          <span>Página {page} de 5</span>
-        </footer>
-      </div>
-    </section>
-  );
+  return <section className="relative overflow-hidden rounded-[2.5rem] border border-[#d9c69b] bg-[#fffaf0] px-6 py-8 shadow-[0_24px_70px_rgba(35,67,48,.10)] sm:px-11 sm:py-10 print:break-after-page print:rounded-none print:border-0 print:shadow-none">
+    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_86%_15%,rgba(205,173,93,.16),transparent_22%),radial-gradient(circle_at_8%_88%,rgba(78,113,79,.11),transparent_26%),linear-gradient(135deg,rgba(255,255,255,.55),transparent_58%)]"/>
+    <div className="pointer-events-none absolute right-[-8%] top-[22%] h-64 w-64 rounded-full border border-[#c7a451]/20"/><div className="pointer-events-none absolute right-[-3%] top-[27%] h-44 w-44 rounded-full border border-[#c7a451]/10"/><Botanical side="left"/><Botanical side="right"/>
+    <div className="relative z-10"><header className="mb-10 grid grid-cols-[1fr_auto_1fr] items-start gap-3"><div className="pt-5 text-[8px] font-semibold uppercase leading-5 tracking-[.28em] text-[#496457]"><div>Autenticidade</div><div>Equilíbrio</div><div>Bem-estar</div><div>Sempre</div><div className="mt-3 h-px w-14 bg-[#b89447]"/></div><div className="text-center"><img src="/logo-everton-oficial.svg" alt="Everton Piceni" className="mx-auto h-32 w-32 object-contain sm:h-40 sm:w-40"/><div className="mt-1 text-[9px] font-semibold uppercase tracking-[.23em] text-[#173c2c]">Terapias Holísticas e Bem-Estar</div><div className="mx-auto mt-3 h-px w-44 bg-[#c6a350]"/></div><div className="pt-5 text-right text-[8px] uppercase leading-5 tracking-[.28em] text-[#4b6156]"><div>Corpo</div><div>Mente</div><div>Energia</div><div>Espírito</div><div className="ml-auto mt-3 h-px w-14 bg-[#b89447]"/><div className="mt-3 font-serif text-sm normal-case italic leading-5 tracking-normal">Mais equilíbrio<br/>para uma vida<br/>com sentido.</div></div></header>{children}<footer className="mt-11 flex items-end justify-between gap-4 border-t border-[#ddcfae] pt-4 text-[8px] uppercase tracking-[.22em] text-[#6f786f]"><span>Everton Piceni · Terapias Holísticas e Bem-Estar</span><span>Página {page} de 5</span></footer></div>
+  </section>;
 }
 
-function Title({ children }: { children: React.ReactNode }) {
-  return <h2 className="font-serif text-3xl leading-tight text-[#173c2c] sm:text-[3.25rem]">{children}</h2>;
-}
-
-function Paragraphs({ items }: { items: string[] }) {
-  return (
-    <div className="space-y-4 text-[15px] leading-7 text-[#44584b] sm:text-[16px] sm:leading-[1.85]">
-      {items.map((text, index) => <p key={`${index}-${text.slice(0, 24)}`}>{text}</p>)}
-    </div>
-  );
-}
+function Title({ children }: { children: React.ReactNode }) { return <h2 className="max-w-3xl font-serif text-3xl leading-[1.08] text-[#173c2c] sm:text-[3.25rem]">{children}</h2>; }
+function Divider(){return <div className="my-6 flex items-center gap-3"><div className="h-px flex-1 bg-[#d2b369]"/><span className="font-serif text-[#b38a36]">◇</span><div className="h-px w-24 bg-[#d2b369]"/></div>}
+function Paragraphs({ items }: { items: string[] }) { return <div className="space-y-5 text-[15px] leading-7 text-[#40564a] sm:text-[16px] sm:leading-[1.9]">{items.map((text,index)=><p key={`${index}-${text.slice(0,32)}`}>{text}</p>)}</div>; }
 
 export function FullReportApprovedView({ report }: FullReportApprovedViewProps) {
-  return (
-    <div className="space-y-7">
-      <PageShell page={1}>
-        <div className="max-w-3xl py-6 sm:py-10">
-          <div className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-[#a07f36]">Relatório Completo</div>
-          <h1 className="font-serif text-4xl leading-[1.03] text-[#173c2c] sm:text-[3.8rem]">
-            Leitura do <span className="text-[#a87828]">Seu Momento</span>
-          </h1>
-          <div className="my-7 flex items-center gap-3"><div className="h-px flex-1 bg-[#caa451]" /><div className="font-serif text-lg text-[#aa8439]">◇</div><div className="h-px flex-1 bg-[#caa451]" /></div>
-          <div className="font-serif text-3xl text-[#173c2c] sm:text-4xl">{report.nome}</div>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-[#506258]">{report.page1.intro}</p>
-          <p className="mt-6 max-w-2xl text-base leading-7 text-[#718077]">{report.page1.subtitle}</p>
-          <div className="mt-12 font-serif text-2xl italic text-[#a87828]">Cuidar da sua energia é voltar para você.</div>
-        </div>
-      </PageShell>
-
-      <PageShell page={2}>
-        <Title>{report.page2.title}</Title>
-        <div className="my-6 h-px w-full bg-[#d2b369]" />
-        <Paragraphs items={report.page2.paragraphs} />
-        {report.page2.cycle && <div className="mt-8 rounded-[1.75rem] border border-[#dec98e] bg-[#fbf3df] px-6 py-5 text-center font-serif text-lg italic leading-8 text-[#9a6f22]">{report.page2.cycle}</div>}
-        <p className="mt-6 text-base leading-7 text-[#5d6b62]">Esse ciclo não define você. Ele apenas nos ajuda a compreender o que pode estar acontecendo neste momento para que possamos cuidar justamente do ponto onde tudo começa a pesar.</p>
-      </PageShell>
-
-      <PageShell page={3}>
-        <Title>{report.page3.title}</Title>
-        <div className="my-6 h-px w-full bg-[#d2b369]" />
-        <Paragraphs items={report.page3.paragraphs} />
-
-        <div className="my-8 rounded-[1.75rem] border border-[#e2d4b3] bg-white/55 p-6">
-          <div className="font-serif text-2xl text-[#173c2c]">Recursos que permanecem vivos em você</div>
-          <ul className="mt-4 space-y-2 text-[15px] leading-6 text-[#53655a]">{report.page3.preserved.map(item => <li key={item}>• {item}</li>)}</ul>
-          <div className="mt-5 font-serif text-xl italic text-[#a87828]">É essa parte que queremos fortalecer.</div>
-        </div>
-
-        <div className="mt-8">
-          <h3 className="font-serif text-3xl leading-tight text-[#173c2c]">O que os seus chakras nos mostram dentro do protocolo</h3>
-          <div className="mt-5 space-y-5">
-            {report.page3.chakras.map(chakra => <div key={chakra.name} className="border-l-2 border-[#c8a656] pl-4"><div className="font-semibold text-[#9a6f22]">{chakra.name}</div><p className="mt-1 text-[15px] leading-7 text-[#506258]">{chakra.text}</p></div>)}
-          </div>
-          <p className="mt-7 text-base leading-7 text-[#5d6b62]">Nada disso significa que há algo errado com você. Significa apenas que existem partes suas pedindo reorganização, descanso, sustentação e cuidado.</p>
-        </div>
-      </PageShell>
-
-      <PageShell page={4}>
-        <Title>{report.page4.title}</Title>
-        <div className="my-6 h-px w-full bg-[#d2b369]" />
-        <Paragraphs items={report.page4.paragraphs} />
-        <div className="mt-9 rounded-[1.75rem] bg-[#edf1e8] px-6 py-5 font-serif text-xl italic leading-8 text-[#375542]">O cuidado é escolhido para dialogar com a sua história — não para se sobrepor a ela.</div>
-      </PageShell>
-
-      <PageShell page={5}>
-        <Title>{report.page5.title}</Title>
-        <div className="my-6 h-px w-full bg-[#d2b369]" />
-        <Paragraphs items={report.page5.paragraphs} />
-        <div className="my-9 h-px w-full bg-[#e0d1ad]" />
-        <h3 className="font-serif text-3xl text-[#173c2c] sm:text-4xl">{report.page5.closingTitle}</h3>
-        <div className="mt-5"><Paragraphs items={report.page5.closing} /></div>
-        <div className="mt-9 font-serif text-2xl italic leading-9 text-[#a87828]">Você não precisa carregar tudo sem apoio. Seu ritmo será respeitado. Sem pressa, mas com presença.</div>
-      </PageShell>
-    </div>
-  );
+  return <div className="space-y-8">
+    <PageShell page={1}><div className="max-w-3xl py-7 sm:py-12"><div className="mb-5 text-[10px] font-semibold uppercase tracking-[.28em] text-[#9d7b32]">Relatório Completo</div><h1 className="font-serif text-5xl leading-[.98] text-[#173c2c] sm:text-[4.25rem]">Leitura do <span className="italic text-[#a87828]">Seu Momento</span></h1><Divider/><div className="font-serif text-3xl text-[#173c2c] sm:text-4xl">{report.nome}</div><p className="mt-6 max-w-2xl text-lg leading-8 text-[#506258]">{report.page1.intro}</p><p className="mt-6 max-w-2xl text-base leading-7 text-[#718077]">{report.page1.subtitle}</p><div className="mt-12 font-serif text-2xl italic text-[#a87828]">Cuidar da sua energia é voltar para você.</div></div></PageShell>
+    <PageShell page={2}><Title>{report.page2.title}</Title><Divider/><Paragraphs items={report.page2.paragraphs}/><div className="mt-9 border-l border-[#c6a350] pl-5 font-serif text-xl italic leading-8 text-[#8f6b2b]">A leitura não procura encaixar você em um padrão pronto. Ela parte do que você efetivamente respondeu.</div></PageShell>
+    <PageShell page={3}><Title>{report.page3.title}</Title><Divider/><Paragraphs items={report.page3.paragraphs}/><div className="my-9 border-y border-[#dfd0ad] py-6"><div className="font-serif text-2xl text-[#173c2c]">Recursos que permanecem vivos em você</div><div className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">{report.page3.preserved.map(item=><div key={item} className="flex gap-3 text-[15px] leading-6 text-[#53655a]"><span className="text-[#b38a36]">◇</span><span>{item}</span></div>)}</div></div><h3 className="font-serif text-3xl leading-tight text-[#173c2c]">O que os seus chakras nos mostram dentro do protocolo</h3><div className="mt-6 space-y-6">{report.page3.chakras.map(chakra=><div key={chakra.name} className="grid gap-2 border-b border-[#e2d8c0] pb-5 sm:grid-cols-[180px_1fr]"><div className="font-serif text-lg text-[#9a6f22]">{chakra.name}</div><p className="text-[15px] leading-7 text-[#506258]">{chakra.text}</p></div>)}</div></PageShell>
+    <PageShell page={4}><Title>{report.page4.title}</Title><Divider/><Paragraphs items={report.page4.paragraphs}/><div className="mt-10 border-t border-[#d8c89e] pt-6 font-serif text-xl italic leading-8 text-[#375542]">Cada recurso precisa ter uma função clara dentro da leitura. O que não estiver definido não será preenchido por suposição.</div></PageShell>
+    <PageShell page={5}><Title>{report.page5.title}</Title><Divider/><Paragraphs items={report.page5.paragraphs}/><div className="my-10 h-px bg-[#dfd0ad]"/><h3 className="font-serif text-3xl text-[#173c2c] sm:text-4xl">{report.page5.closingTitle}</h3><div className="mt-6"><Paragraphs items={report.page5.closing}/></div><div className="mt-10 font-serif text-2xl italic leading-9 text-[#a87828]">Sem pressa. Sem texto pronto. Com presença no que é seu.</div></PageShell>
+  </div>;
 }
