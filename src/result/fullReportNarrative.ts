@@ -15,82 +15,70 @@ export interface FullReportNarrative {
   page5: { title: string; paragraphs: string[]; closingTitle: string; closing: string[] };
 }
 
-type ObservedAnswer = { id: string; text: string; category: string; level: number };
-const firstName = (name: string) => name.trim().split(/\s+/)[0] || 'você';
-const unique = (values: string[]) => values.filter((v, i, a) => Boolean(v) && a.indexOf(v) === i);
-function joinNatural(values: string[]) { const clean = values.filter(Boolean); if (!clean.length) return ''; if (clean.length === 1) return clean[0]; if (clean.length === 2) return `${clean[0]} e ${clean[1]}`; return `${clean.slice(0, -1).join(', ')} e ${clean[clean.length - 1]}`; }
-const friendlyResourceName = (value: string) => value.replace(/\s+—\s+.*/, '').trim();
+type Answer = { id:string; text:string; level:number };
+const firstName=(v:string)=>v.trim().split(/\s+/)[0]||'você';
+const uniq=(v:string[])=>v.filter((x,i,a)=>Boolean(x)&&a.indexOf(x)===i);
+const join=(v:string[])=>v.length<2?(v[0]||''):v.length===2?`${v[0]} e ${v[1]}`:`${v.slice(0,-1).join(', ')} e ${v[v.length-1]}`;
+const clean=(v:string)=>v.replace(/\s+—\s+.*/, '').trim();
 
-function observedAnswers(input: AnamneseInput): ObservedAnswer[] {
-  return PERGUNTAS_ANAMNESE.map(q => ({ id: q.id, text: q.text, category: q.categoria, level: input.respostasObjetivas[q.id] ?? 0 })).sort((a, b) => b.level - a.level);
+function answers(input:AnamneseInput):Answer[]{
+  return PERGUNTAS_ANAMNESE.map(q=>({id:q.id,text:q.text,level:input.respostasObjetivas[q.id]??0})).sort((a,b)=>b.level-a.level);
 }
 
-function relationshipReading(active: ObservedAnswer[]) {
-  const has = (id: string) => active.some(x => x.id === id && x.level >= 3);
-  const parts: string[] = [];
-  if (has('q2_mente_acelerada') && has('q1_procrastinacao_inicio')) parts.push('A mente acelerada e a dificuldade de começar aparecem juntas. Quando pensamentos, antecipação e responsabilidades ocupam espaço demais, até um primeiro passo simples pode parecer maior do que realmente é.');
-  if (has('q5_autocobranca_insuficiencia') && has('q1_procrastinacao_inicio')) parts.push('A autocobrança aparece ao lado da dificuldade de começar. Isso sugere um ciclo em que a pressão interna aumenta o peso da ação; o adiamento traz um alívio curto e depois pode devolver ainda mais cobrança.');
-  if (has('q4_cansaco_esgotamento') && (has('q1_procrastinacao_inicio') || has('q2_mente_acelerada'))) parts.push('O cansaço também muda a leitura: antes de pedir movimento, o cuidado precisa considerar a energia disponível e criar mais espaço para estabilização e descanso interno.');
-  if (has('q7_dificuldade_dizer_nao') && has('q8_dificuldade_receber')) parts.push('Sua disponibilidade para os outros aparece junto da dificuldade de receber. Isso pode deixar suas próprias necessidades para depois e tornar limites, reciprocidade e acolhimento partes importantes do cuidado.');
-  if (has('q6_engolir_emocoes') && has('q20_conflitos_relacionamento')) parts.push('O que fica guardado emocionalmente aparece junto das relações. A leitura pede espaço para expressão, limites e uma forma mais segura de reconhecer o que é seu antes de sustentar o que pertence aos outros.');
-  if (has('q14_falta_direcao_proposito') && has('q17_desejo_recomeco')) parts.push('O desejo de recomeçar aparece junto da busca por direção. Há movimento interno, mas ele precisa de sustentação para ganhar forma sem virar mais uma obrigação.');
-  return parts.slice(0, 4);
+function relationships(a:Answer[]){
+  const has=(id:string)=>a.some(x=>x.id===id&&x.level>=3); const out:string[]=[];
+  if(has('q2_mente_acelerada')&&has('q1_procrastinacao_inicio')) out.push('Sua mente parece estar tentando dar conta de muita coisa ao mesmo tempo. Quando isso acontece, começar pode ficar mais difícil — não porque falte vontade, mas porque o primeiro passo chega carregado de pensamentos, antecipações e pressão.');
+  if(has('q5_autocobranca_insuficiencia')&&has('q1_procrastinacao_inicio')) out.push('Também aparece uma cobrança forte sobre você mesmo. Quanto mais você sente que precisa fazer direito, resolver logo ou corresponder, mais pesada a ação pode ficar. O adiamento alivia por um instante, mas depois devolve cobrança e cansaço.');
+  if(has('q4_cansaco_esgotamento')) out.push('O cansaço que aparece nas suas respostas muda a direção do cuidado. Antes de pedir produtividade, decisão ou coragem, é preciso devolver sustentação. Você não precisa ser empurrado; precisa encontrar chão para conseguir se mover sem se violentar.');
+  if(has('q7_dificuldade_dizer_nao')||has('q8_dificuldade_receber')) out.push('Existe ainda um ponto delicado na forma como você se coloca nas relações: oferecer, sustentar e compreender pode estar mais disponível do que receber, limitar ou dizer do que você precisa. Isso também consome energia e merece cuidado.');
+  if(has('q6_engolir_emocoes')) out.push('Há sentimentos que parecem permanecer mais tempo dentro de você do que deveriam. O cuidado não vai exigir que você os resolva imediatamente; primeiro vai criar espaço para que possam ser reconhecidos, acolhidos e expressos com mais segurança.');
+  return out.slice(0,4);
 }
 
-function chakraText(name: string, active: ObservedAnswer[]) {
-  const ids = new Set(active.filter(x => x.level >= 3).map(x => x.id)); const n = name.toLowerCase();
-  if (n.includes('frontal')) return ids.has('q2_mente_acelerada') ? 'O Frontal aparece relacionado ao excesso de pensamentos e antecipação. Dentro do cuidado, ele pede menos ruído e mais espaço para clareza, percepção e presença.' : 'O Frontal entra como eixo de clareza, percepção e espaço interno.';
-  if (n.includes('plexo')) return ids.has('q5_autocobranca_insuficiencia') || ids.has('q1_procrastinacao_inicio') ? 'O Plexo Solar conversa com autocobrança, confiança nas próprias escolhas e ação. Aqui, o trabalho é favorecer movimento sem transformar mudança em pressão.' : 'O Plexo Solar entra ligado à autonomia, confiança e escolhas.';
-  if (n.includes('card')) return ids.has('q8_dificuldade_receber') || ids.has('q6_engolir_emocoes') ? 'O Cardíaco aparece na forma como você oferece cuidado e na necessidade de também receber. O foco é acolhimento, reciprocidade e espaço para si.' : 'O Cardíaco entra ligado ao acolhimento e à possibilidade de receber cuidado.';
-  if (n.includes('lar')) return ids.has('q7_dificuldade_dizer_nao') || ids.has('q12_trava_expressao_criatividade') ? 'O Laríngeo conversa com limites, expressão das necessidades e voz própria. O foco é permitir que aquilo que você sente encontre uma forma mais presente de ser comunicado.' : 'O Laríngeo entra relacionado à expressão e aos limites.';
-  if (n.includes('bás') || n.includes('raiz') || n.includes('muladh')) return 'O Raiz pede segurança, aterramento e estabilidade. Ele entra primeiro quando é necessário criar chão antes de estimular novos movimentos.';
-  if (n.includes('sacral') || n.includes('umbilical')) return 'O Sacral participa do cuidado ligado ao sentir, à criatividade, ao prazer e à fluidez.';
-  return 'Este centro participa da leitura energética em diálogo com aquilo que suas respostas mostram e será acompanhado dentro do percurso.';
+function chakraText(name:string,a:Answer[]){
+  const has=(id:string)=>a.some(x=>x.id===id&&x.level>=3); const n=name.toLowerCase();
+  if(n.includes('raiz')||n.includes('bás')) return 'Este centro pede chão, segurança e sensação de amparo. Por isso ele entra no início do cuidado: antes de qualquer expansão, o seu sistema precisa sentir que pode repousar e se sustentar.';
+  if(n.includes('frontal')) return has('q2_mente_acelerada')?'Aqui aparece a sobrecarga mental. O cuidado busca diminuir o ruído interno para que clareza não seja mais uma obrigação, mas algo que possa surgir quando a mente encontra espaço.':'Este centro pede mais silêncio interno, percepção e clareza.';
+  if(n.includes('plexo')) return 'Aqui tocamos confiança, autonomia e movimento. A intenção não é cobrar força, mas ajudar você a recuperar firmeza para escolher e agir sem transformar cada passo em prova de valor.';
+  if(n.includes('card')) return 'Este centro fala de acolhimento e reciprocidade. O trabalho é permitir que você também receba, se inclua e se trate com a mesma presença que costuma oferecer para fora.';
+  if(n.includes('lar')) return 'Este centro pede voz e limite. O cuidado favorece a expressão do que você sente e precisa, sem culpa por ocupar o próprio espaço.';
+  if(n.includes('coron')) return 'Este centro aparece ligado a sentido, conexão e integração. O foco é aproximar aquilo que você sente por dentro da vida que consegue viver concretamente.';
+  return 'Este centro aparece como parte importante do seu momento e será acompanhado com delicadeza ao longo do percurso.';
 }
 
-function careStrategy(active: ObservedAnswer[], chakraNames: string[], topAxes: string[]) {
-  const has = (id: string) => active.some(x => x.id === id && x.level >= 3);
-  const chakras = chakraNames.map(x => x.toLowerCase());
-  const stages: string[] = [];
-  if (chakras.some(x => x.includes('raiz') || x.includes('bás')) || has('q4_cansaco_esgotamento')) stages.push('Primeiro, estabilizar: criar mais sensação de chão, sustentação e espaço interno antes de exigir qualquer mudança.');
-  if (chakras.some(x => x.includes('frontal')) || has('q2_mente_acelerada')) stages.push('Depois, aliviar a sobrecarga mental: reduzir o excesso de estímulo interno para favorecer clareza e presença.');
-  if (chakras.some(x => x.includes('card')) || has('q8_dificuldade_receber') || has('q6_engolir_emocoes')) stages.push('Em seguida, acolher o campo emocional: abrir espaço para receber cuidado, reconhecer necessidades e diminuir a pressão de sustentar tudo sozinho.');
-  if (chakras.some(x => x.includes('plexo')) || has('q5_autocobranca_insuficiencia') || has('q1_procrastinacao_inicio')) stages.push('Com mais sustentação, fortalecer confiança e movimento: trabalhar escolhas e ação possível sem transformar o processo em nova cobrança.');
-  if (chakras.some(x => x.includes('lar')) || has('q7_dificuldade_dizer_nao')) stages.push('Também será trabalhada a expressão: favorecer limites, voz própria e comunicação mais coerente com o que você sente e precisa.');
-  if (!stages.length) stages.push(`O cuidado será organizado a partir dos eixos que mais apareceram agora — ${joinNatural(topAxes)} — começando por estabilização e seguindo para integração e movimento possível.`);
-  return stages.slice(0, 5);
-}
+export function buildFullReportNarrative({intake,analysis,composition}:{intake:AnamneseInput;analysis:AnaliseCompletaResultado;composition:CareComposition|null}):FullReportNarrative{
+  const nome=firstName(intake.nomePessoa); const report=analysis.relatorioEverton; const all=answers(intake); const active=all.filter(x=>x.level>=2); const rel=relationships(active);
+  const ranked=report.eixosOrdenados; const priorities=ranked.slice(0,4).map(x=>x.nome.toLowerCase());
+  const preserved=report.analiseContextualAvancada?.fatoresPreservados.recursosInternosPreservados||[];
+  const chakras=uniq([...report.regioesCorporais.chakrasCorrespondentes,...report.recursosInternos.chakras]).slice(0,5);
+  const automatic=selectComplementaryCare(ranked); const solfeggio=composition?.solfeggio||selectSolfeggioFrequency(ranked);
+  const crystals=composition?.ethericCrystals?.length?composition.ethericCrystals:automatic.ethericCrystals;
+  const florals=composition?.floral?.length?composition.floral:automatic.florals;
+  const aromas=composition?.aromatherapy?.length?composition.aromatherapy:automatic.aromatherapy;
+  const energies=uniq([...(composition?.audio?.recursosEnergeticos.energias||[]),...(report.recursosInternos.energias||[])]).map(clean).slice(0,8);
+  const systems=uniq([composition?.audio?.sistemaBase||report.sistemaBase?.nome||'',composition?.audio?.sistemaPrincipal||report.sistemaPrincipal?.nome||'',...(composition?.audio?.sistemasComplementares||report.sistemasComplementares?.map(x=>x.nome)||[])]).filter(Boolean).slice(0,7);
+  const bath=selectBathSupport(ranked);
+  const page4:string[]=[];
 
-function resourceReason(kind: string, names: string, priorities: string[], chakras: string[]) {
-  const target = joinNatural(priorities.slice(0, 3));
-  const centers = joinNatural(chakras.slice(0, 3));
-  const centerText = centers ? ` e aos centros ${centers}` : '';
-  return `${kind}: ${names}. Este recurso foi selecionado para acompanhar especificamente os pontos de ${target}${centerText}, dentro da sequência de cuidado definida para este momento.`;
-}
+  page4.push(`Direção do cuidado: ${nome}, o seu percurso começa por sustentação e segurança. Depois, vamos aliviar o que hoje está em excesso, acolher o campo emocional e fortalecer confiança, clareza e movimento. A ordem importa: você não precisa se forçar a avançar antes de se sentir mais amparado por dentro.`);
+  if(energies.length) page4.push(`Energias que serão empregadas: ${join(energies)}. Elas foram escolhidas para trabalhar em conjunto os pontos que mais apareceram agora — ${join(priorities.slice(0,3))} — respeitando também os centros ${join(chakras.slice(0,3))}. No áudio personalizado, elas entram como uma composição única, e não como técnicas soltas.`);
+  if(systems.length) page4.push(`Como essa energia será conduzida: ${join(systems)} formam a base do trabalho energético desta leitura. A intenção é usar cada sistema onde ele faz sentido para você agora: primeiro sustentando, depois harmonizando o que está sobrecarregado e, por fim, apoiando integração e movimento.`);
+  if(solfeggio) page4.push(`Frequência de apoio — ${solfeggio.hz} Hz: ela acompanha ${solfeggio.intencaoProjeto.toLowerCase()}. Dentro da sua composição, será usada como apoio ao ambiente energético do áudio, em coerência com aquilo que apareceu na anamnese.`);
+  if(crystals.length) page4.push(`Cristais etéricos — ${join(crystals.map(x=>x.nome))}: entram para sustentar os centros e prioridades identificados na sua leitura. A escolha não é decorativa; cada cristal compõe o mesmo direcionamento do áudio e dos chakras que pedem atenção.`);
+  if(florals.length) page4.push(`Florais — ${join(florals.map(x=>x.nome))}: foram aproximados do seu momento emocional para apoiar, com suavidade, os temas que apareceram com mais força nas respostas. Eles complementam o percurso sem substituir outros cuidados que façam parte da sua vida.`);
+  if(aromas.length) page4.push(`Aromaterapia — ${join(aromas.map(x=>clean(x.nome)))}: entra como apoio sensorial para ajudar o corpo a reconhecer momentos de pausa, presença e acolhimento durante o percurso.`);
+  if(bath) page4.push(`Banho de apoio — ${bath.nome}: este é um recurso complementar para marcar um momento de cuidado consigo. Ele acompanha a mesma intenção da composição e deve ser usado conforme a orientação prevista para esse recurso.`);
 
-export function buildFullReportNarrative({ intake, analysis, composition }: { intake: AnamneseInput; analysis: AnaliseCompletaResultado; composition: CareComposition | null }): FullReportNarrative {
-  const nome = firstName(intake.nomePessoa); const report = analysis.relatorioEverton; const answers = observedAnswers(intake); const active = answers.filter(x => x.level >= 2); const relationships = relationshipReading(active);
-  const rankedAxes = report.eixosOrdenados; const topAxes = rankedAxes.slice(0, 4).map(x => x.nome.toLowerCase()); const preserved = report.analiseContextualAvancada?.fatoresPreservados.recursosInternosPreservados || []; const chakras = unique([...report.regioesCorporais.chakrasCorrespondentes, ...report.recursosInternos.chakras]).slice(0, 5);
-  const automaticComplementary = selectComplementaryCare(rankedAxes); const solfeggio = composition?.solfeggio || selectSolfeggioFrequency(rankedAxes); const crystals = composition?.ethericCrystals?.length ? composition.ethericCrystals : automaticComplementary.ethericCrystals; const florals = composition?.floral?.length ? composition.floral : automaticComplementary.florals; const aromas = composition?.aromatherapy?.length ? composition.aromatherapy : automaticComplementary.aromatherapy;
-  const energies = unique([...(composition?.audio?.recursosEnergeticos.energias || []), ...(report.recursosInternos.energias || [])]).map(friendlyResourceName).slice(0, 6);
-  const audioSystems = unique([composition?.audio?.sistemaBase || report.sistemaBase?.nome || '', composition?.audio?.sistemaPrincipal || report.sistemaPrincipal?.nome || '', ...(composition?.audio?.sistemasComplementares || report.sistemasComplementares?.map(x => x.nome) || [])]).filter(Boolean).slice(0, 6); const bath = selectBathSupport(rankedAxes);
-  const strategy = careStrategy(active, chakras, topAxes);
-  const freeText = [intake.relatoLivreNecessidade?.trim() ? `Quando você diz “${intake.relatoLivreNecessidade.trim()}”, essa fala entra na leitura como uma necessidade concreta e ajuda a definir a prioridade do cuidado.` : '', intake.relatoLivreDesafios?.trim() ? `Você também reconhece como desafio “${intake.relatoLivreDesafios.trim()}”. Esse ponto será observado ao longo do percurso para perceber o que muda quando a pressão diminui e existe mais sustentação.` : ''].filter(Boolean);
-  const resources: string[] = [];
-  if (energies.length) resources.push(resourceReason('Energias empregadas no áudio personalizado', joinNatural(energies), topAxes, chakras));
-  if (audioSystems.length) resources.push(`A composição será conduzida por ${joinNatural(audioSystems)}. Esses recursos não entram como uma lista de técnicas: serão organizados na ordem do cuidado — estabilizar, aliviar o que está em excesso, fortalecer os centros que pedem sustentação e então favorecer integração e movimento.`);
-  if (solfeggio) resources.push(`Frequência de apoio: ${solfeggio.hz} Hz. Nesta composição, ela acompanha ${solfeggio.intencaoProjeto.toLowerCase()} e será usada em coerência com as prioridades encontradas na anamnese.`);
-  if (crystals.length) resources.push(resourceReason('Cristais etéricos', joinNatural(crystals.map(x => x.nome)), topAxes, chakras));
-  if (florals.length) resources.push(resourceReason('Florais', joinNatural(florals.map(x => x.nome)), topAxes, chakras));
-  if (aromas.length) resources.push(resourceReason('Aromaterapia', joinNatural(aromas.map(x => x.nome.replace(/\s+—.*/, ''))), topAxes, chakras));
-  if (bath) resources.push(`Banho de apoio: ${bath.nome}. Ele entra como recurso complementar do percurso, seguindo a orientação prevista para esse recurso e sem substituir os demais cuidados.`);
-  const cycle = relationships.length >= 2 ? 'muitas demandas → sobrecarga → dificuldade de decidir ou começar → adiamento → pequeno alívio momentâneo → cobrança → cansaço → nova tentativa.' : undefined;
+  const free:string[]=[];
+  if(intake.relatoLivreNecessidade?.trim()) free.push(`Quando você escreve “${intake.relatoLivreNecessidade.trim()}”, isso não fica à margem da análise. Essa frase ajuda a mostrar onde você sente que mais precisa ser encontrado agora.`);
+  if(intake.relatoLivreDesafios?.trim()) free.push(`Você também nomeou “${intake.relatoLivreDesafios.trim()}” como algo difícil de atravessar. Esse ponto será observado ao longo do percurso, não para medir desempenho, mas para perceber se ele começa a pesar de outra forma.`);
+  const cycle=rel.length>=2?'muitas demandas → sobrecarga → dificuldade de começar ou decidir → adiamento → alívio curto → cobrança → cansaço → nova tentativa':undefined;
 
-  return { nome,
-    page1: { title: 'Relatório Completo — Leitura do Seu Momento', subtitle: 'Uma devolutiva construída a partir das suas respostas, dos pontos que pedem cuidado e dos recursos escolhidos para acompanhar o seu percurso.', intro: `${nome}, suas respostas foram recebidas com cuidado. O que você trouxe aqui não é apenas um formulário: é um retrato do seu momento, com sentimentos, desafios, recursos e também possibilidades de movimento.` },
-    page2: { title: 'Diagnóstico da Anamnese', paragraphs: [`${nome}, ao reunirmos tudo o que você respondeu, os pontos que mais pedem atenção agora se concentram em ${joinNatural(topAxes)}. A leitura não usa isso para definir quem você é; usa para entender onde o peso está maior e por onde o cuidado precisa começar.`, ...relationships, ...freeText, 'O ponto central não é falta de vontade. Suas respostas mostram percepção do que precisa mudar, mas também indicam que pressão, cansaço ou excesso de pensamentos podem transformar até uma mudança desejada em mais uma exigência. Por isso, o cuidado não começará cobrando ação: começará criando sustentação.', 'A partir daí, o percurso passa a ter uma direção: diminuir o que hoje pesa demais, fortalecer os centros que pedem apoio e só então favorecer clareza, confiança e movimento possível.'], cycle },
-    page3: { title: 'O que suas respostas contam sobre você', paragraphs: ['Mesmo entre os pontos que hoje pedem atenção, suas respostas mostram recursos que permanecem vivos. Eles importam porque o cuidado não será construído apenas em torno do que está difícil, mas também a partir do que em você já consegue perceber, desejar e sustentar.', intake.relatoLivrePreservado?.trim() ? `Você mesmo reconheceu algo que permanece vivo: “${intake.relatoLivrePreservado.trim()}”. Isso também fará parte do percurso.` : 'A própria decisão de olhar para o seu momento mostra uma parte sua que ainda busca equilíbrio e possibilidade de mudança.'], preserved: preserved.length ? preserved : ['percepção do próprio momento', 'desejo verdadeiro de mudança', 'sensibilidade', 'capacidade de se observar', 'abertura para receber cuidado'], chakras: chakras.map(name => ({ name, text: chakraText(name, active) })) },
-    page4: { title: 'O que vamos trabalhar com você', paragraphs: ['O cuidado foi organizado em uma sequência, porque não faz sentido estimular movimento quando o que aparece primeiro é necessidade de sustentação. A direção para este momento será:', ...strategy, 'Para acompanhar essa direção, a composição personalizada reúne os recursos abaixo. Cada escolha está vinculada às prioridades encontradas na sua anamnese e aos centros energéticos que apareceram na leitura:', ...resources, 'A intenção é que esses recursos trabalhem como uma composição integrada: primeiro oferecendo sustentação, depois ajudando a reduzir o que está em excesso e, por fim, favorecendo integração, confiança e um movimento que seja possível para você agora.'] },
-    page5: { title: 'Seu percurso a partir daqui', paragraphs: ['Depois desta leitura, você escolhe entre o percurso de 7 ou de 21 dias. Antes do início, há um dia de acolhimento para entrar na experiência sem transformar o cuidado em mais uma cobrança.', 'Na opção de 7 dias, o percurso condensa as prioridades identificadas na anamnese. Na opção de 21 dias, há mais espaço para acompanhar diferentes camadas, observar respostas e realizar reavaliações.', `Nos primeiros momentos, observe especialmente o que acontece com ${joinNatural(topAxes.slice(0, 3))}. Não procure uma mudança perfeita: perceba pequenas diferenças na forma como você pensa, sente, reage, descansa, escolhe ou consegue iniciar um movimento.`, 'Ao longo do percurso, o que responder bem será mantido; o que continuar pesando será reavaliado. O cuidado deve se ajustar ao seu momento — não obrigar você a caber em um roteiro.'], closingTitle: `Uma última coisa, ${nome}`, closing: ['Você não é a soma das respostas que marcou. Elas mostram onde determinadas experiências estão pesando agora.', 'O caminho proposto tem uma ordem: sustentar primeiro, aliviar o excesso, fortalecer o que pede cuidado e então favorecer movimento.', 'Seu próximo passo não precisa resolver tudo. Precisa ser possível, coerente e respeitoso com você.'] }
+  return {nome,
+    page1:{title:'Relatório Completo — Leitura do Seu Momento',subtitle:'Uma leitura feita para que você consiga se reconhecer nela e, principalmente, saiba por onde o cuidado vai começar.',intro:`${nome}, eu quero que você leia estas páginas sem a sensação de estar recebendo um diagnóstico frio. Aqui estão os fios que apareceram nas suas respostas, aquilo que ainda permanece forte em você e o caminho de cuidado pensado para este momento.`},
+    page2:{title:'O que está acontecendo com você agora',paragraphs:[`${nome}, quando suas respostas são colocadas lado a lado, os pontos que mais pedem cuidado aparecem em ${join(priorities)}. Mais importante do que os nomes desses eixos é perceber como eles se encontram na sua vida.`,...rel,...free,'O direcionamento, portanto, não começa exigindo mudança. Começa diminuindo a pressão. A proposta é criar sustentação suficiente para que clareza, confiança e movimento possam voltar a aparecer sem serem arrancados à força.'],cycle},
+    page3:{title:'O que suas respostas contam sobre você',paragraphs:['Nem tudo em você está cansado ou fragilizado. Há recursos que continuam presentes e que serão usados a favor do seu processo. Cuidar não é olhar apenas para o que dói; é também lembrar a você aquilo que ainda está vivo.',intake.relatoLivrePreservado?.trim()?`Você mesmo reconheceu algo importante: “${intake.relatoLivrePreservado.trim()}”. Isso será tratado como força do percurso, não como detalhe.`:'O simples fato de você conseguir olhar para o próprio momento já mostra percepção, desejo de mudança e abertura para um cuidado diferente da cobrança.'],preserved:preserved.length?preserved:['capacidade de se observar','desejo verdadeiro de mudança','sensibilidade para perceber o próprio momento','abertura para receber cuidado','possibilidade de recomeçar sem precisar fazer tudo de uma vez'],chakras:chakras.map(name=>({name,text:chakraText(name,active)}))},
+    page4:{title:'O que vamos trabalhar com você',paragraphs:page4},
+    page5:{title:'Como esse cuidado segue daqui para frente',paragraphs:['Nos primeiros movimentos, o foco é você se sentir mais sustentado. Isso significa diminuir excesso de pressão, criar momentos reais de pausa e permitir que corpo, emoção e mente voltem a ser percebidos juntos.','Com essa base, o trabalho avança para os centros e temas que apareceram na sua leitura. O áudio personalizado reúne as energias escolhidas para você; os demais recursos entram como apoio ao mesmo direcionamento, e não como uma lista de coisas para cumprir.','Ao longo do percurso, observe menos se você está “fazendo certo” e mais o que muda dentro de você: onde existe um pouco mais de espaço, o que deixa de apertar tanto, o que começa a ficar mais claro e onde ainda existe resistência ou cansaço.','Na reavaliação, essas percepções serão comparadas com o seu ponto de partida. O cuidado poderá então ser ajustado ao que realmente mudou — porque o percurso deve acompanhar você, e não obrigar você a acompanhar um roteiro rígido.'],closingTitle:`Uma última coisa, ${nome}`,closing:['Você não precisa chegar aqui forte.','Não precisa ter todas as respostas.','Não precisa transformar este processo em mais uma cobrança.','Por agora, basta permitir que o cuidado também chegue até você.']}
   };
 }
