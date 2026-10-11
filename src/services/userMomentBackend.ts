@@ -9,6 +9,11 @@ export interface UserMomentData {
     personName: string | null;
     completedAt: string | null;
     declaredIntention: string;
+    answers: Record<string, number>;
+    freeTextNeed: string;
+    freeTextChallenges: string;
+    freeTextStrengths: string;
+    energeticSensitivity: string;
   } | null;
   entitlement: CommercialEntitlement | null;
   result: {
@@ -46,13 +51,25 @@ export async function loadUserMoment(): Promise<UserMomentData> {
 
   const { data: intake, error: intakeError } = await supabase
     .from('intake_sessions')
-    .select('id,person_name,completed_at,declared_intention')
+    .select('id,person_name,completed_at,declared_intention,answers,free_text_need,free_text_challenges,free_text_strengths,energetic_sensitivity')
     .eq('user_id', authData.user.id)
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
 
   if (intakeError) throw intakeError;
+
+  const mapIntake = (row: any) => ({
+    id: row.id,
+    personName: row.person_name,
+    completedAt: row.completed_at,
+    declaredIntention: row.declared_intention || '',
+    answers: row.answers && typeof row.answers === 'object' ? row.answers : {},
+    freeTextNeed: row.free_text_need || '',
+    freeTextChallenges: row.free_text_challenges || '',
+    freeTextStrengths: row.free_text_strengths || '',
+    energeticSensitivity: row.energetic_sensitivity || 'moderada',
+  });
 
   if (!intake) {
     return {
@@ -66,16 +83,9 @@ export async function loadUserMoment(): Promise<UserMomentData> {
 
   const entitlement = await getCurrentUserEntitlementForIntake(intake.id);
 
-  // Sem entitlement ativo, RLS também bloqueia resultado/plano permanente.
-  // Evitamos consultas desnecessárias e deixamos a regra explícita na aplicação.
   if (!entitlement) {
     return {
-      intake: {
-        id: intake.id,
-        personName: intake.person_name,
-        completedAt: intake.completed_at,
-        declaredIntention: intake.declared_intention,
-      },
+      intake: mapIntake(intake),
       entitlement: null,
       result: null,
       carePlan: null,
@@ -194,12 +204,7 @@ export async function loadUserMoment(): Promise<UserMomentData> {
     : null;
 
   return {
-    intake: {
-      id: intake.id,
-      personName: intake.person_name,
-      completedAt: intake.completed_at,
-      declaredIntention: intake.declared_intention,
-    },
+    intake: mapIntake(intake),
     entitlement,
     result: mappedResult,
     carePlan: mappedPlan,
