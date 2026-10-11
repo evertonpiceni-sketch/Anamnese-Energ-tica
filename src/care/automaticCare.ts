@@ -7,15 +7,17 @@ import { buildFullReportNarrative } from '../result/fullReportNarrative';
 import { selectComplementaryCare } from './complementaryCatalogs';
 import { selectSolfeggioFrequency } from './solfeggioCatalog';
 import { selectBathSupport } from './bathCatalog';
-import { CARE_INTENTIONS, CARE_PURPOSES, contextualWelcome, dailyInvitation } from './patientCareNarrative';
+import { CARE_INTENTIONS, contextualWelcome, dailyInvitation } from './patientCareNarrative';
 import { bathReceivingGuidance, bathProgrammingInstructions } from './bathCatalog';
 import { proposeDailyEnergySchedule, validateDailyEnergySchedule, documentedEnergyNames, documentedEnergyResource, isDocumentedCareSystem } from './dailyEnergySchedule';
 
 const resourceDescription = (text: string) => text
-  .replace(/^Material de formação relaciona \S+ a /, 'Escolhido como apoio para ')
-  .replace(/^Material de formação descreve \S+ em contexto de /, 'Aroma de apoio para ')
+  .replace(/^Material de formação relaciona \S+ a /, '')
+  .replace(/^Material de formação descreve \S+ em contexto de /, '')
   .replace(/ O app limita.*$/, '')
-  .replace(/^(Usado|Usada|Aparece) (no bloco inicial de|no bloco de|no bloco final de|em blocos de) /, 'Este cristal etérico acompanha ');
+  .replace(/^(Usado|Usada|Aparece) (no bloco inicial de|no bloco de|no bloco final de|em blocos de) /, '')
+  .replace(/^Este cristal etérico acompanha /, '')
+  .trim();
 
 export interface PatientCareResource {
   id: string;
@@ -42,12 +44,12 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
   const frequency = selectSolfeggioFrequency(journeyAxes);
   const journeyReason = (compatibleAxes: EixoId[]) => {
     const related = evidence.filter(item => item.level >= 2 && compatibleAxes.some(axis => (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[axis] || 0) > 0)).slice(0, 2);
-    return related.length ? `Essa escolha se aproxima do que você contou: ${related[0].observation.split('. ')[0].toLowerCase()}. A intenção é oferecer um apoio constante, enquanto damos espaço às suas necessidades ao longo dos dias.` : 'A intenção é acompanhar seu momento com um apoio constante, enquanto você percebe o que faz sentido para si.';
+    return related.length ? `Esse apoio foi incluído porque conversa com o que você contou sobre ${related[0].name}. A intenção é acompanhar o percurso de forma constante e discreta.` : 'Esse apoio acompanha a jornada de forma constante e discreta, respeitando o seu ritmo.';
   };
   const journeyResources: PatientCareResource[] = [
-    ...journeySupport.florals.filter(item => item.fonteDocumental).slice(0, 1).map(item => ({ id: item.id, category: 'Floral' as const, name: item.nome, explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`, guidance: `Orientação de Everton Piceni para o floral deste percurso: 10 gotas, duas vezes ao dia, durante os ${days} dias.`, source: item.fonteDocumental || '' })),
-    ...journeySupport.aromatherapy.filter(item => item.fonteDocumental).map(item => ({ id: item.id, category: 'Aromaterapia' as const, name: item.nome.replace(/\s+—\s+.*/, ''), explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`, guidance: `O mesmo aroma acompanha os ${days} dias, por uso olfativo ou ambiental, se confortável para você. Não ingerir nem aplicar diretamente na pele.`, source: item.fonteDocumental || '' })),
-    ...(frequency ? [{ id: frequency.id, category: 'Solfeggio' as const, name: `${frequency.hz} Hz`, explanation: `${frequency.intencaoProjeto} ${journeyReason(frequency.eixos)}`, guidance: `Esta é a única frequência-base escolhida para a programação de toda a jornada de ${days} dias. Ela acompanhará o áudio do tratamento.`, source: frequency.fonteProjeto }] : []),
+    ...journeySupport.florals.filter(item => item.fonteDocumental).slice(0, 1).map(item => ({ id: item.id, category: 'Floral' as const, name: item.nome, explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`.trim(), guidance: `Ao longo dos ${days} dias, siga a orientação combinada para este floral: 10 gotas, duas vezes ao dia.`, source: item.fonteDocumental || '' })),
+    ...journeySupport.aromatherapy.filter(item => item.fonteDocumental).map(item => ({ id: item.id, category: 'Aromaterapia' as const, name: item.nome.replace(/\s+—\s+.*/, ''), explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`.trim(), guidance: `Esse aroma pode acompanhar os ${days} dias por uso olfativo ou ambiental, sempre de forma confortável. Não ingerir nem aplicar diretamente na pele.`, source: item.fonteDocumental || '' })),
+    ...(frequency ? [{ id: frequency.id, category: 'Solfeggio' as const, name: `${frequency.hz} Hz`, explanation: `Essa frequência acompanha o áudio como um fundo de apoio para ${frequency.intencaoProjeto.toLowerCase()}.`, guidance: `Ela permanece como frequência-base ao longo dos ${days} dias.`, source: frequency.fonteProjeto }] : []),
   ];
   const resources: PatientCareResource[] = [...journeyResources];
   const dailyEnergySchedule = proposed.map(day => {
@@ -62,15 +64,15 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
         id: item.id,
         category: 'Cristal etérico' as const,
         name: item.nome,
-        explanation: `Como apoio ao cuidado deste dia, ${item.nome} acompanha a intenção de ${CARE_PURPOSES[target]}. ${resourceDescription(item.descricao)} Ele funciona aqui como uma referência energética da composição; você não precisa adquirir uma pedra física nem sentir algo específico para que a prática faça sentido.`,
-        guidance: 'Você pode apenas deixar essa referência acompanhar a sessão. Não é necessário segurar, comprar ou visualizar um cristal físico.',
+        explanation: `${item.nome} entra hoje como uma lembrança de ${CARE_INTENTIONS[target].toLowerCase()}. ${resourceDescription(item.descricao)} Não é preciso ter a pedra física; essa referência já faz parte da composição do cuidado.`.replace(/\.\s*\./g, '.').trim(),
+        guidance: 'Apenas deixe essa referência acompanhar a prática, sem precisar fazer nada com ela.',
         source: item.fonteDocumental || ''
       })),
       ...(bath ? [{
         id: bath.id,
         category: 'Banho energético' as const,
         name: bath.nome,
-        explanation: `${bath.descricaoPublica} Neste protocolo, esse “banho” não é feito com água ou ervas: ele é uma prática de visualização e recepção simbólica de luz, integrada ao mesmo cuidado do dia.`,
+        explanation: `${bath.descricaoPublica} Ele entra como um momento de recolhimento dentro da prática de hoje — sem água, ervas ou qualquer preparo físico.`,
         guidance: bathReceivingGuidance(bath),
         programmingInstructions: bathProgrammingInstructions(bath),
         source: bath.fonteDocumental
@@ -84,8 +86,8 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
       const compatibleAxes = documented?.eixosCompatíveis || Object.keys(system.compatibilidadeEixos) as EixoId[];
       const selectedAxis = compatibleAxes.includes(target) ? target : axes.find(axis => compatibleAxes.includes(axis.eixoId))?.eixoId || 'integracao';
       const explanation = name === 'Original Reiki'
-        ? `O Original Reiki permanece como a base tranquila que sustenta este dia. Ele acompanha o que você acabou de ler sem exigir mudança, desempenho ou uma sensação específica; a proposta é que você possa receber cuidado no seu próprio ritmo.`
-        : `${name} entra neste dia porque sua proposta se aproxima da necessidade de ${CARE_PURPOSES[selectedAxis]}. Junto do Reiki, ele não aparece como uma técnica isolada, mas como parte do mesmo movimento de cuidado: primeiro acolher o que está presente, depois abrir espaço para uma mudança possível.`;
+        ? 'Hoje, o Original Reiki fica como a base silenciosa deste cuidado. Você não precisa fazer nada para recebê-lo; ele apenas acompanha a sua pausa com suavidade.'
+        : `${name} se aproxima deste dia para apoiar ${CARE_INTENTIONS[selectedAxis].toLowerCase()}. Ele entra junto do Reiki como um cuidado complementar, sem pressa e sem cobrança.`;
       return { name, explanation, source: documented?.fonteDocumental || system.origemDocumental.idDocumento };
     });
     return { ...day, intention: CARE_INTENTIONS[target], reason, invitation: dailyInvitation(related, target, day.day === days), resources: dayResources, energyDetails };
