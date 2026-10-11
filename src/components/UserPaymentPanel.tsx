@@ -43,19 +43,28 @@ export function UserPaymentPanel() {
   const [paying, setPaying] = useState<InfinitePayAmountCents | null>(null);
   const [message, setMessage] = useState('');
 
-  async function refresh() {
-    setLoading(true);
+  async function refresh(silent = false) {
+    if (!silent) setLoading(true);
     try {
       setData(await loadUserMoment());
     } catch {
       setData(null);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }
 
   useEffect(() => {
     void refresh();
+
+    const refreshSilently = () => void refresh(true);
+    const interval = window.setInterval(refreshSilently, 15_000);
+    window.addEventListener('focus', refreshSilently);
+
+    return () => {
+      window.clearInterval(interval);
+      window.removeEventListener('focus', refreshSilently);
+    };
   }, []);
 
   if (loading || !data?.intake) return null;
