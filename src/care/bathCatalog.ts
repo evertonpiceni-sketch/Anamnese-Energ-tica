@@ -103,7 +103,7 @@ export function selectBathSupport(
 /** Source: 12ª Chave Dourada, pp. 30–31. Visualization is a spiritual invitation, not a predicted physical effect. */
 export function bathReceivingGuidance(bath: BathSupportResource): string {
   const color = bath.id.replace('templo-', '');
-  return `Aqui, “banho” não significa água, ervas ou qualquer preparo físico. É uma prática de visualização e recepção simbólica de luz. Acomode-se sentado ou deitado e, se for confortável, imagine uma luz ${color} envolvendo suavemente seu corpo, como se você estivesse repousando dentro dela. Não é necessário visualizar com nitidez nem sentir algo especial. Você também pode simplesmente descansar e deixar essa imagem acompanhar o momento.`;
+  return `Aqui, “banho” não significa água, ervas ou qualquer preparo físico. É uma prática de visualização e recepção simbólica de luz. Escolha uma posição confortável, sentado ou deitado, e imagine uma luz ${color} envolvendo suavemente seu corpo, como um espaço de acolhimento e repouso. Você pode receber esse momento durante a prática do dia ou, se preferir, antes de dormir. Não é necessário visualizar com nitidez nem sentir algo especial; apenas permita-se descansar e acompanhar essa imagem no seu próprio ritmo.`;
 }
 
 export function bathProgrammingInstructions(bath: BathSupportResource): string[] {
