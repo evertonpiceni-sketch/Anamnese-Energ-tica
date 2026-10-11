@@ -15,6 +15,7 @@ import { CareComposerAdminView } from './components/CareComposerAdminView';
 import { CasosTesteView } from './components/CasosTesteView';
 import { Heart, LogOut, RotateCcw, ShieldCheck } from 'lucide-react';
 import { AdminIntakeRecord, getLatestCompletedIntakeForAdmin } from './services/adminIntakeBackend';
+import { buildBasicUserResult } from './result/basicUserResult';
 
 type ViewMode = 'anamnese' | 'resultado_pessoa' | 'relatorio_everton' | 'biblioteca' | 'audios' | 'complementares' | 'compositor' | 'reavaliacao' | 'casos';
 
@@ -111,6 +112,10 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
       setResultadoAnalise(analise);
     }
   };
+
+  const userResultForComposer = resultadoAnalise
+    ? buildBasicUserResult(resultadoAnalise, anamneseAtual.nomePessoa)
+    : undefined;
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
@@ -300,6 +305,7 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
             analise={resultadoAnalise}
             backendUserId={backendContext?.userId}
             backendIntakeId={backendContext?.intakeId}
+            friendlyResult={userResultForComposer}
           />
         )}
 
