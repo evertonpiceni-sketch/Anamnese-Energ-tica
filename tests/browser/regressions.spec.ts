@@ -177,3 +177,81 @@ test('ADM opens with a daily motor draft and preserves an existing review', asyn
   await expect(page.getByRole('textbox', { name: 'Intenção do dia' })).toHaveValue('Revisão manual preservada');
   await expect(page.getByRole('group', { name: 'Dia 7', exact: true })).toHaveCount(0);
 });
+
+test('every question changes the reading and unsupported difficulties are absent', async ({ page }) => {
+  await page.goto('/');
+  const data = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { PERGUNTAS_ANAMNESE } = await import(/* @vite-ignore */ String('/src/data/questions.ts'));
+    const { executarAnaliseIntegrativa } = await import(/* @vite-ignore */ String('/src/engine/analysisEngine.ts'));
+    const { buildFullReportNarrative } = await import(/* @vite-ignore */ String('/src/result/fullReportNarrative.ts'));
+    const { buildBasicUserResult } = await import(/* @vite-ignore */ String('/src/result/basicUserResult.ts'));
+    const intake = { ...CASOS_DE_TESTE[0].dados, id: 'same-person', nomePessoa: 'Teste', respostasObjetivas: Object.fromEntries(PERGUNTAS_ANAMNESE.map(q => [q.id, 0])), intencaoDeclarada: '', relatoLivreNecessidade: '', relatoLivreDesafios: '', relatoLivrePreservado: '', regioesCorporaisPercebidas: [], sensibilidadeEnergetica: 'moderada' };
+    const build = input => { const analysis = executarAnaliseIntegrativa(input); return { full: buildFullReportNarrative({ intake: input, analysis, composition: null }), basic: buildBasicUserResult(analysis, input) }; };
+    const zero = build(intake);
+    const variants = PERGUNTAS_ANAMNESE.map(q => ({ question: q, ...build({ ...intake, respostasObjetivas: { ...intake.respostasObjetivas, [q.id]: 4 } }) }));
+    const partial = { ...intake, respostasObjetivas: { ...intake.respostasObjetivas } }; delete partial.respostasObjetivas.q3_sensacao_ameaca_inseguranca;
+    const partialReport = build(partial).full;
+    const quoted = build({ ...intake, relatoLivreNecessidade: 'Não sinto ansiedade. Quero reconhecer meu próprio ritmo.', relatoLivrePreservado: 'Minha criatividade continua viva.' }).full;
+    return { zero, variants, partialReport, quoted };
+  });
+  expect(data.zero.full.page3.chakras).toHaveLength(0);
+  expect(data.zero.basic.priorities).toHaveLength(0);
+  expect(data.zero.full.page2.cycle).toBeUndefined();
+  expect(data.zero.full.page3.preserved.join(' ')).not.toContain('desejo verdadeiro de mudança');
+  expect(data.zero.full.energyNames).toHaveLength(0);
+  expect(new Set(data.variants.map(item => JSON.stringify(item.full.page2))).size).toBe(20);
+  expect(new Set(data.variants.map(item => item.basic.headline)).size).toBe(20);
+  for (const item of data.variants) {
+    expect(item.full.answerEvidence.find(x => x.questionId === item.question.id).level).toBe(4);
+    expect(item.full.page2.paragraphs.join(' ')).toContain('você marcou “Está muito presente”');
+    expect(item.full.source.fingerprint).not.toBe(data.zero.full.source.fingerprint);
+  }
+  const creative = data.variants.find(item => item.question.id === 'q12_trava_expressao_criatividade');
+  expect(creative.full.page3.chakras.map(item => item.name).sort()).toEqual(['Laríngeo', 'Sacral']);
+  expect(creative.full.page2.cycle).toBeUndefined();
+  expect(data.partialReport.answerEvidence).toHaveLength(19);
+  expect(data.partialReport.page2.paragraphs.join(' ')).toContain('Ausência de resposta não será interpretada');
+  expect(data.quoted.page2.paragraphs.join(' ')).toContain('Não sinto ansiedade. Quero reconhecer meu próprio ritmo.');
+  expect(data.quoted.page3.preserved.join(' ')).toContain('Minha criatividade continua viva.');
+  expect(data.quoted.page3.chakras).toHaveLength(0);
+});
+
+test('refreshing a legacy report changes the reading and preserves reviewed care', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { executarAnaliseIntegrativa } = await import(/* @vite-ignore */ String('/src/engine/analysisEngine.ts'));
+    const { buildFullReportNarrative, refreshReportReading } = await import(/* @vite-ignore */ String('/src/result/fullReportNarrative.ts'));
+    const intake = CASOS_DE_TESTE[0].dados;
+    const analysis = executarAnaliseIntegrativa(intake);
+    const schedule = Array.from({ length: 7 }, (_, i) => ({ day: i + 1, energyNames: [i % 2 ? 'Soul Healing' : 'Original Reiki Platinum'], intention: 'Intenção revisada.' }));
+    const stored = { ...buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: 7, dailyEnergySchedule: schedule }), source: undefined, page2: { title: 'Diagnóstico da Anamnese', paragraphs: ['Texto genérico de outra pessoa.'] }, page4: { title: 'Cuidado', paragraphs: ['Direção do cuidado: caminho genérico.', 'Florais — Recurso aprovado.'] } };
+    return { fresh: refreshReportReading(stored, intake, analysis), schedule };
+  });
+  expect(result.fresh.source.generatorVersion).toBe('answers-v2');
+  expect(result.fresh.page2.paragraphs.join(' ')).not.toContain('Texto genérico');
+  expect(result.fresh.page4.paragraphs).toContain('Florais — Recurso aprovado.');
+  expect(result.fresh.dailyEnergySchedule).toEqual(result.schedule);
+  expect(result.fresh.journeyDays).toBe(7);
+});
+
+test('publication rejects a report built from different saved answers', async ({ page }) => {
+  await page.goto('/');
+  const fixture = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { executarAnaliseIntegrativa } = await import(/* @vite-ignore */ String('/src/engine/analysisEngine.ts'));
+    const { buildFullReportNarrative } = await import(/* @vite-ignore */ String('/src/result/fullReportNarrative.ts'));
+    const intake = CASOS_DE_TESTE[0].dados;
+    return { report: buildFullReportNarrative({ intake, analysis: executarAnaliseIntegrativa(intake), composition: null }), row: { id: intake.id, person_name: intake.nomePessoa, answers: { ...intake.respostasObjetivas, q2_mente_acelerada: 0 }, declared_intention: intake.intencaoDeclarada, free_text_need: intake.relatoLivreNecessidade, free_text_challenges: intake.relatoLivreDesafios, free_text_strengths: intake.relatoLivrePreservado, body_regions: intake.regioesCorporaisPercebidas, energetic_sensitivity: intake.sensibilidadeEnergetica } };
+  });
+  let writes = 0;
+  await page.route('**/rest/v1/intake_sessions**', route => route.fulfill({ json: fixture.row }));
+  await page.route('**/rest/v1/full_report_publications**', async route => { if (route.request().method() !== 'GET') writes++; await route.fulfill({ json: null }); });
+  const message = await page.evaluate(async report => {
+    const { publishFullReport } = await import(/* @vite-ignore */ String('/src/services/fullReportBackend.ts'));
+    try { await publishFullReport({ intakeId: 'test', userId: 'test', report }); return 'unexpected success'; } catch (error) { return error.message; }
+  }, fixture.report);
+  expect(message).toContain('não corresponde às respostas salvas');
+  expect(writes).toBe(0);
+});

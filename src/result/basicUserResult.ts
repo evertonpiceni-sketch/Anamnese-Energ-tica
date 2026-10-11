@@ -1,5 +1,6 @@
 import { AnaliseCompletaResultado } from '../engine/analysisEngine';
-import { EixoId } from '../types';
+import { AnamneseInput } from '../types';
+import { collectAnswerEvidence } from './answerEvidence';
 
 export interface BasicUserResult {
   headline: string;
@@ -9,48 +10,16 @@ export interface BasicUserResult {
   closing: string;
 }
 
-const FRIENDLY_AXIS_COPY: Record<EixoId, string> = {
-  seguranca: 'encontrar mais chão, segurança e estabilidade para seguir no seu ritmo',
-  emocional: 'acolher o que está sendo sentido sem precisar carregar tudo sem apoio',
-  autovalor: 'reconhecer seu próprio valor com mais gentileza e menos cobrança',
-  mente: 'criar mais espaço interno, clareza e descanso para a mente',
-  movimento: 'retomar movimento aos poucos, sem transformar cada passo em cobrança',
-  vitalidade: 'recuperar energia e respeitar o ritmo do corpo antes de exigir mais de si',
-  corpo: 'voltar a perceber o corpo como lugar de presença, cuidado e escuta',
-  relacionamentos: 'cuidar das trocas, dos limites e da forma como você se encontra com o outro',
-  prazer: 'reabrir espaço para descanso, prazer e contato com as próprias sensações',
-  criatividade: 'dar mais espaço à sua expressão, ideias e espontaneidade',
-  limpeza: 'soltar pesos que já não precisam ocupar tanto espaço agora',
-  padroes: 'perceber repetições com mais clareza para abrir novas possibilidades de resposta',
-  prosperidade: 'fortalecer segurança e movimento em relação à vida prática e material',
-  poder_pessoal: 'fortalecer limites, escolhas e confiança para sustentar o que é importante para você',
-  proposito: 'reencontrar direção e um próximo passo que faça sentido',
-  espiritualidade: 'reaproximar-se daquilo que traz conexão, sentido e presença',
-  protecao: 'preservar melhor sua energia e criar mais sensação de limite e resguardo',
-  receber: 'permitir-se receber cuidado, apoio e descanso sem precisar compensar imediatamente',
-  recomeco: 'abrir espaço para um novo começo sem exigir que tudo esteja resolvido primeiro',
-  integracao: 'reunir corpo, emoções e pensamentos em uma experiência mais inteira e coerente',
-};
-
-export function buildBasicUserResult(
-  analysis: AnaliseCompletaResultado,
-  nome: string
-): BasicUserResult {
-  const topAxes = analysis.relatorioEverton.eixosOrdenados.slice(0, 3);
-  const priorities = topAxes.map(eixo => FRIENDLY_AXIS_COPY[eixo.eixoId]);
-  const firstName = nome.trim().split(/\s+/)[0];
-
+export function buildBasicUserResult(analysis: AnaliseCompletaResultado, intake: AnamneseInput): BasicUserResult {
+  const evidence = collectAnswerEvidence(intake, analysis.relatorioEverton.eixosOrdenados);
+  const present = evidence.filter(item => item.level >= 2).slice(0, 3);
+  const firstName = intake.nomePessoa.trim().split(/\s+/)[0] || 'Você';
+  const request = intake.relatoLivreNecessidade.trim() || intake.intencaoDeclarada.trim();
   return {
-    headline: firstName
-      ? `${firstName}, seu cuidado pode começar por aqui.`
-      : 'Seu cuidado pode começar por aqui.',
-    intro:
-      'Neste momento, algumas áreas parecem pedir mais presença. Isso não define quem você é; é apenas uma leitura do que aparece com mais força agora.',
-    priorities,
-    intention: priorities[0]
-      ? `Dar atenção, com gentileza, a ${priorities[0]}, respeitando seu ritmo e escolhendo um próximo passo possível.`
-      : 'Seguir com gentileza, respeitando seu ritmo e escolhendo um próximo passo possível.',
-    closing:
-      'Esta leitura é complementar e serve para orientar as práticas do protocolo. Ela não substitui avaliação ou tratamento médico ou psicológico quando necessários.',
+    headline: present.length ? `${firstName}, sua leitura destaca ${present.map(item => item.name).join(', ')}.` : `${firstName}, a leitura acompanha o que você contou.`,
+    intro: `${present.length ? present.map(item => `Você marcou “${item.label}” para ${item.name}.`).join(' ') : evidence.length ? 'Suas respostas objetivas não apresentam temas com intensidade moderada ou alta; não vou atribuir uma sobrecarga que você não relatou.' : 'Ainda faltam respostas objetivas para sustentar a leitura.'}${request ? ` Seu pedido foi: “${request}”.` : ''}${intake.relatoLivreDesafios.trim() ? ` Você descreveu como desafio: “${intake.relatoLivreDesafios.trim()}”.` : ''}`,
+    priorities: present.map(item => item.intention),
+    intention: intake.intencaoDeclarada.trim() ? `Acompanhar sua intenção: “${intake.intencaoDeclarada.trim()}”.${present.length ? ` O primeiro ponto será ${present[0].intention}.` : ''}` : present.length ? `O primeiro ponto será ${present[0].intention}.` : 'O direcionamento será definido com você na revisão do seu pedido.',
+    closing: intake.relatoLivrePreservado.trim() ? `Você reconheceu como força: “${intake.relatoLivrePreservado.trim()}”. Essa referência também fará parte do acompanhamento.` : 'A reavaliação compara suas respostas iniciais com o que você percebe ao longo do cuidado.',
   };
 }

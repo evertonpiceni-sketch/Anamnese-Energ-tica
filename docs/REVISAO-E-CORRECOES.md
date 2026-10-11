@@ -48,3 +48,20 @@ O logo PNG retorna 404 no deploy antigo; as correções de layout ainda estavam 
 - Os círculos dos chakras foram substituídos pelos símbolos das próprias imagens aprovadas, exibidos como recortes de fundo; não houve redesenho das figuras.
 - Ao abrir uma anamnese com plano confirmado no ADM, o motor prepara a proposta diária quando ainda não existe uma. A revisão existente, incluindo programação parcial, é preservada. A proposta continua rascunho, sem aprovação automática.
 - Validação adicional: nomes de energias, sete símbolos, layout móvel e inicialização do ADM sem escrita ou publicação automática. O teste real não tinha composição aprovada no momento desta correção.
+
+## Leitura sustentada pelas respostas (answers-v2)
+
+A auditoria do teste identificou 20 respostas válidas, mas o relatório legado usava parágrafos amplamente fixos e omitia o pedido livre. O conteúdo foi corrigido independentemente da referência visual.
+
+- Cada pergunta tem uma observação e uma intenção próprias. A intensidade marcada determina se o tema é prioritário, secundário ou pouco presente; a análise ponderada desempata a ordem dos temas com a mesma intensidade.
+- Perguntas não respondidas ou com valores inválidos não são tratadas como zero. Não há atribuição automática de esgotamento, autocobrança, desejo de mudança, empatia ou forças preservadas.
+- Intenção, necessidade, desafios, forças declaradas, regiões corporais e sensibilidade são incorporados sem interpretar uma citação como um diagnóstico. A leitura não atribui uma causa única aos cruzamentos de respostas.
+- Chakras são associados aos temas efetivamente marcados (ou às regiões indicadas), com as respostas de origem identificadas. Não são escolhidos apenas porque constam de um sistema energético ou do modelo visual.
+- A leitura básica usa a mesma evidência individual. O componente deixou de afirmar uma sequência fixa de sustentação, alívio e integração para toda pessoa.
+- O relatório registra versão do gerador, identificador de origem, impressão reproduzível das respostas e evidências por pergunta. A impressão não é uma credencial de segurança. A publicação compara a origem com a anamnese salva e recusa respostas diferentes ou incompletas antes da aprovação.
+- Relatórios legados são reconstruídos na leitura com a anamnese acessível por RLS, preservando as energias, a programação revisada e os recursos já registrados. Essa reconstrução não aprova terapias e não escreve automaticamente no banco.
+- O único relatório do teste pago identificado foi corrigido no banco com guarda de concorrência e conferência das respostas. Pedido e desafio foram incluídos, 20 evidências registradas, duração de 7 dias preservada, sem alteração de energias ou programação. Não havia resultado básico publicado para esse teste; não foi criada uma publicação fictícia.
+
+Validação adicional: variações isoladas das 20 perguntas produzem leituras distintas; nenhum tema intenso ou chakra é gerado em um formulário zerado; informações ausentes não viram respostas negativas; citações são preservadas; revisão de relatório legado mantém a programação; tentativa de publicar leitura de respostas diferentes é recusada sem escrita.
+
+O gerador usa regras textuais por tema, não um modelo de linguagem que compreenda livremente qualquer relato. O texto aberto é incorporado como declaração da pessoa; a revisão do terapeuta continua necessária para contextualizar e aprovar a composição.

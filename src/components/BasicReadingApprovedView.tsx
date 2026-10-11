@@ -15,7 +15,7 @@ export function BasicReadingApprovedView({ data }: { data: UserMomentData }) {
     </header>
     <div className="grid gap-4 lg:grid-cols-3">
       <Block number={1} title="Como você chega neste momento"><h3 className="mb-3 text-xl">{result.headline}</h3><p>{result.intro}</p></Block>
-      <Block number={2} title="O que será trabalhado"><ul className="list-disc space-y-2 pl-5">{result.priorities.map((item, i) => <li key={i}>{item}</li>)}</ul></Block>
+      <Block number={2} title="O que será trabalhado">{result.priorities.length ? <ul className="list-disc space-y-2 pl-5">{result.priorities.map((item, i) => <li key={i}>{item}</li>)}</ul> : <p>As respostas disponíveis não destacam uma prioridade intensa. Seu pedido será considerado na revisão do cuidado.</p>}</Block>
       <Block number={3} title="Intenção do cuidado"><p>{result.intention}</p></Block>
     </div>
     {data.audio && <div className="mt-4"><Block number={4} title="Sua sessão exclusiva"><p>{data.audio.titulo}</p><p>{data.audio.intencao}</p></Block></div>}
