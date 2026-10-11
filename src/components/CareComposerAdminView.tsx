@@ -26,6 +26,8 @@ import { BIBLIOTECA_MESTRA } from '../data/bibliotecaMestra';
 import { AdminAudioUpload } from './AdminAudioUpload';
 import { AudioGenerationAdminPanel } from './AudioGenerationAdminPanel';
 import { requestResultEmail } from '../services/resultEmail';
+import { buildFullReportNarrative } from '../result/fullReportNarrative';
+import { publishFullReport } from '../services/fullReportBackend';
 import {
   loadCareCompositionReview,
   ManualCareComposition,
@@ -358,12 +360,24 @@ export function CareComposerAdminView({
           })),
           userResult: friendlyResult,
         });
+
+        const fullReport = buildFullReportNarrative({
+          intake: anamnese,
+          analysis: analise,
+          composition,
+        });
+
+        await publishFullReport({
+          intakeId: backendIntakeId,
+          userId: backendUserId,
+          report: fullReport,
+        });
       }
 
       setReviewStatus(saved.status === 'approved' ? 'approved' : 'draft');
       setReviewMessage(
         approve
-          ? 'Composição aprovada. O upload do áudio está liberado.'
+          ? 'Composição aprovada. O relatório completo foi preparado no backend e só será visível quando o entitlement permitir. O upload do áudio está liberado.'
           : 'Rascunho salvo no backend.'
       );
     } catch (error) {
