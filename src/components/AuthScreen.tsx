@@ -10,8 +10,18 @@ const PRODUCTION_APP_URL = 'https://relatorioenergetico.vercel.app';
 const RECOVERY_COOLDOWN_SECONDS = 60;
 const RECOVERY_COOLDOWN_KEY = 'anamnese-recovery-next-at';
 
+function validPassword(password: string) {
+  return password.length >= 8 && /[A-Za-z]/.test(password) && /\d/.test(password);
+}
+
 function friendlyAuthError(message: string) {
   const normalized = message.toLowerCase();
+  if (normalized.includes('password should contain') || normalized.includes('password should be')) {
+    return 'Sua senha precisa ter pelo menos 8 caracteres e combinar letras e números.';
+  }
+  if (normalized.includes('email address not authorized')) {
+    return 'Não foi possível enviar o e-mail de confirmação para este endereço agora. Tente novamente mais tarde ou entre em contato com o atendimento.';
+  }
   if (normalized.includes('email rate limit exceeded') || normalized.includes('over_email_send_rate_limit') || normalized.includes('rate limit')) {
     return 'O serviço de e-mail está protegendo sua conta porque houve vários pedidos em sequência. Aguarde um pouco antes de solicitar outro link. Se você já recebeu um e-mail recente, use somente o link mais novo.';
   }
@@ -19,7 +29,7 @@ function friendlyAuthError(message: string) {
     return 'Este link de recuperação não está mais válido. Por segurança, os links são de uso único. Volte ao acesso e solicite um novo link quando o botão estiver disponível novamente.';
   }
   if (normalized.includes('invalid login credentials')) {
-    return 'Não foi possível entrar com esses dados. Confira o e-mail e a senha e tente novamente.';
+    return 'Não foi possível entrar com esses dados. Confira o e-mail e a senha. Se você já criou esta conta e não lembra a senha, use “Esqueci minha senha”.';
   }
   if (normalized.includes('email not confirmed')) {
     return 'Seu e-mail ainda precisa ser confirmado. Verifique sua caixa de entrada e, se necessário, a pasta de spam.';
@@ -70,8 +80,10 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
     setErrorMessage('');
 
     try {
+      const normalizedEmail = email.trim().toLowerCase();
+
       if (mode === 'signin') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await supabase.auth.signInWithPassword({ email: normalizedEmail, password });
         if (error) throw error;
         return;
       }
@@ -81,8 +93,13 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
         return;
       }
 
+      if (!validPassword(password)) {
+        setErrorMessage('Sua senha precisa ter pelo menos 8 caracteres e combinar letras e números.');
+        return;
+      }
+
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: normalizedEmail,
         password,
         options: {
           emailRedirectTo: PRODUCTION_APP_URL,
@@ -94,6 +111,12 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
       });
 
       if (error) throw error;
+
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setMode('signin');
+        setErrorMessage('Este e-mail já possui uma conta. Entre com sua senha ou use “Esqueci minha senha” para criar uma nova. Não é necessário fazer outro cadastro.');
+        return;
+      }
 
       if (data.user && data.session) {
         await supabase
@@ -107,8 +130,8 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
 
       setMessage(
         data.session
-          ? 'Conta criada. Você já pode continuar.'
-          : 'Conta criada. Confira seu e-mail para confirmar o acesso. O link retornará para este site.'
+          ? 'Conta criada. Seu acesso já está disponível.'
+          : 'Cadastro recebido. Enviamos um e-mail para confirmar seu acesso. Abra o link mais recente recebido antes de tentar entrar.'
       );
     } catch (error) {
       const raw = error instanceof Error ? error.message : 'Não foi possível concluir o acesso.';
@@ -136,11 +159,11 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
 
     setBusy(true);
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${PRODUCTION_APP_URL}/?setup=password` });
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), { redirectTo: `${PRODUCTION_APP_URL}/?setup=password` });
       if (error) throw error;
       startRecoveryCooldown();
       setRecoveryRequested(true);
-      setMessage('Pedido enviado. Confira sua caixa de entrada e também o spam. Se houver mais de um e-mail de recuperação, use somente o link mais recente. Um novo pedido ficará disponível em 60 segundos.');
+      setMessage('Pedido enviado. Abra somente o e-mail de recuperação mais recente. Ao tocar no link, você será levado diretamente à tela para escolher uma nova senha. Confira também o spam.');
     } catch (error) {
       const raw = error instanceof Error ? error.message : 'Não foi possível enviar o link agora.';
       if (raw.toLowerCase().includes('rate limit')) startRecoveryCooldown();
@@ -155,6 +178,7 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
     setErrorMessage('');
     try {
       await verifyPasswordLink(recoveryLink.trim());
+      window.location.reload();
     } catch (cause) {
       const raw = cause instanceof Error ? cause.message : 'Não foi possível verificar o link.';
       setErrorMessage(friendlyAuthError(raw));
@@ -226,9 +250,10 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
                   <span className="mb-2 block text-sm font-semibold text-[#365441]">Senha</span>
                   <div className="relative">
                     <LockKeyhole className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a8b68]" />
-                    <input type={showPassword ? 'text' : 'password'} required minLength={8} value={password} onChange={e => setPassword(e.target.value)} className="user-input pl-11 pr-12" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} placeholder="Mínimo de 8 caracteres" />
+                    <input type={showPassword ? 'text' : 'password'} required minLength={8} value={password} onChange={e => setPassword(e.target.value)} className="user-input pl-11 pr-12" autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} placeholder={mode === 'signin' ? 'Sua senha' : '8+ caracteres, com letras e números'} />
                     <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={showPassword} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#365441]">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
+                  {mode === 'signup' && <span className="mt-2 block text-xs leading-5 text-[#7b837d]">Use pelo menos 8 caracteres e combine letras e números.</span>}
                 </label>
 
                 {mode === 'signup' && (
@@ -259,9 +284,9 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
 
               {recoveryRequested && (
                 <div className="mt-5 space-y-3 rounded-2xl border border-[#d8c99f] bg-white/70 p-4">
-                  <p className="text-sm leading-6">Use somente o e-mail de recuperação mais recente. Se o botão recebido não abrir, copie o endereço completo do link e cole abaixo.</p>
+                  <p className="text-sm leading-6">Ao abrir o link mais recente, a tela de nova senha deve aparecer automaticamente. Se isso não acontecer, copie o endereço completo do link recebido e cole abaixo.</p>
                   <label className="block text-sm font-semibold">Link recebido no e-mail<input type="url" autoComplete="off" value={recoveryLink} onChange={event => setRecoveryLink(event.target.value)} className="user-input mt-2" /></label>
-                  <button type="button" disabled={busy || !recoveryLink.trim()} onClick={() => void openRecoveryLink()} className="w-full rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-50">Verificar este link</button>
+                  <button type="button" disabled={busy || !recoveryLink.trim()} onClick={() => void openRecoveryLink()} className="w-full rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-50">Abrir tela de nova senha</button>
                 </div>
               )}
 
