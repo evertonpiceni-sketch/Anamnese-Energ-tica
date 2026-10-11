@@ -38,7 +38,6 @@ export interface PersonalizedAudioPlan {
   solfeggio: SolfeggioFrequency | null;
   roteiroBase: string[];
   duracaoMinutos?: number;
-  arquivoUrl?: string;
   status: PersonalizedAudioStatus;
   assinaturaComposicao: string;
 }
@@ -48,6 +47,8 @@ export interface PersonalizedAudioPlan {
  * O áudio é criado para uma única pessoa e uma única anamnese.
  * Não existe catálogo de áudios reutilizáveis como tratamento final.
  * O catálogo do sistema contém apenas componentes, regras e recursos.
+ * O arquivo final nunca recebe URL pública/direta neste objeto; reprodução e
+ * download passam obrigatoriamente pelo backend privado e suas políticas RLS.
  */
 export function criarPlanoAudioPersonalizado(params: {
   userId: string;
@@ -129,7 +130,6 @@ function construirRoteiroBase(
 
   return etapas;
 }
-
 
 function hashString(value: string): string {
   let hash = 2166136261;
