@@ -114,7 +114,7 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
   };
 
   const userResultForComposer = resultadoAnalise
-    ? buildBasicUserResult(resultadoAnalise, anamneseAtual.nomePessoa)
+    ? buildBasicUserResult(resultadoAnalise, anamneseAtual)
     : undefined;
 
   return (

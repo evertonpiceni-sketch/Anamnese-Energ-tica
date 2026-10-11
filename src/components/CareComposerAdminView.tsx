@@ -30,7 +30,7 @@ import { AdminAudioUpload } from './AdminAudioUpload';
 import { AudioGenerationAdminPanel } from './AudioGenerationAdminPanel';
 import { requestResultEmail, requestFullReportEmail } from '../services/resultEmail';
 import { buildFullReportNarrative } from '../result/fullReportNarrative';
-import { publishFullReport, loadFullReportForAdmin } from '../services/fullReportBackend';
+import { publishFullReport, loadFullReportForAdmin, validateFullReportSource } from '../services/fullReportBackend';
 import {
   loadCareCompositionReview,
   ManualCareComposition,
@@ -338,6 +338,11 @@ export function CareComposerAdminView({
         const error = validateDailyEnergySchedule(manual.dailyEnergySchedule || [], confirmed.days, overriddenResources.energias);
         if (error) throw new Error(error);
       }
+      const fullReport = approve ? buildFullReportNarrative({
+        intake: anamnese, analysis: analise, composition,
+        journeyDays: confirmed?.days, dailyEnergySchedule: manual.dailyEnergySchedule,
+      }) : null;
+      if (fullReport) await validateFullReportSource(backendIntakeId, fullReport);
       const saved = await saveCareCompositionReview({
         intakeId: backendIntakeId,
         userId: backendUserId,
@@ -386,18 +391,10 @@ export function CareComposerAdminView({
           userResult: friendlyResult,
         });
 
-        const fullReport = buildFullReportNarrative({
-          intake: anamnese,
-          analysis: analise,
-          composition,
-          journeyDays: confirmed?.days,
-          dailyEnergySchedule: manual.dailyEnergySchedule,
-        });
-
         await publishFullReport({
           intakeId: backendIntakeId,
           userId: backendUserId,
-          report: fullReport,
+          report: fullReport!,
         });
       }
 

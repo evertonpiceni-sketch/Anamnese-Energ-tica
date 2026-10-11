@@ -62,16 +62,16 @@ export function FullReportApprovedView({ report }: Props) {
         <Text items={report.page2.paragraphs}/>
 
       </div>
-      {report.page2.cycle && <div className="mt-8 rounded-[1.7rem] border border-[#d8c89c] bg-[#fbf3df]/80 px-6 py-5"><div className="text-[9px] font-semibold uppercase tracking-[.25em] text-[#6b786f]">Um ciclo percebido nas suas respostas</div><div className="mt-3 font-serif text-lg italic leading-7 text-[#966d24]">{report.page2.cycle}</div></div>}
+      {report.page2.cycle && <div className="mt-8 rounded-[1.7rem] border border-[#d8c89c] bg-[#fbf3df]/80 px-6 py-5"><div className="text-[9px] font-semibold uppercase tracking-[.25em] text-[#6b786f]">Uma relação a observar nas suas respostas</div><div className="mt-3 font-serif text-lg italic leading-7 text-[#966d24]">{report.page2.cycle}</div></div>}
     </Shell>
 
     <Shell total={totalPages} page={3}>
       <Title kicker="Forças e centros que pedem atenção">{report.page3.title}</Title>
       <Text items={report.page3.paragraphs}/>
       <div className="my-8 rounded-[1.8rem] bg-[#f8efdc]/80 p-6"><h3 className="font-serif text-2xl text-[#173c2c]">O que permanece vivo em você</h3><div className="mt-4 grid gap-3 sm:grid-cols-2">{report.page3.preserved.map((item,i)=><div key={i} className="flex gap-3 text-sm leading-6 text-[#53665b]"><span className="text-[#b18432]">✦</span><span>{item}</span></div>)}</div></div>
-      <h3 className="font-serif text-3xl text-[#173c2c]">O que os seus chakras nos mostram dentro do protocolo</h3>
+      <h3 className="font-serif text-3xl text-[#173c2c]">Chakras associados aos temas que você relatou</h3>
+      {!report.page3.chakras.length && <p className="mt-4 font-serif leading-7 text-[#52645a]">As respostas disponíveis não indicam centros específicos para priorizar nesta leitura.</p>}
       <div className="mt-6 grid gap-6 sm:grid-cols-2">{report.page3.chakras.map((c,i)=><article key={i} className="flex items-start gap-4 border-b border-[#d9c79b]/70 pb-5"><ChakraSymbol name={c.name}/><div><h4 className="font-serif text-xl text-[#9a6f22]">{c.name}</h4><p className="mt-2 font-serif text-sm leading-6 text-[#52645a]">{c.text}</p></div></article>)}</div>
-      <div className="mt-8 font-serif text-xl italic text-[#a87828]">Antes de pedir mais de você, o cuidado vai devolver sustentação ao que hoje está pedindo espaço.</div>
     </Shell>
 
     <Shell total={totalPages} page={4}>
@@ -81,7 +81,7 @@ export function FullReportApprovedView({ report }: Props) {
         {energyNames.length ? <><ul className="mt-4 grid gap-x-8 gap-y-3 sm:grid-cols-2">{energyNames.map(name => <li key={name} className="font-serif text-lg text-[#9a6f22]">{name}</li>)}</ul><p className="mt-4 font-serif leading-7 text-[#43584c]">{schedule.length ? 'A programação ao final deste relatório mostra em quais dias cada energia será trabalhada e a intenção de cada composição.' : 'Estas são as energias da composição revisada. A distribuição por dia será apresentada após a aprovação da programação.'}</p></> : <p role="status" className="mt-3 font-serif leading-7 text-[#43584c]">A composição energética aguarda revisão do terapeuta. Os nomes das energias e sua distribuição por dia serão incluídos após a aprovação.</p>}
       </section>
       <Text items={report.page4.paragraphs}/>
-      <div className="mt-8 flex items-center gap-5 rounded-[1.8rem] bg-[#173c2c] p-6 text-[#f8f0df]"><div className="hidden sm:block"><Logo/></div><p className="font-serif text-lg italic leading-7">A sequência respeita o seu momento: primeiro sustentar, depois aliviar o excesso, fortalecer o que pede apoio e só então favorecer movimento e integração.</p></div>
+      <div className="mt-8 flex items-center gap-5 rounded-[1.8rem] bg-[#173c2c] p-6 text-[#f8f0df]"><div className="hidden sm:block"><Logo/></div><p className="font-serif text-lg italic leading-7">{schedule.length ? `No primeiro dia, a intenção revisada é: ${schedule[0].intention}` : 'A ordem e as intenções de cada dia serão definidas na revisão da sua composição, considerando os temas desta leitura.'}</p></div>
     </Shell>
 
     <Shell total={totalPages} page={5}>
