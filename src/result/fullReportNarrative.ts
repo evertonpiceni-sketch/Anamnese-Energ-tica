@@ -11,6 +11,7 @@ export interface FullReportNarrative {
   nome: string;
   deliveryMode?: 'automatic';
   careResources?: import('../care/automaticCare').PatientCareResource[];
+  journeyResources?: import('../care/automaticCare').PatientCareResource[];
   journeyDays?: 7 | 21;
   dailyEnergySchedule?: DailyEnergyPlan[];
   energyNames?: string[];
@@ -40,11 +41,10 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
   const intention = intake.intencaoDeclarada?.trim();
   const strengthIsLoss = !!strength && /(?:não|nao|sem|perdi)\s+(?:tenho\s+|sinto\s+|minha?\s+)?(?:fé|fe|força|forca|esperança|esperanca|vontade|criatividade|energia|amor|clareza)/i.test(strength);
   const regions = REGIOES_CORPORAIS.filter(region => intake.regioesCorporaisPercebidas.includes(region.id));
-  const opening = `${nome}, suas respostas foram recebidas com cuidado. O que você compartilhou tem lugar aqui, e seu percurso pode começar respeitando o ritmo que você consegue viver agora.`;
   const wish = intention ? (/^cura[.!\s]*$/i.test(intention) ? 'Seu desejo de se sentir melhor merece acolhimento e um cuidado atento ao que você está vivendo.' : `A intenção que você trouxe — “${intention}” — nos ajuda a manter perto aquilo que importa para você.`) : '';
   const diagnosis = [
-    opening,
-    ...leading.map(item => item.level === 2 ? `Em alguns momentos, ${item.observation.charAt(0).toLowerCase()}${item.observation.slice(1)}` : item.observation),
+
+    ...leading.slice(0, 3).map(item => item.level === 2 ? `Em alguns momentos, ${item.observation.charAt(0).toLowerCase()}${item.observation.slice(1)}` : item.observation),
     ...(need ? [`Você trouxe um pedido importante: “${need}”. Vamos acolhê-lo como parte do seu caminho, com atenção ao que você precisa e ao que é possível agora.`] : []),
     ...(challenge ? [`Ao compartilhar “${challenge}”, você nos permite olhar mais de perto para o que está vivendo. Esse relato merece escuta e cuidado, no seu tempo.`] : []),
     ...(strengthIsLoss ? [`Você também compartilhou: “${strength}”. Há espaço para acolher essa experiência e perceber que apoio faria sentido para você agora.`] : []),
@@ -76,7 +76,7 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
   const narrative: FullReportNarrative = {
     nome, energyNames, dailyEnergySchedule, source: narrativeSource(intake),
     answerEvidence: evidence.map(item => ({ questionId: item.questionId, questionText: item.questionText, level: item.level, label: item.label, theme: item.name })),
-    page1: { title: 'Relatório Completo — Leitura do Seu Momento', subtitle: 'Uma leitura acolhedora do seu momento e dos caminhos possíveis de cuidado.', intro: `${opening} ${leading.slice(0, 2).map(item => item.observation).join(' ')} ${wish}`.trim() },
+    page1: { title: 'Relatório Completo — Leitura do Seu Momento', subtitle: 'Uma leitura acolhedora do seu momento e dos caminhos possíveis de cuidado.', intro: leading.length ? `${nome}, o ponto de partida do seu cuidado é ${join(leading.slice(0, 2).map(item => item.name))}. A leitura a seguir mostra como esses temas orientam a escolha dos recursos e a sequência dos dias.` : `${nome}, seu percurso parte do que você deseja cultivar e do pedido que trouxe. Há espaço para perceber o que faz sentido cuidar agora.` },
     page2: { title: 'Diagnóstico da Anamnese', paragraphs: diagnosis, ...((level('q1_procrastinacao_inicio') ?? 0) >= 3 && (level('q5_autocobranca_insuficiencia') ?? 0) >= 3 ? { cycle: 'Quando começar parece difícil e a cobrança aumenta, um passo pequeno pode ser mais acolhedor do que exigir uma grande mudança. Você pode experimentar esse movimento no seu tempo.' } : {}) },
     page3: { title: 'O que suas respostas contam sobre você', paragraphs: [
       ...(interactions.length ? interactions : ['Cada experiência que você compartilhou merece ser acolhida no seu próprio contexto. Vamos construir esse cuidado com espaço para escutar você, além do que aparece nesta leitura.']),
@@ -85,7 +85,7 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
     ], preserved, chakras: buildEvidenceChakras(intake, evidence) },
     page4: { title: 'O que vamos trabalhar com você', paragraphs: care },
     page5: { title: 'Seu percurso de cuidado', paragraphs: [
-      'A duração e as energias de cada dia seguem o plano confirmado e a composição aprovada.',
+      'A duração segue seu plano confirmado; as energias de cada dia são selecionadas a partir das suas respostas.',
       ...leading.slice(0, 3).map(item => `Um convite possível é ${item.intention}. Perceba como isso se apresenta ao longo dos dias, sem transformar a observação em uma cobrança.`),
       ...(need ? [`Seu pedido — “${need}” — continua no centro desse percurso. Ao longo dos dias, você pode notar o que se aproxima dele e o que ainda precisa de cuidado.`] : []),
       'Reserve um momento tranquilo para receber o cuidado e siga as orientações que acompanham cada dia. Você pode registrar pequenas percepções e compartilhar o que precisar ser ajustado.',

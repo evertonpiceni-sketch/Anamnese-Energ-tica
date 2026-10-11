@@ -251,7 +251,7 @@ export interface ComplementaryCareSelection {
 }
 
 function scoreByAxes(resourceAxes: EixoId[], axes: Array<{ eixoId: EixoId; percentual: number }>) {
-  return axes.slice(0, 5).reduce((score, axis, index) => {
+  return axes.reduce((score, axis, index) => {
     if (!resourceAxes.includes(axis.eixoId)) return score;
     const positionWeight = Math.max(1, 5 - index);
     return score + axis.percentual * positionWeight;

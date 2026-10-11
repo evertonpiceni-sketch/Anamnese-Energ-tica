@@ -80,25 +80,25 @@ export function AuthScreen() {
     <div className="min-h-screen bg-[#f6f1e6] px-5 py-10 text-[#173c2c]">
       <div className="mx-auto flex min-h-[78vh] max-w-5xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0] shadow-2xl shadow-[#173f2d]/10 lg:grid-cols-[.9fr_1.1fr]">
-          <div className="hidden bg-[#173f2d] p-10 text-white lg:flex lg:flex-col lg:justify-between">
+          <div className="relative isolate flex min-h-[300px] flex-col justify-between overflow-hidden bg-[#173f2d] p-7 text-white sm:p-10 lg:min-h-[520px]" style={{ backgroundImage: 'linear-gradient(180deg,rgba(14,48,31,.6),rgba(14,48,31,.94)),url(/natureza-aprovada.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 68%' }}>
             <div>
               <img
                 src="/logo-everton-oficial.png"
                 alt="Everton Piceni"
-                className="h-36 w-36 rounded-xl bg-[#fffaf0] p-2 object-contain opacity-95"
+                className="h-28 w-28 rounded-xl bg-[#fffaf0]/95 p-2 object-contain lg:h-36 lg:w-36"
               />
               <div className="mt-8 text-xs font-semibold tracking-[0.18em] text-[#dfc988]">
                 ANAMNESE INTEGRATIVA
               </div>
               <h1 className="mt-4 font-serif text-4xl leading-tight">
-                Um espaço reservado para o seu cuidado.
+                Um momento para respirar e voltar para você.
               </h1>
               <p className="mt-5 max-w-md text-sm leading-7 text-[#d7e2da]">
-                Entre para acessar sua anamnese, seu resultado, suas práticas e os recursos que forem preparados para o seu momento.
+                Que bom receber você. Aqui, o que você compartilha orienta uma leitura e um percurso de cuidado no seu ritmo.
               </p>
             </div>
             <p className="text-xs leading-5 text-[#aec1b4]">
-              Seus dados ficam vinculados à sua conta e protegidos pelas regras de acesso do sistema.
+              Seu espaço é privado. Suas respostas são tratadas com cuidado.
             </p>
           </div>
 

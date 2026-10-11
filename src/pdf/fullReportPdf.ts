@@ -9,6 +9,7 @@ import type { FullReportNarrative } from '../result/fullReportNarrative';
 export async function createFullReportPdfBlob(report: FullReportNarrative): Promise<{ blob: Blob; fileName: string }> {
   const { default: html2canvas } = await import('html2canvas-pro');
   const host = document.createElement('div');
+  host.className = 'pdf-export';
   host.style.cssText = 'position:absolute;left:-10000px;top:0;width:794px;pointer-events:none;';
   document.body.appendChild(host);
   const root = createRoot(host);

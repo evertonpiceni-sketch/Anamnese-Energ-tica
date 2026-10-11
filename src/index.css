@@ -143,3 +143,19 @@ main section {
 @media (max-width:1023px) {
   .welcome-hero > div:nth-child(2) { background:linear-gradient(180deg,rgba(14,48,31,.96),rgba(14,48,31,.82) 52%,rgba(14,48,31,.08)); }
 }
+
+.intro-nature { border-radius:2rem; overflow:hidden; background:#173c2c url(/natureza-aprovada.jpg) center 68% / cover; padding:2rem 0; }
+.intro-nature > section { background:rgba(255,250,240,.94); margin:1rem 2rem; }
+@media(max-width:640px) { .intro-nature { padding:1rem 0; } .intro-nature > section { margin:1rem; } }
+
+.user-step-card { border-top:4px solid #8b9f63; background-image:radial-gradient(circle at 100% 0,rgba(230,196,104,.2),transparent 50%); }
+
+.pdf-export .report-content { padding:24px 32px; }
+.pdf-export .report-content header img { width:100px; height:100px; }
+.pdf-export .report-content h2 { font-size:36px; }
+.pdf-export .report-content h3 { font-size:22px; }
+.pdf-export .report-content h4 { font-size:18px; }
+.pdf-export .report-content p, .pdf-export .report-content li { font-size:14px; line-height:20px; }
+.pdf-export .report-content .space-y-5 > :not(:last-child) { margin-bottom:12px; }
+.pdf-export .report-content ol > li { padding:14px; }
+.pdf-export .report-content ol > li p, .pdf-export .report-content ol > li li { font-size:13px; line-height:19px; }

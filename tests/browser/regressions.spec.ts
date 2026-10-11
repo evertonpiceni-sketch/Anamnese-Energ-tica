@@ -136,14 +136,14 @@ test('report names the reviewed energies and uses the approved chakra artwork', 
   const narrative = await report(page);
   const approved = { ...narrative, dailyEnergySchedule: Array.from({ length: 7 }, (_, i) => ({ day: i + 1, energyNames: [i % 2 ? 'Soul Healing' : 'Original Reiki Platinum'], intention: 'Acolher o momento com presença.' })), page3: { ...narrative.page3, chakras: ['Plexo Solar', 'Cardíaco', 'Laríngeo', 'Frontal', 'Raiz', 'Coronário', 'Sacral'].map(name => ({ name, text: 'Centro identificado na leitura individual.' })) } };
   await render(page, 'FullReportApprovedView', { report: approved });
-  const energies = page.getByRole('region', { name: 'Energias do cuidado' });
-  await expect(energies.getByText('Soul Healing', { exact: true })).toBeVisible();
-  await expect(energies.getByText('Original Reiki Platinum', { exact: true })).toBeVisible();
+  const energies = page.getByRole('region', { name: 'Programação diária' });
+  await expect(energies).toContainText('Soul Healing');
+  await expect(energies).toContainText('Original Reiki Platinum');
   const symbols = page.getByRole('img', { name: /^Símbolo do / });
   await expect(symbols).toHaveCount(7);
-  expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-cristalinos.png')))).toBe(true);
+  expect(await symbols.evaluateAll(items => items.every(item => getComputedStyle(item).backgroundImage.includes('chakras-logo.png')))).toBe(true);
   await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-aprovados.png' });
-  await page.getByRole('region', { name: 'Energias do cuidado' }).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
+  await page.getByRole('region', { name: 'Programação diária' }).screenshot({ path: '/workspace/scratch/energias-aprovadas.png' });
   await page.setViewportSize({ width: 375, height: 812 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('region', { name: 'Chakras do cuidado' }).screenshot({ path: '/workspace/scratch/chakras-mobile.png' });
@@ -288,7 +288,11 @@ test('automatic care delivers seven distinct days and documented complementary r
     expect(new Set(report.dailyEnergySchedule.map(day => [...day.energyNames].sort().join('|'))).size).toBe(7);
     expect(report.dailyEnergySchedule.every(day => day.reason && day.energyDetails.every(item => item.source) && day.resources.every(item => item.source))).toBe(true);
   }
-  for (const resources of result.resources) expect(new Set(resources.map(item => item.category))).toEqual(new Set(['Cristal etérico', 'Floral', 'Aromaterapia', 'Banho energético', 'Solfeggio']));
+  for (const resources of result.resources) {
+    expect(resources.every(item => ['Cristal etérico', 'Floral', 'Aromaterapia', 'Banho energético', 'Solfeggio'].includes(item.category))).toBe(true);
+    expect(resources.some(item => item.category === 'Solfeggio')).toBe(true);
+    expect(resources.some(item => item.category === 'Cristal etérico')).toBe(true);
+  }
   expect(result.mental.source.fingerprint).not.toBe(result.emotional.source.fingerprint);
   expect(result.mental.dailyEnergySchedule).not.toEqual(result.emotional.dailyEnergySchedule);
   expect(result.calm.page3.chakras).toHaveLength(0);
@@ -296,7 +300,7 @@ test('automatic care delivers seven distinct days and documented complementary r
   expect(result.emotional.page3.chakras.map(item => item.name).sort()).toEqual(['Cardíaco', 'Laríngeo']);
   await render(page, 'FullReportApprovedView', { report: result.reports[0] });
   await expect(page.getByRole('heading', { name: 'Dia 7', exact: true })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Recursos da biblioteca' })).toContainText('Cristal etérico');
+  await expect(page.getByRole('region', { name: 'Programação diária' })).toContainText('Cristal etérico');
   await expect(page.getByText('aguarda revisão', { exact: false })).toHaveCount(0);
   await expect(page.getByText('Neste cuidado, esse centro está associado', { exact: false })).toHaveCount(0);
 });
@@ -400,4 +404,47 @@ test('failed preparatory replacement preserves the previous audio and removes on
   expect(result.uploaded[0].upsert).toBe(false);
   expect(result.removed).toEqual([result.uploaded[0].path]);
   expect(result.removed).not.toContain('preparatory/previous.mp3');
+});
+
+test('patient reading does not repeat its opening and explains every scheduled energy and support without ADM jargon', async ({ page }) => {
+  await page.goto('/');
+  const report = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    return buildAutomaticCare(CASOS_DE_TESTE[0].dados, 7).report;
+  });
+  expect(report.page2.paragraphs).not.toContain(report.page1.intro);
+  expect(report.page1.intro).not.toContain(report.page2.paragraphs[0]);
+  await render(page, 'FullReportApprovedView', { report });
+  const schedule = page.getByRole('region', { name: 'Programação diária' });
+  for (const day of report.dailyEnergySchedule) {
+    const dayView = schedule.locator('ol > li').nth(day.day - 1);
+    for (const energy of day.energyDetails) await expect(dayView).toContainText(`${energy.name}: ${energy.explanation}`);
+    for (const resource of day.resources.filter(item => !report.journeyResources.some(resource => resource.id === item.id))) await expect(dayView).toContainText(`${resource.category} · ${resource.name}: ${resource.explanation}`);
+  }
+  await expect(page.locator('.report-page')).not.toContainText('O app limita');
+  await expect(page.locator('.report-page')).not.toContainText('Recurso confirmado no material');
+  await expect(page.getByRole('heading', { name: 'Recursos que acompanham o seu percurso' })).toHaveCount(0);
+});
+
+test('floral aroma and one Solfeggio remain fixed throughout the journey and ADM receives the same guidance', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    const { buildEnergyProgrammingScript } = await import(/* @vite-ignore */ String('/src/care/energyProgrammingScript.ts'));
+    const reports = CASOS_DE_TESTE.map(sample => buildAutomaticCare(sample.dados, 7).report);
+    return { reports, script: buildEnergyProgrammingScript(CASOS_DE_TESTE[0].dados.nomePessoa, reports[0].dailyEnergySchedule) };
+  });
+  for (const report of result.reports) {
+    expect(report.journeyResources.filter(item => item.category === 'Solfeggio')).toHaveLength(1);
+    expect(report.journeyResources.filter(item => item.category === 'Floral')).toHaveLength(1);
+    const fixed = report.journeyResources.map(item => item.id).sort();
+    for (const day of report.dailyEnergySchedule) expect(day.resources.filter(item => ['Solfeggio', 'Floral', 'Aromaterapia'].includes(item.category)).map(item => item.id).sort()).toEqual(fixed);
+    expect(report.journeyResources.find(item => item.category === 'Floral').guidance).toContain('10 gotas, duas vezes ao dia');
+  }
+  expect(result.script.every(day => day.lines.join('\n').includes('única frequência-base'))).toBe(true);
+  await render(page, 'FullReportApprovedView', { report: result.reports[0] });
+  await expect(page.getByRole('region', { name: 'Apoios de toda a jornada' })).toContainText('10 gotas, duas vezes ao dia');
+  await expect(page.getByRole('region', { name: 'Programação diária' })).toContainText('recebido durante a sessão de escuta');
 });

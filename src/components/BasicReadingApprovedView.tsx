@@ -19,13 +19,14 @@ export function BasicReadingApprovedView({ data }: { data: UserMomentData }) {
       <Block number={3} title="Intenção do cuidado"><p>{result.intention}</p></Block>
     </div>
     {data.audio && <div className="mt-4"><Block number={4} title="Sua sessão exclusiva"><p>{data.audio.titulo}</p><p>{data.audio.intencao}</p></Block></div>}
-    {data.automaticReport?.dailyEnergySchedule?.length && <div className="mt-4"><Block number={4} title="Seu cuidado, dia a dia"><ol className="space-y-4">{data.automaticReport.dailyEnergySchedule.map(day => <li key={day.day}><strong>Dia {day.day} · {day.energyNames.join(' · ')}</strong><p>{day.intention}</p><p className="text-sm">{day.reason}</p><p className="text-sm">{day.resources?.map(item => `${item.category}: ${item.name}`).join(' · ')}</p></li>)}</ol></Block></div>}
-    <div className="mt-4"><Block number={5} title="Recursos de apoio"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    {!!data.automaticReport?.journeyResources?.length && <div className="mt-4"><Block number={4} title="Apoios de toda a jornada">{data.automaticReport.journeyResources.map(resource => <p key={resource.id} className="mb-3"><strong>{resource.category} · {resource.name}:</strong> {resource.explanation}<br/>{resource.guidance}</p>)}</Block></div>}
+    {data.automaticReport?.dailyEnergySchedule?.length && <div className="mt-4"><Block number={4} title="Seu cuidado, dia a dia"><ol className="space-y-4">{data.automaticReport.dailyEnergySchedule.map(day => <li key={day.day}><strong>Dia {day.day} · {day.intention}</strong><ul>{day.energyDetails?.map(energy => <li key={energy.name}><strong>{energy.name}:</strong> {energy.explanation}</li>)}</ul><p>{day.intention}</p><p className="text-sm">{day.reason}</p><ul className="text-sm">{day.resources?.filter(item => !data.automaticReport?.journeyResources?.some(resource => resource.id === item.id)).map(item => <li key={item.id}><strong>{item.category} · {item.name}:</strong> {item.explanation}</li>)}</ul></li>)}</ol></Block></div>}
+    {!data.automaticReport?.journeyResources?.length && <div className="mt-4"><Block number={5} title="Recursos de apoio"><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       {result.solfeggio?.hz && <p><strong>Frequência da sessão</strong><br/>{result.solfeggio.hz} Hz</p>}
       {result.ethericCrystals.length > 0 && <p><strong>Cristais etéricos</strong><br/>{names(result.ethericCrystals)}<br/><span className="text-sm">Referências energéticas, sem necessidade de pedras físicas.</span></p>}
       {result.floral.length > 0 && <p><strong>Floral</strong><br/>{names(result.floral)}</p>}
       {result.aromatherapy.length > 0 && <p><strong>Aromaterapia</strong><br/>{names(result.aromatherapy)}</p>}
-    </div></Block></div>
+    </div></Block></div>}
     <div className="mt-4 grid gap-4 sm:grid-cols-2"><Block number={6} title={`Como usar nos próximos ${data.entitlement.days} dias`}><ol className="list-decimal space-y-2 pl-5"><li>Reserve um momento tranquilo para você.</li><li>Ouça sua sessão quando estiver disponível.</li><li>Use os recursos conforme a orientação recebida.</li><li>Observe e registre suas percepções.</li></ol></Block><Block number={7} title="Fechamento"><p>{result.closing}</p></Block></div>
   </article>;
 }
