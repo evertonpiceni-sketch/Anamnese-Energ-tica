@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '../lib/supabase';
 import { Download, FileText } from 'lucide-react';
 import type { CommercialEntitlement } from '../commercial/entitlements';
 import { canAccessFullReport } from '../commercial/entitlements';
@@ -60,7 +61,7 @@ export function EntitledFullReportCard({
           <div>
             <h2 className="font-serif text-xl text-[#173c2c]">Relatório completo incluído</h2>
             <p className="mt-2 text-sm leading-6 text-[#715f36]">
-              Seu plano dá acesso ao relatório completo. Ele aparecerá aqui assim que a composição for revisada e a versão final for publicada.
+              Seu plano dá acesso ao relatório completo. A leitura será preparada automaticamente a partir das suas respostas.
             </p>
             {message && <p className="mt-2 text-xs leading-5 text-[#8a6a57]">{message}</p>}
           </div>
@@ -79,7 +80,7 @@ export function EntitledFullReportCard({
             <div className="text-xs font-semibold tracking-[0.18em] text-[#9a7838]">LEITURA DO SEU MOMENTO</div>
             <h2 className="mt-2 font-serif text-3xl leading-tight text-[#173c2c]">Sua leitura completa está disponível.</h2>
             <p className="mt-3 text-sm leading-7 text-[#5d6d63]">
-              Esta é a leitura vinculada à sua anamnese e à composição aprovada para este momento.
+              Esta é a leitura vinculada à sua anamnese e ao percurso individual preparado para este momento.
             </p>
           </div>
           <button type="button" disabled={busy} onClick={async () => { setBusy(true); setMessage(''); try { const { downloadFullReportPdf } = await import('../pdf/fullReportPdf'); await downloadFullReportPdf(report); } catch { setMessage('Não foi possível preparar seu PDF. Tente novamente.'); } finally { setBusy(false); } }} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white shadow-md transition hover:bg-[#22533d]">
@@ -88,7 +89,7 @@ export function EntitledFullReportCard({
         </div>
       </div>
 
-      <button type="button" disabled={busy} onClick={async () => { if (!publication) return; setBusy(true); setMessage(''); try { const result = await requestFullReportEmail({ userId: publication.userId, intakeId, report, requestedBy: 'user' }); setMessage(result.message); } catch { setMessage('Não foi possível solicitar o envio agora. Tente novamente.'); } finally { setBusy(false); } }} className="rounded-full border border-[#cdbc91] px-5 py-3 text-sm font-semibold disabled:opacity-50">Receber por e-mail</button>
+      <button type="button" disabled={busy} onClick={async () => { if (!publication) return; setBusy(true); setMessage(''); try { const userId = publication.userId || (await supabase.auth.getUser()).data.user?.id; if (!userId) throw new Error('Usuário não autenticado.'); const result = await requestFullReportEmail({ userId, intakeId, report, requestedBy: 'user' }); setMessage(result.message); } catch { setMessage('Não foi possível solicitar o envio agora. Tente novamente.'); } finally { setBusy(false); } }} className="rounded-full border border-[#cdbc91] px-5 py-3 text-sm font-semibold disabled:opacity-50">Receber por e-mail</button>
       {message && <p role="status" className="text-sm text-[#715f36]">{message}</p>}
       <FullReportApprovedView report={report} />
     </section>

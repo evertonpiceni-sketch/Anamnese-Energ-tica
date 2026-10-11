@@ -43,9 +43,21 @@ export function buildEvidenceChakras(intake: AnamneseInput, evidence: ReturnType
   return ['Raiz', 'Sacral', 'Plexo Solar', 'Cardíaco', 'Laríngeo', 'Frontal', 'Coronário'].map(name => {
     const support = evidence.filter(item => item.level >= 2 && item.chakras.includes(name));
     const regions = body.filter(region => region.chakrasCorrespondentes.some(chakra => canonical(chakra) === name));
-    const reasons = support.map(item => item.intention);
-    if (regions.length) reasons.push(`acolher as sensações que você percebe em ${regions.map(region => region.nome.toLowerCase()).join(' e ')}`);
-    return { name, score: support.reduce((total, item) => total + item.level, 0) + regions.length * 4, text: `Neste cuidado, esse centro está associado a ${reasons.slice(0, 2).join(' e ')}.` };
+    const meanings: Record<string, string> = {
+      Raiz: 'a segurança, o descanso e a sensação de ter um chão para se apoiar',
+      Sacral: 'o contato com o corpo, a receptividade e o prazer de viver pequenas experiências',
+      'Plexo Solar': 'a confiança nas próprias escolhas e a liberdade de agir com menos cobrança',
+      Cardíaco: 'o acolhimento emocional e a possibilidade de oferecer e também receber cuidado',
+      Laríngeo: 'a expressão do que sente e a comunicação das suas necessidades e limites',
+      Frontal: 'a clareza dos pensamentos e a percepção dos caminhos que fazem sentido para você',
+      Coronário: 'a conexão com sua própria fonte de amparo, sentido e espiritualidade',
+    };
+    const themes = support.slice(0, 2).map(item => item.name).join(' e ');
+    const bodyReason = regions.length ? ` As sensações que você indicou em ${regions.map(region => region.nome.toLowerCase()).join(' e ')} também fazem parte dessa leitura.` : '';
+    const text = themes
+      ? `Conforme a análise das suas respostas, ${themes} se relacionam, na leitura energética do protocolo, ao chakra ${name}. Esses relatos sugerem uma necessidade de fortalecer ${meanings[name]}.${bodyReason}`
+      : `As sensações que você indicou em ${regions.map(region => region.nome.toLowerCase()).join(' e ')} se relacionam, no protocolo, ao chakra ${name}. O cuidado com esse centro tem como intenção apoiar ${meanings[name]}.`;
+    return { name, score: support.reduce((total, item) => total + item.level, 0) + regions.length * 4, text };
   }).filter(item => item.score > 0).sort((a, b) => b.score - a.score).map(({ name, text }) => ({ name, text }));
 }
 
@@ -54,5 +66,5 @@ export function narrativeSource(intake: AnamneseInput) {
   const snapshot = JSON.stringify([intake.id, PERGUNTAS_ANAMNESE.map(q => [q.id, intake.respostasObjetivas[q.id] ?? null]), intake.intencaoDeclarada, intake.relatoLivreNecessidade, intake.relatoLivreDesafios, intake.relatoLivrePreservado, [...intake.regioesCorporaisPercebidas].sort(), intake.sensibilidadeEnergetica]);
   let hash = 2166136261;
   for (const character of snapshot) hash = Math.imul(hash ^ character.charCodeAt(0), 16777619);
-  return { generatorVersion: 'answers-v3' as const, intakeId: intake.id, fingerprint: (hash >>> 0).toString(16) };
+  return { generatorVersion: 'answers-v4' as const, intakeId: intake.id, fingerprint: (hash >>> 0).toString(16) };
 }

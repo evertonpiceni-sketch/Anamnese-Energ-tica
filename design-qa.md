@@ -15,3 +15,6 @@ final result: passed
 ## Revisão de conteúdo individual
 
 O conteúdo do modelo visual deixou de ser referência para conclusões sobre a pessoa. A auditoria compara as respostas persistidas do teste com as evidências da versão answers-v2. A leitura usa as intensidades reais, os relatos abertos e as regiões explicitamente selecionadas. O layout editorial foi preservado. Captura móvel do relatório real sem transbordamento horizontal; exportação do mesmo componente concluída. As fontes da leitura não são as frases das referências visuais.
+
+
+Atualização de composição automática: recepção com foto aprovada sem branqueamento, leitura única, chakras cristalinos em 3D em recurso próprio transparente e programação de todos os dias com recursos documentados. Verificação visual do caso pago em desktop e 375 px, sem rolagem horizontal. A contagem de páginas do PDF depende do conteúdo real, incluindo a programação; não há preenchimento artificial para manter cinco páginas.

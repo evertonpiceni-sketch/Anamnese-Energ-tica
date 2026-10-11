@@ -36,6 +36,8 @@ export function FullReportApprovedView({ report }: Props) {
   const schedule = report.dailyEnergySchedule || [];
   const energyNames = Array.from(new Set(schedule.length ? schedule.flatMap(day => day.energyNames) : report.energyNames || []));
   const resources = report.page4.paragraphs.filter(text => /^(Frequência de apoio|Cristais etéricos|Florais|Aromaterapia|Banho de apoio)/.test(text));
+  const libraryResources = report.careResources || [];
+  const categories = Array.from(new Set(libraryResources.map(resource => resource.category)));
   const direction = report.page4.paragraphs.filter(text => !resources.includes(text));
   return <Shell page={1} total={1}>
     <Title kicker={report.journeyDays ? `Seu cuidado · ${report.journeyDays} dias` : 'Relatório completo'}>Leitura do <span className="italic text-[#a87828]">Seu Momento</span></Title>
@@ -51,16 +53,25 @@ export function FullReportApprovedView({ report }: Props) {
     </section>}
     <section className="mt-6 border-t border-[#d9c79b] pt-5" aria-label="Energias do cuidado">
       <h3 className="font-serif text-2xl text-[#173c2c]">Energias que serão trabalhadas</h3>
-      {energyNames.length ? <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">{energyNames.map(name => <li key={name} className="font-serif text-lg text-[#9a6f22]">{name}</li>)}</ul> : <p role="status" className="mt-3 font-serif leading-7 text-[#43584c]">Sua composição está sendo revisada com atenção ao que você contou. As energias e as intenções de cada dia serão apresentadas aqui após essa revisão.</p>}
-      {!!resources.length && <div className="mt-4"><Text items={resources}/></div>}
+      {energyNames.length ? <ul className="mt-3 flex flex-wrap gap-x-6 gap-y-2">{energyNames.map(name => <li key={name} className="font-serif text-lg text-[#9a6f22]">{name}</li>)}</ul> : <p role="status" className="mt-3 font-serif leading-7 text-[#43584c]">Estamos preparando sua composição individual a partir das suas respostas.</p>}
+      {!!resources.length && !libraryResources.length && <div className="mt-4"><Text items={resources}/></div>}
     </section>
+    {!!libraryResources.length && <section className="mt-6" aria-label="Recursos da biblioteca">
+      <h3 className="font-serif text-2xl text-[#173c2c]">Recursos que acompanham o seu percurso</h3>
+      <div className="mt-4 space-y-4">{categories.map(category => {
+        const items = libraryResources.filter(resource => resource.category === category);
+        return <article key={category} data-pdf-block><h4 className="font-serif text-lg text-[#9a6f22]">{category} · {items.map(item => item.name).join(' · ')}</h4><p className="mt-1 font-serif text-sm leading-6 text-[#43584c]">{items[0].explanation}</p>{items[0].guidance && <p className="font-serif text-sm leading-6 text-[#52645a]">{items[0].guidance}</p>}</article>;
+      })}</div>
+    </section>}
     {!!schedule.length && <section className="mt-7" aria-label="Programação diária">
       <h3 className="font-serif text-3xl text-[#173c2c]">Seu cuidado, dia a dia</h3>
-      <p className="mt-3 font-serif leading-7 text-[#43584c]">Cada composição foi revisada para acompanhar as intenções do seu percurso de {report.journeyDays || schedule.length} dias.</p>
+      <p className="mt-3 font-serif leading-7 text-[#43584c]">A partir das suas respostas, o motor selecionou os recursos da biblioteca para o seu percurso de {report.journeyDays || schedule.length} dias.</p>
       <ol className="mt-4 space-y-4">{schedule.map(entry => <li key={entry.day} className="border-b border-[#d9c79b]/70 pb-4" data-pdf-block>
         <h4 className="font-serif text-xl text-[#a87828]">Dia {entry.day}</h4>
         <p className="mt-1 font-serif font-semibold leading-6 text-[#173c2c]">{entry.energyNames.join(' · ')}</p>
         <p className="mt-1 font-serif leading-6 text-[#43584c]">{entry.intention}</p>
+        {entry.reason && <p className="mt-1 font-serif text-sm leading-6 text-[#52645a]">{entry.reason}</p>}
+        {!!entry.resources?.length && <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1">{entry.resources.map(resource => <li key={resource.id} className="font-serif text-sm leading-6 text-[#52645a]"><strong>{resource.category}:</strong> {resource.name}</li>)}</ul>}
       </li>)}</ol>
     </section>}
     <div className="mt-6"><Text items={report.page5.paragraphs.filter(text => text.startsWith('Reserve um momento') || text.startsWith('Não é preciso medir'))}/></div>

@@ -43,6 +43,7 @@ export interface UserMomentData {
     publishedAt: string | null;
   } | null;
   audio: PersonalizedAudioPlan | null;
+  automaticReport?: import('../result/fullReportNarrative').FullReportNarrative;
 }
 
 export async function loadUserMoment(): Promise<UserMomentData> {
@@ -51,7 +52,7 @@ export async function loadUserMoment(): Promise<UserMomentData> {
 
   const { data: intake, error: intakeError } = await supabase
     .from('intake_sessions')
-    .select('id,person_name,completed_at,declared_intention,answers,free_text_need,free_text_challenges,free_text_strengths,energetic_sensitivity')
+    .select('id,external_ref,person_name,completed_at,declared_intention,answers,free_text_need,free_text_challenges,free_text_strengths,body_regions,energetic_sensitivity')
     .eq('user_id', authData.user.id)
     .order('created_at', { ascending: false })
     .limit(1)
@@ -203,10 +204,18 @@ export async function loadUserMoment(): Promise<UserMomentData> {
       }
     : null;
 
+  const { buildAutomaticCare } = await import('../care/automaticCare');
+  const { buildBasicUserResult } = await import('../result/basicUserResult');
+  const input = { id: intake.external_ref || intake.id, data: '', nomePessoa: intake.person_name || '', respostasObjetivas: intake.answers || {}, intencaoDeclarada: intake.declared_intention || '', relatoLivreNecessidade: intake.free_text_need || '', relatoLivreDesafios: intake.free_text_challenges || '', relatoLivrePreservado: intake.free_text_strengths || '', regioesCorporaisPercebidas: intake.body_regions || [], sensibilidadeEnergetica: intake.energetic_sensitivity || 'moderada' };
+  const automatic = buildAutomaticCare(input, entitlement.days);
+  const { selectComplementaryCare } = await import('../care/complementaryCatalogs');
+  const { selectSolfeggioFrequency } = await import('../care/solfeggioCatalog');
+  const complementary = selectComplementaryCare(automatic.analysis.relatorioEverton.eixosOrdenados);
   return {
+    automaticReport: automatic.report,
     intake: mapIntake(intake),
     entitlement,
-    result: mappedResult,
+    result: { ...buildBasicUserResult(automatic.analysis, input), solfeggio: selectSolfeggioFrequency(automatic.analysis.relatorioEverton.eixosOrdenados), floral: complementary.florals, aromatherapy: complementary.aromatherapy, ethericCrystals: complementary.ethericCrystals, journeyMode: 'AUTOMATIC', publishedAt: mappedResult?.publishedAt || null },
     carePlan: mappedPlan,
     audio,
   };

@@ -74,3 +74,12 @@ A versão answers-v3 mantém as respostas e a rastreabilidade nos metadados, mas
 O relatório deixou de distribuir temas em cinco páginas fixas. A leitura, os pontos de apoio, as intenções de cuidado, os centros associados e os recursos revisados integram um único documento contínuo, seguido da programação diária quando aprovada. Não há capa vazia nem encerramento em uma página própria. O PDF pagina pelo conteúdo real, preserva largura e tamanho do texto e evita dividir parágrafos e composições diárias entre folhas. A composição aprovada e a duração contratada não são modificadas por esta atualização.
 
 A primeira tela usa a fotografia de natureza aprovada sem a camada branca que apagava suas cores. O texto inicial acolhe a pessoa e permite começar no próprio ritmo, sem apresentar detalhes da análise técnica.
+
+
+### Composição automática conforme a orientação atual do responsável
+
+O usuário substituiu expressamente a aprovação prévia pelo fluxo automático. O acesso pago agora gera a leitura e todos os dias do percurso diretamente das respostas salvas; a ausência de publicação ou revisão no ADM não impede a entrega. A edição explícita no ADM continua possível quando a publicação corresponde à mesma fonte e contém a duração completa. Não há alteração dos pagamentos, das políticas RLS ou do estado de geração dos arquivos de áudio.
+
+A seleção usa eixos da análise contextual, intensidade, combinações de respostas, regiões corporais e sensibilidade informada. São elegíveis somente sistemas com catálogo completo e origem documental. Recursos sem subenergia cadastrada usam o próprio nome da técnica documentada. Cristais etéricos, florais, aromas, banhos e frequências são escolhidos dos catálogos ativos; cada dia registra os motivos, a origem dos recursos e as suas intenções. Não são inventados preparos, doses, comandos ou arquivos de áudio.
+
+Necessidades semelhantes podem compartilhar recursos; diferenças nas respostas não exigem alterações artificiais de tratamento. Os testes comparam perfis, modificam respostas da mesma pessoa e verificam a origem do conteúdo e os centros associados. A leitura completa é exibida uma vez, sem repetir o card básico. Os chakras usam arte cristalina em 3D própria e transparente, substituindo os recortes das referências. A primeira tela usa a paisagem aprovada em toda a recepção, com verde, luz dourada e botão em dourado.

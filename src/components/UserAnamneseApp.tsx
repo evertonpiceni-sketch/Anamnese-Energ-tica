@@ -103,15 +103,11 @@ export default function UserAnamneseApp({ userId, onSubmit, onSignOut }: Props) 
           {userArea === 'anamnese' && (
             <>
               {step === 'welcome' && (
-                <section className="grid min-h-[70vh] items-center gap-10 lg:grid-cols-2"><div className="pointer-events-none absolute -left-24 top-0 -z-10 h-[32rem] w-[32rem] rounded-full bg-[#f1d48a]/35 blur-3xl" aria-hidden="true" />
-                  <div className="space-y-6"><Eyebrow>UM ENCONTRO COM O SEU MOMENTO</Eyebrow><h1 className="font-serif text-5xl leading-tight sm:text-6xl">Como você está <span className="italic text-[#a87828]">de verdade?</span></h1><p className="max-w-xl text-lg leading-8 text-[#52665b]">Antes de tudo, respire. Este é um espaço para ouvir você, acolher o que está vivendo e encontrar um caminho de cuidado no seu ritmo.</p><Primary onClick={() => setStep('intro')}>Começar meu cuidado <ArrowRight className="h-5 w-5" /></Primary></div>
-                  <div className="relative mx-auto min-h-[440px] w-full overflow-hidden rounded-[3rem] border border-[#d6c28b] shadow-2xl shadow-[#244735]/20 sm:min-h-[520px]">
-                    <img src="/natureza-aprovada.jpg" alt="Uma pessoa contemplando o nascer do sol entre montanhas e árvores" className="absolute inset-0 h-full w-full object-cover object-[center_72%]" />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#123526]/95 via-[#123526]/65 to-transparent px-7 pb-8 pt-24 text-[#fff5d8]">
-                      <p className="font-serif text-2xl italic leading-8">Cuidar da sua energia é voltar para você.</p>
-                      <p className="mt-3 text-sm leading-6 text-[#fffaf0]">Você pode começar com uma pausa. O próximo passo vem no seu tempo.</p>
-                    </div>
-                  </div>
+                <section className="welcome-hero relative isolate grid min-h-[70vh] overflow-hidden rounded-[2.5rem] border border-[#d5ad54] shadow-2xl shadow-[#173c2c]/20 lg:grid-cols-[1.1fr_.9fr]">
+                  <img src="/natureza-aprovada.jpg" alt="Uma pessoa contemplando o nascer do sol entre montanhas e árvores" className="absolute inset-0 -z-20 h-full w-full object-cover object-[center_68%]" />
+                  <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(14,48,31,.96),rgba(14,48,31,.78)_43%,rgba(14,48,31,.08)_78%)]" />
+                  <div className="flex flex-col justify-center space-y-6 px-7 py-10 text-[#fff8e5] sm:px-10 sm:py-14"><p className="text-xs font-semibold tracking-[.2em] text-[#f5d378]">UM ENCONTRO COM O SEU MOMENTO</p><h1 className="font-serif text-5xl leading-tight sm:text-6xl">Como você está <span className="italic text-[#f5d378]">de verdade?</span></h1><p className="max-w-xl text-lg leading-8 text-[#fff8e5]">Antes de tudo, respire. Este é um espaço para ouvir você, acolher o que está vivendo e encontrar um caminho de cuidado no seu ritmo.</p><div><Primary onClick={() => setStep('intro')}>Começar meu cuidado <ArrowRight className="h-5 w-5" /></Primary></div></div>
+                  <div className="relative flex min-h-[240px] flex-col justify-end px-7 pb-8 pt-16 text-[#fff8e5] lg:min-h-[520px]"><p className="font-serif text-2xl italic leading-8">Cuidar da sua energia é voltar para você.</p><p className="mt-3 text-sm leading-6">Você pode começar com uma pausa. O próximo passo vem no seu tempo.</p></div>
                 </section>
               )}
 
