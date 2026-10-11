@@ -8,6 +8,20 @@ type Mode = 'signin' | 'signup';
 
 const PRODUCTION_APP_URL = 'https://relatorioenergetico.vercel.app';
 
+function friendlyAuthError(message: string) {
+  const normalized = message.toLowerCase();
+  if (normalized.includes('email rate limit exceeded') || normalized.includes('rate limit')) {
+    return 'Muitas tentativas foram feitas em pouco tempo. Aguarde alguns instantes e tente novamente.';
+  }
+  if (normalized.includes('invalid login credentials')) {
+    return 'Não foi possível entrar com esses dados. Confira o e-mail e a senha e tente novamente.';
+  }
+  if (normalized.includes('email not confirmed')) {
+    return 'Seu e-mail ainda precisa ser confirmado. Verifique sua caixa de entrada e, se necessário, a pasta de spam.';
+  }
+  return message;
+}
+
 export function AuthScreen({ initialError = '' }: { initialError?: string }) {
   const [mode, setMode] = useState<Mode>('signin');
   const [name, setName] = useState('');
@@ -17,7 +31,7 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState(initialError);
+  const [errorMessage, setErrorMessage] = useState(initialError ? friendlyAuthError(initialError) : '');
   const [recoveryRequested, setRecoveryRequested] = useState(false);
   const [recoveryLink, setRecoveryLink] = useState('');
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -70,7 +84,8 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
           : 'Conta criada. Confira seu e-mail para confirmar o acesso. O link retornará para este site.'
       );
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível concluir o acesso.');
+      const raw = error instanceof Error ? error.message : 'Não foi possível concluir o acesso.';
+      setErrorMessage(friendlyAuthError(raw));
     } finally {
       setBusy(false);
     }
@@ -85,7 +100,10 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
       if (error) throw error;
       setRecoveryRequested(true);
       setMessage('Se houver uma conta com esse e-mail, você receberá um link para definir uma nova senha. Confira também a caixa de spam.');
-    } catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Não foi possível enviar o link agora.'); }
+    } catch (error) {
+      const raw = error instanceof Error ? error.message : 'Não foi possível enviar o link agora.';
+      setErrorMessage(friendlyAuthError(raw));
+    }
     finally { setBusy(false); }
   }
 
@@ -101,56 +119,64 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
   }
 
   return (
-    <div className="min-h-screen px-5 py-10 text-[#173c2c]">
-      <div className="mx-auto flex min-h-[78vh] max-w-5xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#d8c99f] bg-[#fffaf0] shadow-2xl shadow-[#173f2d]/10 lg:grid-cols-[.9fr_1.1fr]">
-          <div className="relative isolate flex min-h-[300px] flex-col justify-between overflow-hidden bg-[#173f2d] p-7 text-white sm:p-10 lg:min-h-[520px]" style={{ backgroundImage: 'linear-gradient(180deg,rgba(14,48,31,.6),rgba(14,48,31,.94)),url(/natureza-aprovada.jpg)', backgroundSize: 'cover', backgroundPosition: 'center 68%' }}>
-            <div>
+    <div className="min-h-screen px-5 py-8 text-[#173c2c] sm:py-10">
+      <div className="mx-auto flex min-h-[82vh] max-w-5xl items-center justify-center">
+        <div className="grid w-full overflow-hidden rounded-[2rem] border border-[#d8c99f]/85 bg-[#fffaf0]/96 shadow-[0_28px_85px_rgba(23,63,45,.14)] lg:grid-cols-[.94fr_1.06fr]">
+          <div
+            className="relative isolate flex min-h-[330px] flex-col justify-between overflow-hidden p-7 text-white sm:p-10 lg:min-h-[560px] lg:p-11"
+            style={{
+              backgroundImage: 'linear-gradient(180deg,rgba(18,56,38,.34),rgba(16,49,34,.78)),url(/natureza-aprovada.jpg)',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center 66%'
+            }}
+          >
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_10%,rgba(255,246,214,.12),transparent_30%)]" />
+            <div className="relative z-10">
               <img
                 src="/logo-everton-oficial.png"
                 alt="Everton Piceni"
-                className="h-28 w-28 rounded-xl bg-[#fffaf0]/95 p-2 object-contain lg:h-36 lg:w-36"
+                className="h-28 w-28 object-contain opacity-80 drop-shadow-[0_10px_30px_rgba(0,0,0,.16)] lg:h-36 lg:w-36"
               />
-              <div className="mt-8 text-xs font-semibold tracking-[0.18em] text-[#dfc988]">
+              <div className="mt-8 text-xs font-semibold tracking-[0.2em] text-[#ead79d]">
                 ANAMNESE INTEGRATIVA
               </div>
-              <h1 className="mt-4 font-serif text-4xl leading-tight">
+              <h1 className="mt-4 max-w-md font-serif text-4xl leading-[1.08] text-[#fffdf7] sm:text-[2.7rem]">
                 Um momento para respirar e voltar para você.
               </h1>
-              <p className="mt-5 max-w-md text-sm leading-7 text-[#d7e2da]">
-                Que bom receber você. Aqui, o que você compartilha orienta uma leitura e um percurso de cuidado no seu ritmo.
+              <p className="mt-5 max-w-md text-[15px] leading-7 text-[#edf3ee]">
+                O que você compartilha aqui orienta uma leitura sensível e um percurso de cuidado construído no seu ritmo.
               </p>
             </div>
-            <p className="text-xs leading-5 text-[#aec1b4]">
-              Seu espaço é privado. Suas respostas são tratadas com cuidado.
+            <p className="relative z-10 mt-8 max-w-sm text-xs leading-5 text-[#d8e4dc]">
+              Seu espaço é privado. Suas respostas são tratadas com cuidado e respeito.
             </p>
           </div>
 
-          <div className="p-7 sm:p-10">
-            <div className="mx-auto max-w-md">
+          <div className="flex items-center p-7 sm:p-10 lg:p-12">
+            <div className="mx-auto w-full max-w-md">
               <div className="lg:hidden">
                 <img
                   src="/logo-everton-oficial.png"
                   alt="Everton Piceni"
-                  className="h-20 w-20 object-contain"
+                  className="h-20 w-20 object-contain opacity-80"
                 />
               </div>
 
               <div className="mt-5 lg:mt-0">
-                <div className="text-xs font-semibold tracking-[0.16em] text-[#a18443]">
-                  {mode === 'signin' ? 'BEM-VINDO DE VOLTA' : 'CRIAR MEU ACESSO'}
+                <div className="text-xs font-semibold tracking-[0.18em] text-[#a18443]">
+                  {mode === 'signin' ? 'SEU ESPAÇO DE ACESSO' : 'SEU NOVO ACESSO'}
                 </div>
-                <h2 className="mt-2 font-serif text-3xl text-[#173c2c]">
-                  {mode === 'signin' ? 'Entrar' : 'Criar conta'}
+                <h2 className="mt-2 font-serif text-[2.15rem] leading-tight text-[#173c2c]">
+                  {mode === 'signin' ? 'Entre para continuar' : 'Crie seu acesso'}
                 </h2>
-                <p className="mt-2 text-sm leading-6 text-[#68736b]">
+                <p className="mt-3 max-w-sm text-sm leading-6 text-[#68736b]">
                   {mode === 'signin'
-                    ? 'Use o e-mail e a senha cadastrados.'
+                    ? 'Use seu e-mail e senha para acessar seu espaço com segurança.'
                     : 'Crie seu acesso para que sua jornada possa ser salva com segurança.'}
                 </p>
               </div>
 
-              <form onSubmit={submit} className="mt-7 space-y-4">
+              <form onSubmit={submit} className="mt-8 space-y-5">
                 {mode === 'signup' && (
                   <label className="block">
                     <span className="mb-2 block text-sm font-semibold text-[#365441]">Seu nome</span>
@@ -224,13 +250,13 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
                 )}
 
                 {errorMessage && (
-                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
+                  <div className="rounded-2xl border border-[#e4c3b9] bg-[#fff5f1] px-4 py-3 text-sm leading-6 text-[#9b4e40]">
                     {errorMessage}
                   </div>
                 )}
 
                 {message && (
-                  <div className="rounded-xl border border-[#cad9c8] bg-[#edf3e9] p-3 text-sm text-[#41604b]">
+                  <div className="rounded-2xl border border-[#cad9c8] bg-[#edf3e9] px-4 py-3 text-sm leading-6 text-[#41604b]">
                     {message}
                   </div>
                 )}
@@ -238,14 +264,14 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
                 <button
                   type="submit"
                   disabled={busy}
-                  className="w-full rounded-full bg-[#173f2d] px-6 py-3.5 font-semibold text-white shadow-md transition hover:bg-[#22533d] disabled:opacity-50"
+                  className="w-full rounded-full bg-[#173f2d] px-6 py-3.5 font-semibold text-white shadow-[0_10px_25px_rgba(23,63,45,.18)] transition hover:bg-[#22533d] disabled:opacity-50"
                 >
-                  {busy ? 'Aguarde...' : mode === 'signin' ? 'Entrar' : 'Criar minha conta'}
+                  {busy ? 'Aguarde...' : mode === 'signin' ? 'Acessar meu espaço' : 'Criar minha conta'}
                 </button>
-                {mode === 'signin' && <button type="button" disabled={busy} onClick={() => void recoverPassword()} className="w-full text-center text-sm font-semibold text-[#806c3f] underline underline-offset-4 disabled:opacity-50">Esqueci minha senha</button>}
+                {mode === 'signin' && <button type="button" disabled={busy} onClick={() => void recoverPassword()} className="w-full text-center text-sm font-medium text-[#806c3f] underline decoration-[#c4ad73] underline-offset-4 disabled:opacity-50">Esqueci minha senha</button>}
               </form>
-              {recoveryRequested && <div className="mt-5 space-y-3 rounded-2xl border border-[#d8c99f] bg-white/70 p-4"><p className="text-sm leading-6">Se o link do e-mail não abrir, copie o endereço do botão recebido e cole aqui. A verificação será feita neste app.</p><label className="block text-sm font-semibold">Link recebido no e-mail<input type="url" autoComplete="off" value={recoveryLink} onChange={event => setRecoveryLink(event.target.value)} className="user-input mt-2" /></label><button type="button" disabled={busy || !recoveryLink.trim()} onClick={() => void openRecoveryLink()} className="w-full rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-50">Definir minha senha</button></div>}
 
+              {recoveryRequested && <div className="mt-5 space-y-3 rounded-2xl border border-[#d8c99f] bg-white/70 p-4"><p className="text-sm leading-6">Se o link do e-mail não abrir, copie o endereço do botão recebido e cole aqui. A verificação será feita neste app.</p><label className="block text-sm font-semibold">Link recebido no e-mail<input type="url" autoComplete="off" value={recoveryLink} onChange={event => setRecoveryLink(event.target.value)} className="user-input mt-2" /></label><button type="button" disabled={busy || !recoveryLink.trim()} onClick={() => void openRecoveryLink()} className="w-full rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-50">Definir minha senha</button></div>}
 
               <button
                 type="button"
@@ -254,7 +280,7 @@ export function AuthScreen({ initialError = '' }: { initialError?: string }) {
                   setMessage('');
                   setErrorMessage('');
                 }}
-                className="mt-5 w-full text-center text-sm font-medium text-[#806c3f] hover:text-[#5f4f2d]"
+                className="mt-6 w-full text-center text-sm font-medium text-[#806c3f] hover:text-[#5f4f2d]"
               >
                 {mode === 'signin' ? 'Ainda não tenho conta' : 'Já tenho uma conta'}
               </button>
