@@ -5,6 +5,8 @@ import { PrivacyPolicy } from './PrivacyPolicy';
 
 type Mode = 'signin' | 'signup';
 
+const PRODUCTION_APP_URL = 'https://relatorioenergetico.vercel.app';
+
 export function AuthScreen() {
   const [mode, setMode] = useState<Mode>('signin');
   const [name, setName] = useState('');
@@ -38,6 +40,7 @@ export function AuthScreen() {
         email,
         password,
         options: {
+          emailRedirectTo: PRODUCTION_APP_URL,
           data: {
             display_name: name.trim(),
             consent_lgpd: true,
@@ -60,7 +63,7 @@ export function AuthScreen() {
       setMessage(
         data.session
           ? 'Conta criada. Você já pode continuar.'
-          : 'Conta criada. Confira seu e-mail para confirmar o acesso.'
+          : 'Conta criada. Confira seu e-mail para confirmar o acesso. O link retornará para este site.'
       );
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Não foi possível concluir o acesso.');
