@@ -197,6 +197,7 @@ export async function markAudioGenerationPublished(params: {
       final_storage_path: params.finalStoragePath,
       final_approved_at: now,
       published_at: now,
+      last_error: null,
       updated_at: now,
     })
     .eq('audio_plan_id', params.audioPlanId)
@@ -205,6 +206,37 @@ export async function markAudioGenerationPublished(params: {
 
   if (error) throw error;
   if (data) await createVersion(data);
+}
+
+export async function markAudioGenerationUnpublished(audioPlanId: string): Promise<void> {
+  const { data: current, error: currentError } = await supabase
+    .from('audio_generation_jobs')
+    .select('*')
+    .eq('audio_plan_id', audioPlanId)
+    .maybeSingle();
+
+  if (currentError) throw currentError;
+  if (!current) return;
+
+  const nextStatus: AudioGenerationStatus = current.script_approved_at
+    ? 'ready_to_publish'
+    : 'script_draft';
+
+  const { data, error } = await supabase
+    .from('audio_generation_jobs')
+    .update({
+      status: nextStatus,
+      final_storage_path: null,
+      final_approved_at: null,
+      published_at: null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', current.id)
+    .select('*')
+    .single();
+
+  if (error) throw error;
+  await createVersion(data);
 }
 
 export async function getAudioGenerationJob(
