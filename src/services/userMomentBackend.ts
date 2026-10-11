@@ -1,5 +1,7 @@
 import { supabase } from '../lib/supabase';
 import type { PersonalizedAudioPlan } from '../audio/audioCatalog';
+import type { CommercialEntitlement } from '../commercial/entitlements';
+import { getCurrentUserEntitlementForIntake } from './entitlementBackend';
 
 export interface UserMomentData {
   intake: {
@@ -8,6 +10,7 @@ export interface UserMomentData {
     completedAt: string | null;
     declaredIntention: string;
   } | null;
+  entitlement: CommercialEntitlement | null;
   result: {
     headline: string;
     intro: string;
@@ -52,7 +55,32 @@ export async function loadUserMoment(): Promise<UserMomentData> {
   if (intakeError) throw intakeError;
 
   if (!intake) {
-    return { intake: null, result: null, carePlan: null, audio: null };
+    return {
+      intake: null,
+      entitlement: null,
+      result: null,
+      carePlan: null,
+      audio: null,
+    };
+  }
+
+  const entitlement = await getCurrentUserEntitlementForIntake(intake.id);
+
+  // Sem entitlement ativo, RLS também bloqueia resultado/plano permanente.
+  // Evitamos consultas desnecessárias e deixamos a regra explícita na aplicação.
+  if (!entitlement) {
+    return {
+      intake: {
+        id: intake.id,
+        personName: intake.person_name,
+        completedAt: intake.completed_at,
+        declaredIntention: intake.declared_intention,
+      },
+      entitlement: null,
+      result: null,
+      carePlan: null,
+      audio: null,
+    };
   }
 
   const [{ data: result, error: resultError }, { data: carePlan, error: planError }] =
@@ -88,7 +116,9 @@ export async function loadUserMoment(): Promise<UserMomentData> {
         closing: result.closing,
         solfeggio: result.solfeggio,
         floral: Array.isArray(result.floral) ? result.floral : [],
-        aromatherapy: Array.isArray(result.aromatherapy) ? result.aromatherapy : [],
+        aromatherapy: Array.isArray(result.aromatherapy)
+          ? result.aromatherapy
+          : [],
         ethericCrystals: Array.isArray(result.etheric_crystals)
           ? result.etheric_crystals
           : [],
@@ -106,7 +136,9 @@ export async function loadUserMoment(): Promise<UserMomentData> {
         audioDurationSeconds: carePlan.audio_duration_seconds,
         solfeggio: carePlan.solfeggio,
         floral: Array.isArray(carePlan.floral) ? carePlan.floral : [],
-        aromatherapy: Array.isArray(carePlan.aromatherapy) ? carePlan.aromatherapy : [],
+        aromatherapy: Array.isArray(carePlan.aromatherapy)
+          ? carePlan.aromatherapy
+          : [],
         ethericCrystals: Array.isArray(carePlan.etheric_crystals)
           ? carePlan.etheric_crystals
           : [],
@@ -154,7 +186,9 @@ export async function loadUserMoment(): Promise<UserMomentData> {
           ? Math.max(1, Math.round(mappedPlan.audioDurationSeconds / 60))
           : undefined,
         status:
-          mappedPlan.audioStatus === 'published' ? 'GERADO' : 'AGUARDANDO_GERACAO',
+          mappedPlan.audioStatus === 'published'
+            ? 'GERADO'
+            : 'AGUARDANDO_GERACAO',
         assinaturaComposicao: mappedPlan.audioPlanId,
       }
     : null;
@@ -166,6 +200,7 @@ export async function loadUserMoment(): Promise<UserMomentData> {
       completedAt: intake.completed_at,
       declaredIntention: intake.declared_intention,
     },
+    entitlement,
     result: mappedResult,
     carePlan: mappedPlan,
     audio,
