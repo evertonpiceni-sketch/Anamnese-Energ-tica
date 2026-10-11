@@ -22,6 +22,10 @@
       ]
     },
     "allowImportingTsExtensions": true,
+    "strict": false,
     "noEmit": true
-  }
+  },
+  "exclude": [
+    "supabase/functions"
+  ]
 }
