@@ -7,6 +7,8 @@ const json = (status: number, body: unknown) =>
     headers: { "content-type": "application/json; charset=utf-8" },
   });
 
+const allowedAmounts = [1500, 5000, 6500, 10000, 18000];
+
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
 
@@ -17,6 +19,96 @@ Deno.serve(async (req: Request) => {
     return json(503, { error: "supabase_service_not_configured" });
   }
 
+  let payload: any;
+  try {
+    payload = await req.json();
+  } catch {
+    return json(400, { error: "invalid_json" });
+  }
+
+  const admin = createClient(supabaseUrl, serviceRoleKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  });
+
+  // InfinitePay envia order_nsu, transaction_nsu e invoice_slug.
+  // Não confiamos apenas no webhook: a venda é confirmada novamente no payment_check oficial.
+  const infiniteOrder = String(payload?.order_nsu || "").trim();
+  const infiniteTransaction = String(payload?.transaction_nsu || "").trim();
+  const infiniteSlug = String(payload?.invoice_slug || payload?.slug || "").trim();
+
+  if (infiniteOrder && infiniteTransaction && infiniteSlug) {
+    const handle = Deno.env.get("INFINITEPAY_HANDLE");
+    if (!handle) {
+      return json(503, { success: false, message: "infinitepay_handle_not_configured" });
+    }
+
+    const { data: order, error: orderError } = await admin
+      .from("commercial_checkout_orders")
+      .select("intake_id,amount_cents")
+      .eq("order_nsu", infiniteOrder)
+      .maybeSingle();
+
+    if (orderError || !order) {
+      return json(400, { success: false, message: "order_not_found" });
+    }
+
+    const checkResponse = await fetch("https://api.checkout.infinitepay.io/payment_check", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        handle,
+        order_nsu: infiniteOrder,
+        transaction_nsu: infiniteTransaction,
+        slug: infiniteSlug,
+      }),
+    });
+
+    let check: any = {};
+    try {
+      check = await checkResponse.json();
+    } catch {
+      // Resposta inválida é tratada como pagamento não confirmado.
+    }
+
+    if (!checkResponse.ok || check?.success !== true || check?.paid !== true) {
+      return json(400, { success: false, message: "payment_not_confirmed" });
+    }
+
+    if (Number(check?.amount) !== Number(order.amount_cents)) {
+      return json(400, { success: false, message: "payment_amount_mismatch" });
+    }
+
+    const paymentReference = String(payload?.receipt_url || infiniteTransaction);
+    const { data, error } = await admin.rpc("process_confirmed_commercial_payment", {
+      p_provider: "infinitepay",
+      p_event_id: infiniteTransaction,
+      p_intake_id: order.intake_id,
+      p_amount_cents: order.amount_cents,
+      p_payment_reference: paymentReference,
+      p_raw_payload: {
+        order_nsu: infiniteOrder,
+        transaction_nsu: infiniteTransaction,
+        invoice_slug: infiniteSlug,
+        receipt_url: payload?.receipt_url || null,
+        payment_check: check,
+      },
+    });
+
+    if (error) return json(400, { success: false, message: error.message });
+
+    const { error: markError } = await admin.rpc("mark_checkout_order_paid", {
+      p_order_nsu: infiniteOrder,
+      p_transaction_nsu: infiniteTransaction,
+      p_invoice_slug: infiniteSlug,
+      p_payment_reference: paymentReference,
+    });
+
+    if (markError) return json(400, { success: false, message: markError.message });
+
+    return json(200, { success: true, message: null, entitlement: data });
+  }
+
+  // Fluxo interno/manual: sessão administrativa ou segredo privado.
   const expectedSecret = Deno.env.get("PAYMENT_WEBHOOK_SECRET");
   const providedSecret = req.headers.get("x-webhook-secret");
   const authorization = req.headers.get("authorization") || "";
@@ -41,22 +133,17 @@ Deno.serve(async (req: Request) => {
     }
   }
 
-  const authorizedBySecret = Boolean(expectedSecret && providedSecret && providedSecret === expectedSecret);
+  const authorizedBySecret = Boolean(
+    expectedSecret && providedSecret && providedSecret === expectedSecret
+  );
   if (!authorizedAsAdmin && !authorizedBySecret) {
-    return json(401, {
-      error: expectedSecret ? "unauthorized" : "webhook_secret_not_configured_or_admin_required",
-    });
-  }
-
-  let payload: any;
-  try {
-    payload = await req.json();
-  } catch {
-    return json(400, { error: "invalid_json" });
+    return json(401, { error: "unauthorized" });
   }
 
   const provider = String(payload?.provider || (authorizedAsAdmin ? "manual_admin" : "")).trim();
-  const eventId = String(payload?.event_id || (authorizedAsAdmin ? `manual-${crypto.randomUUID()}` : "")).trim();
+  const eventId = String(
+    payload?.event_id || (authorizedAsAdmin ? `manual-${crypto.randomUUID()}` : "")
+  ).trim();
   const intakeId = String(payload?.intake_id || "").trim();
   const amountCents = Number(payload?.amount_cents);
   const paymentReference = payload?.payment_reference ? String(payload.payment_reference) : null;
@@ -68,13 +155,9 @@ Deno.serve(async (req: Request) => {
   if (!provider || !eventId || !intakeId || !Number.isInteger(amountCents)) {
     return json(400, { error: "missing_or_invalid_fields" });
   }
-  if (![1500, 5000, 6500, 10000, 18000].includes(amountCents)) {
+  if (!allowedAmounts.includes(amountCents)) {
     return json(422, { error: "unsupported_commercial_amount" });
   }
-
-  const admin = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false, autoRefreshToken: false },
-  });
 
   const { data, error } = await admin.rpc("process_confirmed_commercial_payment", {
     p_provider: provider,
@@ -83,19 +166,14 @@ Deno.serve(async (req: Request) => {
     p_amount_cents: amountCents,
     p_payment_reference: paymentReference,
     p_raw_payload: {
-      ...payload,
+      provider,
+      event_id: eventId,
+      intake_id: intakeId,
+      amount_cents: amountCents,
       accepted_via: authorizedAsAdmin ? "admin_session" : "webhook_secret",
     },
   });
 
-  if (error) {
-    const message = error.message || "payment_processing_failed";
-    const status = message.includes("addon_requires_existing_basic_plan") ? 409
-      : message.includes("unsupported_commercial_amount") ? 422
-      : message.includes("intake_not_found") ? 404
-      : 500;
-    return json(status, { error: message });
-  }
-
+  if (error) return json(400, { error: error.message });
   return json(200, { ok: true, entitlement: data });
 });
