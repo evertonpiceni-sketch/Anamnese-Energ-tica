@@ -4,16 +4,68 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #f6f1e6;
   color: #173c2c;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
 html {
   background: #f6f1e6;
+  scroll-behavior: smooth;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background:
+    radial-gradient(circle at 7% 12%, rgba(121, 151, 117, 0.13), transparent 24rem),
+    radial-gradient(circle at 94% 26%, rgba(199, 164, 81, 0.12), transparent 25rem),
+    radial-gradient(circle at 18% 88%, rgba(204, 220, 195, 0.22), transparent 28rem),
+    linear-gradient(145deg, #f8f3e9 0%, #f5efe2 52%, #f1eee3 100%);
+  background-attachment: fixed;
+}
+
+body::before,
+body::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 999px;
+  opacity: 0.45;
+}
+
+body::before {
+  width: 26rem;
+  height: 26rem;
+  left: -14rem;
+  top: 20vh;
+  border: 1px solid rgba(83, 119, 85, 0.13);
+  box-shadow: 7rem 9rem 0 -1px rgba(255,255,255,0.18), 7rem 9rem 0 0 rgba(184,149,70,0.08);
+}
+
+body::after {
+  width: 32rem;
+  height: 32rem;
+  right: -19rem;
+  bottom: -9rem;
+  border: 1px solid rgba(184, 149, 70, 0.14);
+}
+
+#root {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: Georgia, "Times New Roman", ui-serif, serif;
+  letter-spacing: -0.018em;
+}
+
+::selection {
+  background: rgba(184, 149, 70, 0.22);
+  color: #173c2c;
 }
 
 button,
@@ -23,23 +75,49 @@ select {
   font: inherit;
 }
 
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
 .user-input {
   width: 100%;
-  border-radius: 1rem;
-  border: 1px solid #d8cdb6;
-  background: rgba(255, 255, 255, 0.72);
-  padding: 0.85rem 1rem;
+  border-radius: 1.15rem;
+  border: 1px solid rgba(202, 185, 145, 0.72);
+  background: rgba(255, 253, 247, 0.78);
+  padding: 0.95rem 1rem;
   color: #284638;
   outline: none;
-  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 8px 24px rgba(34, 67, 48, 0.035);
+  backdrop-filter: blur(10px);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
 }
 
 .user-input::placeholder {
-  color: #9b9c91;
+  color: #98998f;
+}
+
+.user-input:hover {
+  border-color: rgba(184, 149, 70, 0.68);
+  background: rgba(255,255,255,0.9);
 }
 
 .user-input:focus {
   border-color: #b89546;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(184, 149, 70, 0.12);
+  background: rgba(255,255,255,0.96);
+  box-shadow: 0 0 0 3px rgba(184, 149, 70, 0.10), 0 12px 30px rgba(34, 67, 48, 0.07);
+}
+
+@keyframes gentle-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+main section {
+  animation: gentle-rise 420ms ease both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  main section { animation: none; }
+  * { transition-duration: 0.01ms !important; }
 }
