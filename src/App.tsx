@@ -4,6 +4,7 @@ import AdminApp from './AdminApp';
 import UserAnamneseApp from './components/UserAnamneseApp';
 import { AuthScreen } from './components/AuthScreen';
 import { AdminCommercialPaymentPanel } from './components/AdminCommercialPaymentPanel';
+import { UserPaymentPanel } from './components/UserPaymentPanel';
 import { supabase } from './lib/supabase';
 
 type AppRole = 'user' | 'admin';
@@ -126,5 +127,10 @@ export default function App() {
     );
   }
 
-  return <UserAnamneseApp userId={session.user.id} onSignOut={signOut} />;
+  return (
+    <>
+      <UserAnamneseApp userId={session.user.id} onSignOut={signOut} />
+      <UserPaymentPanel />
+    </>
+  );
 }
