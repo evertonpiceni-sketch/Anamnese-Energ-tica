@@ -1,10 +1,16 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+const corsHeaders = {
+  "access-control-allow-origin": "https://relatorioenergetico.vercel.app",
+  "access-control-allow-headers": "authorization, x-client-info, apikey, content-type",
+  "access-control-allow-methods": "POST, OPTIONS",
+};
+
 const json = (status: number, body: unknown) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { "content-type": "application/json; charset=utf-8" },
+    headers: { ...corsHeaders, "content-type": "application/json; charset=utf-8" },
   });
 
 const INFINITEPAY_HANDLE = "everton-rodrigo-piceni";
@@ -19,6 +25,9 @@ const PRODUCTS: Record<number, { productCode: string; addon: boolean; descriptio
 };
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: corsHeaders });
+  }
   if (req.method !== "POST") return json(405, { error: "method_not_allowed" });
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
