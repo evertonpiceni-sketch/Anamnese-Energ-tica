@@ -127,6 +127,13 @@ const CLUSTERS_SEMANTICOS = [
   },
 ];
 
+/** Keep explicit denials out of keyword-based symptom scoring. This is conservative, not a clinical language model. */
+function affirmedProblemClauses(text: string): string {
+  return text.toLowerCase().split(/[.,;!?\n]+|\b(?:mas|porém|porem|entretanto)\b/).filter(clause =>
+    !/(?:não|nao|nunca|jamais)\s+(?:sinto|tenho|tive|estou com|apresento|percebo|sofro(?: de)?|estou sentindo)\s+(?:mais\s+|nenhum[ao]?\s+|qualquer\s+|essa?\s+)?(?:ansiedade|medo|pânico|panico|cansaço|cansaco|esgotamento|fadiga|tristeza|angústia|angustia|culpa|vergonha|raiva|ressentimento|insônia|insonia|confusão|confusao|aperto|insegurança|inseguranca|dor|crise|desespero)/.test(clause)
+  ).join(' ');
+}
+
 /**
  * Analisa as respostas abertas com extração semântica e peso qualitativo
  */
@@ -136,7 +143,7 @@ export function executarAnaliseQualitativaProfunda(input: AnamneseInput): Analis
   const textoPreservado = (input.relatoLivrePreservado || '').toLowerCase();
   const textoIntencao = (input.intencaoDeclarada || '').toLowerCase();
 
-  const textoCompletoProblemas = `${textoNecessidade} ${textoDesafios} ${textoIntencao}`;
+  const textoCompletoProblemas = affirmedProblemClauses(`${textoNecessidade}. ${textoDesafios}. ${textoIntencao}`);
 
   // 1. Identificar Clusters Semânticos Ativos
   const clustersAtivos: AnaliseQualitativaProfunda['clustersSemanticos'] = [];
@@ -213,21 +220,20 @@ export function executarAnaliseQualitativaProfunda(input: AnamneseInput): Analis
     'criatividade', 'vontade', 'sonho', 'amor', 'esperança', 'paixão', 'energia viva',
     'aprender', 'cuidar', 'família', 'fé', 'força', 'dedicação', 'inteligência', 'clareza'
   ];
-  const recursosPreservadosEncontrados = termosPreservadosPositivos.filter((tp) =>
-    textoPreservado.includes(tp)
-  );
+  const preservedClauses = textoPreservado.split(/[.,;!?\n]+|\b(?:mas|porém|porem)\b/).filter(clause => !/(?:não|nao|sem|perdi)\s+(?:tenho\s+|sinto\s+|minha?\s+)?(?:fé|fe|força|forca|esperança|esperanca|vontade|criatividade|energia|amor|clareza)/.test(clause)).join(' ');
+  const recursosPreservadosEncontrados = termosPreservadosPositivos.filter(tp => preservedClauses.includes(tp));
 
   const potencialExpansao =
     recursosPreservadosEncontrados.length >= 2 ||
-    textoPreservado.includes('energia') ||
-    textoPreservado.includes('vontade');
+    preservedClauses.includes('energia') ||
+    preservedClauses.includes('vontade');
 
   const fatoresPreservados = {
     descricao: input.relatoLivrePreservado || 'Não detalhado formalmente pelo interagente.',
     recursosInternosPreservados:
       recursosPreservadosEncontrados.length > 0
         ? recursosPreservadosEncontrados
-        : ['Sensibilidade perceptiva ativa', 'Busca espontânea por autocuidado'],
+        : [],
     potencialExpansao,
   };
 

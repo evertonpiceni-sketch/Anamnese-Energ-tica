@@ -84,22 +84,14 @@ export async function uploadPreparatoryAudio(params: {
   durationSeconds?: number | null;
 }): Promise<PreparatoryAudioAsset> {
   const extension = safeExtension(params.file);
-  const storagePath = `preparatory/${PREPARATORY_ID}.${extension}`;
+  const storagePath = `preparatory/${PREPARATORY_ID}-${crypto.randomUUID()}.${extension}`;
   const current = await getPreparatoryAudioAsset();
-
-  if (current?.storagePath && current.storagePath !== storagePath) {
-    const { error: removeError } = await supabase.storage
-      .from(BUCKET)
-      .remove([current.storagePath]);
-
-    if (removeError) throw removeError;
-  }
 
   const { error: uploadError } = await supabase.storage
     .from(BUCKET)
     .upload(storagePath, params.file, {
       contentType: params.file.type || 'audio/mpeg',
-      upsert: true,
+      upsert: false,
       cacheControl: '3600',
     });
 
@@ -112,7 +104,7 @@ export async function uploadPreparatoryAudio(params: {
       storage_path: storagePath,
       duration_seconds:
         params.durationSeconds === undefined || params.durationSeconds === null
-          ? current?.durationSeconds ?? null
+          ? null
           : Math.max(0, Math.round(params.durationSeconds)),
       status: 'published',
       fixed_for_all_users: true,
@@ -134,11 +126,13 @@ export async function uploadPreparatoryAudio(params: {
 
 export async function getAudioDuration(file: File): Promise<number | null> {
   return new Promise(resolve => {
+    const timeout = window.setTimeout(() => { cleanup(); resolve(null); }, 10000);
     const url = URL.createObjectURL(file);
     const audio = document.createElement('audio');
     audio.preload = 'metadata';
 
     const cleanup = () => {
+      window.clearTimeout(timeout);
       URL.revokeObjectURL(url);
       audio.removeAttribute('src');
       audio.load();
