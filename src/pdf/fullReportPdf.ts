@@ -59,15 +59,15 @@ function drawHeader(doc: jsPDF, logo: string | null, page: number) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(6.8);
   doc.setTextColor(150, 119, 53);
-  doc.text('TERAPIAS HOLISTICAS E BEM-ESTAR', 105, 55, { align: 'center' });
+  doc.text('TERAPIAS HOLÍSTICAS E BEM-ESTAR', 105, 55, { align: 'center' });
   doc.setFontSize(6.2);
   doc.setTextColor(91, 108, 97);
-  doc.text('CORPO  |  MENTE  |  ENERGIA  |  ESPIRITO', 105, 59, { align: 'center' });
+  doc.text('CORPO  |  MENTE  |  ENERGIA  |  ESPÍRITO', 105, 59, { align: 'center' });
   doc.setDrawColor(202, 164, 81);
   doc.line(70, 62, 140, 62);
   doc.setFontSize(7);
   doc.setTextColor(107, 116, 109);
-  doc.text(`PAGINA ${page} DE 5`, 190, 286, { align: 'right' });
+  doc.text(`PÁGINA ${page} DE 5`, 190, 286, { align: 'right' });
 }
 
 function drawTitle(doc: jsPDF, title: string, y: number) {
@@ -193,7 +193,7 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
   doc.setFont('times', 'bold');
   doc.setFontSize(27);
   doc.setTextColor(24, 58, 43);
-  doc.text('Relatorio Completo', MARGIN_X, y);
+  doc.text('Relatório Completo', MARGIN_X, y);
   y += 12;
   doc.setTextColor(164, 116, 39);
   doc.text('Leitura do Seu Momento', MARGIN_X, y);
@@ -218,7 +218,7 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
   doc.setFont('times', 'italic');
   doc.setFontSize(17);
   doc.setTextColor(164, 116, 39);
-  doc.text('Cuidar da sua energia e voltar para voce.', MARGIN_X, y);
+  doc.text('Cuidar da sua energia é voltar para você.', MARGIN_X, y);
 
   addBasePage(doc, logo, 2);
   y = drawTitle(doc, report.page2.title, 76);
@@ -238,7 +238,7 @@ export async function createFullReportPdfBlob(report: FullReportNarrative): Prom
   doc.setFont('times', 'bold');
   doc.setFontSize(11.5);
   doc.setTextColor(29, 65, 47);
-  doc.text('Recursos que permanecem vivos em voce', 26, y + 8);
+  doc.text('Recursos que permanecem vivos em você', 26, y + 8);
   doc.setFont('times', 'normal');
   doc.setFontSize(8.8);
   doc.setTextColor(76, 96, 83);
