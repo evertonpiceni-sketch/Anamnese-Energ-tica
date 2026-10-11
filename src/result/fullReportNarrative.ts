@@ -1,6 +1,6 @@
 import { CareComposition } from '../care/careComposer';
 import { AnaliseCompletaResultado } from '../engine/analysisEngine';
-import { AnamneseInput } from '../types';
+import { AnamneseInput, EixoId } from '../types';
 
 export interface FullReportNarrative {
   nome: string;
@@ -47,6 +47,89 @@ function friendlyResourceName(value: string) {
   return value.replace(/\s+—\s+.*/, '').trim();
 }
 
+const AXIS_CARE_COPY: Record<EixoId, { reading: string; care: string }> = {
+  seguranca: {
+    reading: 'a necessidade de se sentir mais segura, amparada e com mais chão',
+    care: 'fortalecer presença, estabilidade e sensação de sustentação, sem exigir movimento antes da hora',
+  },
+  emocional: {
+    reading: 'uma sensibilidade emocional que pode acabar acumulando mais do que precisa',
+    care: 'acolher o que está sendo sentido e abrir espaço para leveza, sem apressar o que ainda precisa ser escutado',
+  },
+  autovalor: {
+    reading: 'a tendência de se cobrar e de nem sempre reconhecer com a mesma facilidade o próprio valor',
+    care: 'reaproximar você da sua própria dignidade, confiança e capacidade de receber cuidado',
+  },
+  mente: {
+    reading: 'uma mente muito ativa, tentando antecipar, organizar ou sustentar muitas coisas ao mesmo tempo',
+    care: 'criar mais espaço interno, clareza e descanso para que os pensamentos não precisem permanecer em alerta constante',
+  },
+  movimento: {
+    reading: 'a dificuldade de transformar percepção em movimento quando a pressão interna fica grande demais',
+    care: 'favorecer retomada gradual, respeitando o seu ritmo e diminuindo a sensação de cobrança em torno de cada passo',
+  },
+  vitalidade: {
+    reading: 'um cansaço que pede mais respeito ao ritmo do corpo antes de novas exigências',
+    care: 'sustentar recuperação de energia, presença corporal e disposição sem forçar produtividade',
+  },
+  corpo: {
+    reading: 'a necessidade de voltar a perceber o corpo como lugar de presença e não apenas como lugar de tensão',
+    care: 'aproximar você do próprio corpo com mais escuta, suavidade e sensação de amparo',
+  },
+  relacionamentos: {
+    reading: 'uma forma muito disponível de se relacionar que, em alguns momentos, pode deixar suas próprias necessidades para depois',
+    care: 'fortalecer limites, reciprocidade e espaço para que você também possa ser cuidada nas relações',
+  },
+  prazer: {
+    reading: 'uma necessidade de recuperar descanso, prazer simples e contato com o que faz bem',
+    care: 'reabrir espaço para receber, sentir e estar presente sem transformar tudo em obrigação',
+  },
+  criatividade: {
+    reading: 'uma parte criativa que pode estar pedindo mais liberdade e menos autocensura',
+    care: 'favorecer expressão, espontaneidade e confiança no que nasce de você',
+  },
+  limpeza: {
+    reading: 'a sensação de carregar pesos que já podem estar ocupando espaço demais',
+    care: 'apoiar soltura, reorganização e abertura para que o presente tenha mais espaço',
+  },
+  padroes: {
+    reading: 'repetições que começam a ficar mais visíveis quando suas respostas são observadas em conjunto',
+    care: 'ampliar consciência sem julgamento, para que novas respostas possam surgir com mais liberdade',
+  },
+  prosperidade: {
+    reading: 'questões de segurança e movimento ligadas à vida prática e material',
+    care: 'fortalecer presença, direção e confiança para lidar com o concreto sem ampliar a pressão',
+  },
+  poder_pessoal: {
+    reading: 'a necessidade de confiar mais nas próprias escolhas e sustentar o que é importante para você',
+    care: 'fortalecer firmeza, autonomia e confiança no próprio movimento',
+  },
+  proposito: {
+    reading: 'uma busca por direção e por um próximo passo que faça sentido de verdade',
+    care: 'favorecer clareza, presença e conexão com aquilo que hoje tem significado para você',
+  },
+  espiritualidade: {
+    reading: 'uma busca de conexão, sentido e presença que ultrapassa apenas o que é racional',
+    care: 'sustentar essa dimensão de forma serena, integrada e respeitosa ao seu momento',
+  },
+  protecao: {
+    reading: 'uma necessidade maior de preservar sua energia e reconhecer melhor os próprios limites',
+    care: 'favorecer sensação de resguardo, firmeza e proteção sem transformar o cuidado em medo',
+  },
+  receber: {
+    reading: 'a dificuldade de receber cuidado com a mesma naturalidade com que você oferece aos outros',
+    care: 'abrir espaço para acolhimento, descanso e receptividade sem culpa',
+  },
+  recomeco: {
+    reading: 'um desejo de começar de outro jeito, mesmo que nem tudo esteja resolvido',
+    care: 'dar sustentação ao recomeço sem exigir respostas definitivas ou mudanças bruscas',
+  },
+  integracao: {
+    reading: 'a necessidade de reunir pensamento, emoção, corpo e presença em uma experiência mais inteira',
+    care: 'favorecer coerência, assimilação e uma sensação maior de estar novamente consigo',
+  },
+};
+
 function chakraText(name: string) {
   const normalized = name.toLowerCase();
   if (normalized.includes('plexo')) {
@@ -77,7 +160,8 @@ export function buildFullReportNarrative(params: {
   const report = analysis.relatorioEverton;
   const person = analysis.resultadoPessoa;
 
-  const topAxes = report.eixosOrdenados.slice(0, 4).map(item => item.nome.toLowerCase());
+  const topAxisResults = report.eixosOrdenados.slice(0, 4);
+  const topAxes = topAxisResults.map(item => item.nome.toLowerCase());
   const preserved = report.analiseContextualAvancada?.fatoresPreservados.recursosInternosPreservados || [];
   const chakrasRaw = [
     ...report.regioesCorporais.chakrasCorrespondentes,
@@ -86,26 +170,36 @@ export function buildFullReportNarrative(params: {
 
   const cycle = report.analiseContextualAvancada?.cadeiasCausais?.[0]?.expressaoFormatada;
 
-  const systemNames = [
+  const systems = [
     report.sistemaPrincipal.nome,
     ...report.sistemasComplementares.map(item => item.nome),
   ].filter(Boolean).map(friendlyResourceName);
 
-  const crystals = composition?.ethericCrystals.map(item => item.nome) || [];
-  const floral = composition?.floral.map(item => item.nome) || [];
-  const aroma = composition?.aromatherapy.map(item => item.nome.replace(/\s+—.*/, '')) || [];
-  const solfeggio = composition?.solfeggio ? `${composition.solfeggio.hz} Hz` : '';
+  const crystals = composition?.ethericCrystals || [];
+  const florals = composition?.floral || [];
+  const aromas = composition?.aromatherapy || [];
 
-  const integratedResources: string[] = [];
-  if (systemNames.length) integratedResources.push(`energias como ${joinNatural(systemNames.slice(0, 3))}`);
-  if (crystals.length) integratedResources.push(`cristais etéricos como ${joinNatural(crystals)}`);
-  if (floral.length) integratedResources.push(`o apoio floral de ${joinNatural(floral)}`);
-  if (aroma.length) integratedResources.push(`a aromaterapia com ${joinNatural(aroma)}`);
-  if (solfeggio) integratedResources.push(`a frequência ${solfeggio}`);
+  const careParagraphs = topAxisResults.slice(0, 3).map((axisResult, index) => {
+    const axis = axisResult.eixoId;
+    const copy = AXIS_CARE_COPY[axis];
+    const system = systems[index] || (index === 0 ? systems[0] : '');
+    const crystal = crystals.find(item => item.eixos.includes(axis));
+    const floral = florals.find(item => item.eixos.includes(axis));
+    const aroma = aromas.find(item => item.eixos.includes(axis));
+    const resources: string[] = [];
 
-  const careIntegration = integratedResources.length
-    ? `Ao longo do cuidado, esses recursos não aparecem como elementos soltos. ${joinNatural(integratedResources)} entram dentro da mesma composição, cada um conversando com um aspecto do que você trouxe e sustentando o processo de forma integrada.`
-    : 'Ao longo do cuidado, cada recurso será escolhido para conversar diretamente com aquilo que apareceu em sua anamnese, sem excessos e sem fórmulas prontas.';
+    if (system) resources.push(system);
+    if (crystal) resources.push(crystal.nome);
+    if (floral) resources.push(`o floral ${floral.nome}`);
+    if (aroma) resources.push(aroma.nome.replace(/\s+—.*/, ''));
+    if (index === 0 && composition?.solfeggio) resources.push(`a frequência ${composition.solfeggio.hz} Hz`);
+
+    const resourceText = resources.length
+      ? `Para acompanhar esse movimento, ${joinNatural(resources)} entram juntos como parte do mesmo cuidado — não como itens separados, mas como apoios escolhidos para conversar entre si e com aquilo que você relatou.`
+      : 'Para acompanhar esse movimento, os recursos do protocolo serão escolhidos de forma integrada, sempre a partir do que apareceu em suas respostas.';
+
+    return `Quando suas respostas mostram ${copy.reading}, o cuidado se volta para ${copy.care}. ${resourceText}`;
+  });
 
   return {
     nome,
@@ -118,7 +212,7 @@ export function buildFullReportNarrative(params: {
       title: 'Diagnóstico da Anamnese',
       paragraphs: [
         `${nome}, antes de qualquer coisa, quero que você saiba que suas respostas foram recebidas com cuidado. O que você contou não é apenas um conjunto de respostas em um formulário. Há uma história por trás delas, um momento que você está vivendo e uma forma muito particular de sentir, reagir, se proteger e tentar seguir em frente.`,
-        `Ao reunirmos tudo o que você respondeu, alguns movimentos aparecem com mais clareza. A intenção desta leitura não é colocar você dentro de um rótulo, mas ajudá-la a compreender o que, neste momento, parece estar pedindo mais atenção, presença e cuidado.`,
+        'Ao reunirmos tudo o que você respondeu, alguns movimentos aparecem com mais clareza. A intenção desta leitura não é colocar você dentro de um rótulo, mas ajudar você a compreender o que, neste momento, parece estar pedindo mais atenção, presença e cuidado.',
         `Em suas respostas aparecem com mais força aspectos ligados a ${joinNatural(topAxes)}. Isso não fala de falta de vontade. Pelo contrário: sua leitura mostra consciência do que está acontecendo, desejo de mudança e uma parte sua que continua procurando uma forma mais leve de viver.`,
         person.seuMomento,
         'Quando existe muita pressão interna, a própria tentativa de mudar pode se transformar em mais uma obrigação. Por isso, antes de exigir movimento, o cuidado precisa oferecer sustentação, espaço e segurança para que o próximo passo possa nascer sem cobrança.',
@@ -139,19 +233,16 @@ export function buildFullReportNarrative(params: {
       title: 'O que vamos trabalhar com você',
       paragraphs: [
         'A partir dessa leitura, o nosso cuidado não será construído para “consertar” você. Será construído para acompanhar você de volta para si, com mais presença, leveza e sustentação.',
-        'Ao longo desse processo, vamos trabalhar a suavização da sobrecarga interna, a reorganização dos pensamentos, o acolhimento emocional, o fortalecimento da presença e a retomada da confiança no seu próprio movimento.',
-        careIntegration,
-        crystals.length || floral.length || aroma.length || solfeggio
-          ? `Quando a mente pede mais suavidade e clareza, os recursos escolhidos para esse eixo ajudam a criar espaço interno e diminuir o excesso. Quando o coração pede acolhimento, entram apoios voltados à ternura, receptividade e cuidado. E quando o momento pede confiança, aterramento ou retomada de movimento, a composição se ajusta para sustentar exatamente esses pontos — sem separar energia, cristal, floral, aroma ou frequência da história que você contou.`
-          : 'Cada recurso será apresentado dentro da própria leitura, no ponto em que fizer sentido para aquilo que você relatou, para que o cuidado tenha nexo, continuidade e verdade.',
-        'Nada entra apenas porque “combina”. Cada escolha precisa conversar com o que você trouxe e apoiar, com delicadeza, o seu caminho de volta ao equilíbrio.',
+        'Ao longo desse processo, não vamos separar o que você sente de um lado e os recursos do outro. Cada escolha entra dentro da própria história que suas respostas contaram, para que o cuidado tenha sentido e continuidade.',
+        ...careParagraphs,
+        'Nada foi incluído por acaso. Energia, cristal, floral, aromaterapia e frequência só entram quando fazem sentido para o mesmo movimento que apareceu em sua leitura. O objetivo é que você compreenda não apenas o que será utilizado, mas por que aquilo foi escolhido para acompanhar você neste momento.',
       ],
     },
     page5: {
       title: 'Os próximos 7 ou 21 dias',
       paragraphs: [
         'A partir daqui começa outra parte do processo. Se a sua escolha for a jornada de 7 dias, vamos trabalhar aquilo que hoje aparece como prioridade, criando um período de cuidado mais concentrado, voltado para reorganização, presença e retomada de movimento.',
-        'Se a sua escolha for a jornada de 21 dias, teremos mais tempo para acompanhar esse processo em camadas, permitindo que o cuidado atravesse diferentes momentos de percepção, integração e retorno a você mesma.',
+        'Se a sua escolha for a jornada de 21 dias, teremos mais tempo para acompanhar esse processo em camadas, permitindo que o cuidado atravesse diferentes momentos de percepção, integração e retorno a você.',
         'Em qualquer uma das escolhas, a proposta permanece a mesma: você não precisa mudar tudo de uma vez. Durante esse período, vamos auxiliar o seu processo com a composição preparada a partir da sua leitura, respeitando o seu ritmo e aquilo que aparecer ao longo do caminho.',
         'No final do período, a leitura poderá ser revisitada. Porque você não é estática — e o cuidado também não deveria ser.',
       ],
