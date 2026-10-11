@@ -8,7 +8,10 @@ import {
   RemotePersonalizedAudio,
   uploadPersonalizedAudio,
 } from '../services/audioBackend';
-import { markAudioGenerationPublished } from '../services/audioGenerationBackend';
+import {
+  markAudioGenerationPublished,
+  markAudioGenerationUnpublished,
+} from '../services/audioGenerationBackend';
 
 interface AdminAudioUploadProps {
   audio: PersonalizedAudioPlan;
@@ -54,14 +57,20 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
         durationSeconds: duration,
       });
 
-      await markAudioGenerationPublished({
-        audioPlanId: audio.id,
-        finalStoragePath: record.storagePath,
-      });
+      try {
+        await markAudioGenerationPublished({
+          audioPlanId: audio.id,
+          finalStoragePath: record.storagePath,
+        });
+      } catch (generationError) {
+        await removePersonalizedAudioRemote(audio.id);
+        throw generationError;
+      }
 
       setStored(record);
       setMessage('Áudio publicado com segurança para esta anamnese.');
     } catch (error) {
+      setStored(await getCarePlanByAudioPlanId(audio.id).catch(() => null));
       setMessage(
         error instanceof Error
           ? `Não foi possível publicar o áudio: ${error.message}`
@@ -80,8 +89,13 @@ export function AdminAudioUpload({ audio, nomePessoa }: AdminAudioUploadProps) {
 
     try {
       await removePersonalizedAudioRemote(audio.id);
+      try {
+        await markAudioGenerationUnpublished(audio.id);
+      } catch (generationError) {
+        console.warn('O áudio foi despublicado, mas a fila de geração não pôde ser atualizada.', generationError);
+      }
       setStored(null);
-      setMessage('Áudio removido deste plano.');
+      setMessage('Áudio removido deste plano e indisponível para o usuário.');
     } catch (error) {
       setMessage(
         error instanceof Error
