@@ -521,13 +521,52 @@ test('forgot password requests the correct recovery redirect and password setup 
     window.__passwordUpdates = 0;
     supabase.auth.updateUser = async () => { window.__passwordUpdates++; return { data: {}, error: new Error('temporary failure') }; };
   });
-  await page.getByLabel('Nova senha').fill('example-secure-123');
-  await page.getByLabel('Confirme a senha').fill('different-secure-123');
+  await page.getByLabel('Nova senha', { exact: true }).fill('example-secure-123');
+  await page.getByLabel('Confirme a senha', { exact: true }).fill('different-secure-123');
   await page.getByRole('button', { name: 'Salvar senha e continuar' }).click();
   await expect(page.getByRole('alert')).toContainText('As senhas precisam ser iguais');
   expect(await page.evaluate(() => window.__passwordUpdates)).toBe(0);
-  await page.getByLabel('Confirme a senha').fill('example-secure-123');
+  await page.getByLabel('Confirme a senha', { exact: true }).fill('example-secure-123');
   await page.getByRole('button', { name: 'Salvar senha e continuar' }).click();
   await expect(page.getByRole('alert')).toContainText('temporary failure');
   expect(await page.evaluate(() => window.__passwordUpdates)).toBe(1);
+});
+
+test('password visibility can be toggled without changing the password or submitting', async ({ page }) => {
+  await render(page, 'AuthScreen', {});
+  const password = page.getByLabel('Senha', { exact: true });
+  await password.fill('private-test-password');
+  await expect(password).toHaveAttribute('type', 'password');
+  await page.getByRole('button', { name: 'Mostrar senha', exact: true }).click();
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(password).toHaveValue('private-test-password');
+  await page.getByRole('button', { name: 'Ocultar senha', exact: true }).click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await render(page, 'PasswordSetupScreen', {});
+  await page.getByLabel('Nova senha', { exact: true }).fill('private-test-password');
+  await page.getByRole('button', { name: 'Mostrar nova senha', exact: true }).click();
+  await expect(page.getByLabel('Nova senha', { exact: true })).toHaveAttribute('type', 'text');
+  await expect(page.getByLabel('Confirme a senha', { exact: true })).toHaveAttribute('type', 'password');
+  await page.getByRole('button', { name: 'Mostrar confirmação de senha', exact: true }).click();
+  await expect(page.getByLabel('Confirme a senha', { exact: true })).toHaveAttribute('type', 'text');
+});
+
+test('recovery links verify in the app without following a localhost redirect and are consumed once', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { supabase } = await import(/* @vite-ignore */ String('/src/lib/supabase.ts'));
+    const { parsePasswordLink, verifyPasswordLink } = await import(/* @vite-ignore */ String('/src/lib/authRecovery.ts'));
+    let calls = 0;
+    supabase.auth.verifyOtp = async parameters => { calls++; return { data: { session: { user: { id: 'admin-test' } }, user: null }, error: null }; };
+    const link = 'https://aokdwgvwcsyqfhrgrboo.supabase.co/auth/v1/verify?token=test-hash&type=recovery&redirect_to=http://localhost:3000';
+    await Promise.all([verifyPasswordLink(link), verifyPasswordLink(link)]);
+    let rejected = false;
+    try { parsePasswordLink('https://other.example/auth/v1/verify?token=bad&type=recovery'); } catch { rejected = true; }
+    return { calls, rejected, url: location.href, parsed: parsePasswordLink(link) };
+  });
+  expect(result.calls).toBe(1);
+  expect(result.rejected).toBe(true);
+  expect(result.url).toContain('setup=password');
+  expect(result.url).not.toContain('token');
+  expect(result.parsed).toEqual({ token_hash: 'test-hash', type: 'recovery' });
 });

@@ -1,21 +1,25 @@
 import { FormEvent, useState } from 'react';
-import { LockKeyhole, Mail, UserRound } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, UserRound } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { verifyPasswordLink } from '../lib/authRecovery';
 import { PrivacyPolicy } from './PrivacyPolicy';
 
 type Mode = 'signin' | 'signup';
 
 const PRODUCTION_APP_URL = 'https://relatorioenergetico.vercel.app';
 
-export function AuthScreen() {
+export function AuthScreen({ initialError = '' }: { initialError?: string }) {
   const [mode, setMode] = useState<Mode>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState(initialError);
+  const [recoveryRequested, setRecoveryRequested] = useState(false);
+  const [recoveryLink, setRecoveryLink] = useState('');
   const [showPrivacy, setShowPrivacy] = useState(false);
 
   async function submit(event: FormEvent) {
@@ -79,8 +83,16 @@ export function AuthScreen() {
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: `${PRODUCTION_APP_URL}/?setup=password` });
       if (error) throw error;
+      setRecoveryRequested(true);
       setMessage('Se houver uma conta com esse e-mail, você receberá um link para definir uma nova senha. Confira também a caixa de spam.');
     } catch (error) { setErrorMessage(error instanceof Error ? error.message : 'Não foi possível enviar o link agora.'); }
+    finally { setBusy(false); }
+  }
+
+  async function openRecoveryLink() {
+    setBusy(true); setErrorMessage('');
+    try { await verifyPasswordLink(recoveryLink.trim()); }
+    catch (cause) { setErrorMessage(cause instanceof Error ? cause.message : 'Não foi possível verificar o link.'); }
     finally { setBusy(false); }
   }
 
@@ -174,14 +186,16 @@ export function AuthScreen() {
                   <div className="relative">
                     <LockKeyhole className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#9a8b68]" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       minLength={8}
                       value={password}
                       onChange={e => setPassword(e.target.value)}
-                      className="user-input pl-11"
+                      className="user-input pl-11 pr-12"
+                      autoComplete={mode === 'signin' ? 'current-password' : 'new-password'}
                       placeholder="Mínimo de 8 caracteres"
                     />
+                    <button type="button" onClick={() => setShowPassword(value => !value)} aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'} aria-pressed={showPassword} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-[#365441]">{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</button>
                   </div>
                 </label>
 
@@ -230,6 +244,8 @@ export function AuthScreen() {
                 </button>
                 {mode === 'signin' && <button type="button" disabled={busy} onClick={() => void recoverPassword()} className="w-full text-center text-sm font-semibold text-[#806c3f] underline underline-offset-4 disabled:opacity-50">Esqueci minha senha</button>}
               </form>
+              {recoveryRequested && <div className="mt-5 space-y-3 rounded-2xl border border-[#d8c99f] bg-white/70 p-4"><p className="text-sm leading-6">Se o link do e-mail não abrir, copie o endereço do botão recebido e cole aqui. A verificação será feita neste app.</p><label className="block text-sm font-semibold">Link recebido no e-mail<input type="url" autoComplete="off" value={recoveryLink} onChange={event => setRecoveryLink(event.target.value)} className="user-input mt-2" /></label><button type="button" disabled={busy || !recoveryLink.trim()} onClick={() => void openRecoveryLink()} className="w-full rounded-full bg-[#173f2d] px-5 py-3 font-semibold text-white disabled:opacity-50">Definir minha senha</button></div>}
+
 
               <button
                 type="button"
