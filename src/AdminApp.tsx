@@ -12,6 +12,7 @@ import { ReavaliacaoView } from './components/ReavaliacaoView';
 import { AudioLibraryView } from './components/AudioLibraryView';
 import { ComplementaryLibrariesView } from './components/ComplementaryLibrariesView';
 import { CareComposerAdminView } from './components/CareComposerAdminView';
+import { EnergyProgrammingAdminSection } from './components/EnergyProgrammingAdminSection';
 import { CasosTesteView } from './components/CasosTesteView';
 import { Heart, LogOut, RotateCcw, ShieldCheck } from 'lucide-react';
 import { AdminIntakeRecord, getLatestCompletedIntakeForAdmin } from './services/adminIntakeBackend';
@@ -300,13 +301,19 @@ export default function AdminApp({ onSignOut }: { onSignOut?: () => void | Promi
         {viewAtiva === 'complementares' && <ComplementaryLibrariesView />}
 
         {viewAtiva === 'compositor' && (
-          <CareComposerAdminView
-            anamnese={anamneseAtual}
-            analise={resultadoAnalise}
-            backendUserId={backendContext?.userId}
-            backendIntakeId={backendContext?.intakeId}
-            friendlyResult={userResultForComposer}
-          />
+          <>
+            <EnergyProgrammingAdminSection
+              anamnese={anamneseAtual}
+              backendIntakeId={backendContext?.intakeId}
+            />
+            <CareComposerAdminView
+              anamnese={anamneseAtual}
+              analise={resultadoAnalise}
+              backendUserId={backendContext?.userId}
+              backendIntakeId={backendContext?.intakeId}
+              friendlyResult={userResultForComposer}
+            />
+          </>
         )}
 
         {viewAtiva === 'reavaliacao' && (
