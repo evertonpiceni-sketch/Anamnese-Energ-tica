@@ -11,12 +11,6 @@ const INITIAL_OPTIONS: Array<{
   description: string;
 }> = [
   {
-    amountCents: 100,
-    title: 'Plano teste — 7 dias',
-    price: 'R$ 1,00',
-    description: 'Plano válido de teste para conferir o fluxo completo de pagamento e liberação do cuidado básico.',
-  },
-  {
     amountCents: 5000,
     title: 'Cuidado personalizado — 7 dias',
     price: 'R$ 50',
