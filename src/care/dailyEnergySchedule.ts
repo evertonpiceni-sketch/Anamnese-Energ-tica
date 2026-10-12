@@ -6,7 +6,7 @@ export interface DailyEnergyPlan {
   reason?: string;
   invitation?: string;
   resources?: import('./automaticCare').PatientCareResource[];
-  energyDetails?: Array<{ name: string; explanation: string; source: string }>;
+  energyDetails?: Array<{ name: string; explanation: string; source: string; questionIds?: string[]; matchedAxes?: EixoId[] }>;
 }
 
 export function validateDailyEnergySchedule(schedule: DailyEnergyPlan[], days: 7 | 21, allowedEnergies: string[]): string | null {
@@ -43,38 +43,51 @@ export function proposeDailyEnergySchedule(params: {
   axes: Array<{ eixoId: EixoId; percentual: number }>;
   highSensitivity?: boolean;
   supportiveSystemIds?: string[];
+  restorativeProfile?: boolean;
 }): DailyEnergyPlan[] {
   const systems = params.systems.filter(isDocumentedCareSystem);
-  const base = systems.find(system => system.ehBaseSustentacao && !system.ehEstimulanteAtivo && system.energias.length > 0);
-  const baseNames = base ? documentedEnergyNames(base).slice(0, 1) : [];
+  // These functions are autonomous in the source or are attunements, not day-by-day activations.
+  const unscheduledFunctions = new Set(['Soul Awakening', 'Soul Fire', 'Mind Shakti Empowerment', 'Soul Regeneration', 'Spiritual Individuality Attunement']);
   const priorities = params.axes.filter(axis => axis.percentual > 0).map(axis => axis.eixoId);
-  const needsGrounding = priorities.includes('seguranca') || priorities.includes('corpo');
-  const focusAxes: EixoId[] = [...(needsGrounding ? ['seguranca' as EixoId] : []), ...priorities.filter(axis => axis !== 'integracao' && (!needsGrounding || axis !== 'seguranca')), 'integracao'];
-  const used = new Set<string>();
+  const phases: EixoId[][] = [
+    ['seguranca', 'corpo', 'vitalidade'], ['emocional', 'mente'],
+    ['autovalor', 'receber', 'protecao', 'relacionamentos', 'padroes', 'limpeza', 'poder_pessoal'],
+    ['proposito', 'recomeco', 'criatividade', 'prazer', 'espiritualidade', 'prosperidade', 'movimento'],
+  ];
+  const selectedPhases = phases.map((group, index) => (index === 0 && priorities.includes('seguranca') ? ['seguranca' as EixoId, ...priorities.filter(axis => group.includes(axis) && axis !== 'seguranca')] : priorities.filter(axis => group.includes(axis))).slice(0, index < 2 ? 2 : 1));
+  const focusAxes: EixoId[] = [...selectedPhases.flat(), 'integracao'];
+  const bridgeAxes: Partial<Record<EixoId, EixoId[]>> = { prazer: ['corpo'], vitalidade: ['corpo'], recomeco: ['integracao'], prosperidade: ['poder_pessoal'] };
+  const usage = new Map<string, number>();
   const result: DailyEnergyPlan[] = [];
   for (let day = 1; day <= params.days; day++) {
-    const first = day === 1;
     const target = day === params.days ? 'integracao' : focusAxes[Math.min(Math.floor((day - 1) * (focusAxes.length - 1) / (params.days - 1)), focusAxes.length - 1)] || 'integracao';
     const candidates = systems.flatMap(system => documentedEnergyNames(system).map(name => {
       const resource = documentedEnergyResource(system, name);
-      const compatible = resource ? resource.eixosCompatíveis.includes(target) : (system.compatibilidadeEixos[target] || 0) > 0;
-      const score = (system.compatibilidadeEixos[target] || 0) * 100 + params.axes.reduce((sum, axis) => sum + (system.compatibilidadeEixos[axis.eixoId] || 0) * axis.percentual, 0);
-      const supportsProfile = params.axes.some(axis => axis.percentual > 0 && (resource ? resource.eixosCompatíveis.includes(axis.eixoId) : (system.compatibilidadeEixos[axis.eixoId] || 0) > 0));
-      return { name, score, compatible, supportsProfile, system };
-    })).filter(item => (item.compatible || item.supportsProfile) && !baseNames.includes(item.name) && !(item.system.ehEstimulanteAtivo && (params.highSensitivity || day <= Math.ceil(params.days / 3))));
-    candidates.sort((a, b) => Number(b.compatible) - Number(a.compatible) || Number(used.has(a.name)) - Number(used.has(b.name)) || b.score - a.score || a.name.localeCompare(b.name));
-    const selected = first && baseNames.length ? undefined : candidates.find(item => item.name !== result.at(-1)?.energyNames.at(-1));
-    if (selected) used.add(selected.name);
-    const energyNames = [...new Set([...baseNames, ...(selected ? [selected.name] : [])])];
-    // Documented compassionate support may accompany the base and the day's main energy.
-    const compassionate = candidates.find(item => params.supportiveSystemIds?.includes(item.system.id) && item.compatible && !energyNames.includes(item.name));
-    if (compassionate) { energyNames.push(compassionate.name); used.add(compassionate.name); }
+      const compatibleAxes = resource?.eixosCompatíveis || Object.keys(system.compatibilidadeEixos) as EixoId[];
+      const compatible = compatibleAxes.includes(target) || (bridgeAxes[target] || []).some(axis => compatibleAxes.includes(axis));
+      // Score the documented function, not unrelated properties of its parent system.
+      const primaryFunctionBonus = resource && resource.eixosCompatíveis[0] === target ? 25 : 0;
+      const score = compatible ? primaryFunctionBonus + (compatibleAxes.includes(target) ? (system.compatibilidadeEixos[target] || 1) * 100 : 100) + params.axes.reduce((sum, axis) => sum + (compatibleAxes.includes(axis.eixoId) ? (system.compatibilidadeEixos[axis.eixoId] || 1) * axis.percentual : 0), 0) / Math.max(1, compatibleAxes.length) / 10 : 0;
+      return { name, score, compatible, compatibleAxes, system };
+    })).filter(item => !unscheduledFunctions.has(item.name) && item.compatible && !(item.system.ehEstimulanteAtivo && (params.highSensitivity || params.restorativeProfile || day <= Math.ceil(params.days / 3))));
+    // No daily default: even a sustaining Reiki must be justified by this day's focus.
+    const ranked = [...candidates].sort((a, b) => (b.score - (usage.get(b.name) || 0) * 140) - (a.score - (usage.get(a.name) || 0) * 140) || a.name.localeCompare(b.name));
+    const main = ranked[0];
+    if (!main) throw new Error(`Não há energia documentada para o foco do dia ${day}.`);
+    const energyNames = [main.name];
+    // A second energy is useful only when it covers an additional reported need.
+    const secondary = ranked.find(item => item.name !== main.name && item.compatibleAxes.some(axis => priorities.includes(axis) && !main.compatibleAxes.includes(axis)));
+    if (secondary) energyNames.push(secondary.name);
+    const compassionate = ranked.find(item => params.supportiveSystemIds?.includes(item.system.id) && !energyNames.includes(item.name) && item.compatibleAxes.some(axis => priorities.includes(axis) && ![main, secondary].filter(Boolean).some(selected => selected!.compatibleAxes.includes(axis))));
+    if (compassionate) energyNames.push(compassionate.name);
+    // Vary comparable, relevant choices; never add an unrelated energy merely to make a day look different.
     const signature = (names: string[]) => [...names].sort().join('|');
-    if (result.some(entry => signature(entry.energyNames) === signature(energyNames))) {
-      const addition = candidates.find(item => !energyNames.includes(item.name) && !result.some(entry => signature(entry.energyNames) === signature([...energyNames, item.name])));
-      if (addition) { energyNames.push(addition.name); used.add(addition.name); }
-      else if (energyNames.length > 1 && result.at(-1)?.energyNames.join('|') === energyNames.join('|')) energyNames.splice(1);
+    if (result.at(-1) && signature(result.at(-1)!.energyNames) === signature(energyNames)) {
+      const alternative = ranked.find(item => !energyNames.includes(item.name));
+      if (alternative) energyNames[0] = alternative.name;
+      else if (energyNames.length > 1) energyNames.pop();
     }
+    energyNames.forEach(name => usage.set(name, (usage.get(name) || 0) + 1));
     result.push({ day, energyNames, focusAxis: target, intention: `Acompanhar ${EIXOS_DEFINITIONS[target].nome.toLowerCase()} com presença, respeitando seu ritmo neste dia.` });
   }
   return result;

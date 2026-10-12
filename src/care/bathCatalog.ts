@@ -12,7 +12,9 @@ export interface BathSupportResource {
 }
 
 /**
- * Banhos incluídos somente quando há material documental no acervo.
+ * Banhos de luz retirados da seleção automática por decisão do usuário.
+ * Receitas de ervas só serão integradas após leitura do PDF específico,
+ * com ingredientes, preparo e cuidados documentados. Preserva-se o histórico.
  * A seleção automática aponta o recurso; preparo detalhado e eventuais
  * ativações permanecem sob validação/orientação do terapeuta.
  */
@@ -25,7 +27,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Raiz'],
     orientacaoPublica: 'Quando indicado, será apresentado como prática complementar de apoio, seguindo a forma documentada no protocolo e a orientação do terapeuta.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
   {
     id: 'templo-marrom',
@@ -35,7 +37,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Raiz'],
     orientacaoPublica: 'Usar somente quando fizer sentido dentro da composição individual e conforme a orientação cadastrada pelo terapeuta.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
   {
     id: 'templo-azul',
@@ -45,7 +47,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Laríngeo'],
     orientacaoPublica: 'A prática só é sugerida quando conversa com a leitura atual e não substitui outros cuidados necessários.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
   {
     id: 'templo-rosa',
@@ -55,7 +57,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Cardíaco'],
     orientacaoPublica: 'Quando indicado, entra como parte do mesmo eixo de cuidado emocional, sem ser apresentado como solução isolada.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
   {
     id: 'templo-laranja',
@@ -65,7 +67,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Sacral'],
     orientacaoPublica: 'A indicação deve respeitar o momento da pessoa e não é usada quando a prioridade é primeiro estabilizar e descansar.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
   {
     id: 'templo-vermelho',
@@ -75,7 +77,7 @@ export const BATH_SUPPORT_CATALOG: BathSupportResource[] = [
     chakras: ['Raiz'],
     orientacaoPublica: 'Somente sugerir quando houver vitalidade suficiente e quando o cuidado não estiver priorizando desaceleração ou estabilização.',
     fonteDocumental: 'APOSTILA-CHAVES-ARCTURIANAS-DE-REALINHAMENTO-DE-SINERGIA-DE-CURA.pdf — seção Banhos do Templo.',
-    status: 'ATIVO',
+    status: 'INATIVO',
   },
 ];
 

@@ -7,7 +7,7 @@ import { buildFullReportNarrative } from '../result/fullReportNarrative';
 import { selectComplementaryCare } from './complementaryCatalogs';
 import { selectSolfeggioFrequency } from './solfeggioCatalog';
 import { selectBathSupport } from './bathCatalog';
-import { CARE_INTENTIONS, CARE_PURPOSES, contextualWelcome, dailyInvitation } from './patientCareNarrative';
+import { CARE_INTENTIONS, contextualWelcome, dailyInvitation, energyCarePurpose } from './patientCareNarrative';
 import { bathReceivingGuidance, bathProgrammingInstructions } from './bathCatalog';
 import { proposeDailyEnergySchedule, validateDailyEnergySchedule, documentedEnergyNames, documentedEnergyResource, isDocumentedCareSystem } from './dailyEnergySchedule';
 
@@ -31,18 +31,24 @@ export interface PatientCareResource {
 export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
   if (PERGUNTAS_ANAMNESE.some(question => { const value = intake.respostasObjetivas[question.id]; return !Number.isInteger(value) || value < 0 || value > 4; })) throw new Error('Conclua as respostas da anamnese para preparar seu percurso individual.');
   const analysis = executarAnaliseIntegrativa(intake);
-  const axes = analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0);
+  const axes = analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0 && PERGUNTAS_ANAMNESE.some(question => intake.respostasObjetivas[question.id] >= 2 && (question.pesosEixos[axis.eixoId] || 0) > 0));
+  const primaryScore = (axis: EixoId) => PERGUNTAS_ANAMNESE.reduce((sum, question) => {
+    const strongest = Math.max(...Object.values(question.pesosEixos));
+    return sum + (intake.respostasObjetivas[question.id] >= 2 && question.pesosEixos[axis] === strongest ? intake.respostasObjetivas[question.id] * strongest : 0);
+  }, 0);
+  axes.sort((a, b) => primaryScore(b.eixoId) - primaryScore(a.eixoId) || b.percentual - a.percentual);
   const evidence = collectAnswerEvidence(intake, axes);
   const systems = BIBLIOTECA_MESTRA.filter(isDocumentedCareSystem);
   const highSensitivity = intake.sensibilidadeEnergetica === 'alta' || intake.sensibilidadeEnergetica === 'muito_alta';
   const needsCompassionateSupport = evidence.some(item => item.level >= 2 && ['q2_mente_acelerada', 'q3_sensacao_ameaca_inseguranca', 'q6_engolir_emocoes', 'q8_dificuldade_receber', 'q20_conflitos_relacionamento'].includes(item.questionId));
-  const proposed = proposeDailyEnergySchedule({ days, systems, axes, highSensitivity, supportiveSystemIds: needsCompassionateSupport ? ['karuna_ki'] : [] });
+  const restorativeProfile = ['q3_sensacao_ameaca_inseguranca', 'q4_cansaco_esgotamento'].some(id => intake.respostasObjetivas[id] >= 3);
+  const proposed = proposeDailyEnergySchedule({ days, systems, axes, highSensitivity, restorativeProfile, supportiveSystemIds: needsCompassionateSupport ? ['karuna_ki'] : [] });
   const journeyAxes = axes.length ? axes : [{ eixoId: 'integracao' as EixoId, percentual: 100 }];
-  const journeySupport = selectComplementaryCare(journeyAxes);
-  const frequency = selectSolfeggioFrequency(journeyAxes);
+  const journeySupport = selectComplementaryCare(analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0).length ? analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0) : journeyAxes);
+  const frequency = selectSolfeggioFrequency(analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0).length ? analysis.relatorioEverton.eixosOrdenados.filter(axis => axis.percentual > 0) : journeyAxes);
   const journeyReason = (compatibleAxes: EixoId[]) => {
     const related = evidence.filter(item => item.level >= 2 && compatibleAxes.some(axis => (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[axis] || 0) > 0)).slice(0, 2);
-    return related.length ? `Essa escolha se aproxima do que você contou: ${related[0].observation.split('. ')[0].toLowerCase()}. A intenção é oferecer um apoio constante, enquanto damos espaço às suas necessidades ao longo dos dias.` : 'A intenção é acompanhar seu momento com um apoio constante, enquanto você percebe o que faz sentido para si.';
+    return related.length ? `A escolha acompanha uma necessidade importante: ${related[0].observation.split('. ')[0].toLowerCase()}. A intenção é sustentar esse acolhimento durante o percurso, sem acrescentar novas exigências.` : 'A intenção é acompanhar seu momento com um apoio constante, com espaço para perceber o que traz conforto.';
   };
   const journeyResources: PatientCareResource[] = [
     ...journeySupport.florals.filter(item => item.fonteDocumental).slice(0, 1).map(item => ({ id: item.id, category: 'Floral' as const, name: item.nome, explanation: `${resourceDescription(item.descricao)} ${journeyReason(item.eixos)}`, guidance: `Orientação de Everton Piceni para o floral deste percurso: 10 gotas, duas vezes ao dia, durante os ${days} dias.`, source: item.fonteDocumental || '' })),
@@ -67,11 +73,10 @@ export function buildAutomaticCare(intake: AnamneseInput, days: 7 | 21) {
       const system = systems.find(item => documentedEnergyNames(item).includes(name))!;
       const documented = documentedEnergyResource(system, name);
       const compatibleAxes = documented?.eixosCompatíveis || Object.keys(system.compatibilidadeEixos) as EixoId[];
-      const selectedAxis = compatibleAxes.includes(target) ? target : axes.find(axis => compatibleAxes.includes(axis.eixoId))?.eixoId || 'integracao';
-      const explanation = name === 'Original Reiki'
-        ? `É a base contínua de sustentação da jornada. Neste dia, acompanha o acolhimento que você acabou de ler, para que possa receber cuidado sem precisar produzir uma sensação ou um resultado.`
-        : `Foi escolhido para ${CARE_PURPOSES[selectedAxis]}. Junto do Reiki, essa intenção se aproxima do que hoje pede atenção em você, respeitando o tempo de acolher antes de mudar.`;
-      return { name, explanation, source: documented?.fonteDocumental || system.origemDocumental.idDocumento };
+      const selectedAxis = compatibleAxes.includes(target) ? target : ['prazer', 'vitalidade'].includes(target) && compatibleAxes.includes('corpo') ? 'corpo' : axes.find(axis => compatibleAxes.includes(axis.eixoId))?.eixoId || 'integracao';
+      const explanation = energyCarePurpose(name, selectedAxis);
+      const questionIds = evidence.filter(item => item.level >= 2 && (PERGUNTAS_ANAMNESE.find(question => question.id === item.questionId)?.pesosEixos[selectedAxis] || 0) > 0).map(item => item.questionId);
+      return { name, explanation, questionIds, matchedAxes: compatibleAxes.filter(axis => axes.some(item => item.eixoId === axis)), source: documented?.fonteDocumental || system.origemDocumental.idDocumento };
     });
     return { ...day, intention: CARE_INTENTIONS[target], reason, invitation: dailyInvitation(related, target, day.day === days), resources: dayResources, energyDetails };
   });

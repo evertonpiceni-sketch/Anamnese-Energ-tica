@@ -242,7 +242,7 @@ test('refreshing a legacy report changes the reading and preserves reviewed care
     const stored = { ...buildFullReportNarrative({ intake, analysis, composition: null, journeyDays: 7, dailyEnergySchedule: schedule }), source: undefined, page2: { title: 'Diagnóstico da Anamnese', paragraphs: ['Texto genérico de outra pessoa.'] }, page4: { title: 'Cuidado', paragraphs: ['Direção do cuidado: caminho genérico.', 'Florais — Recurso aprovado.'] } };
     return { fresh: refreshReportReading(stored, intake, analysis), schedule };
   });
-  expect(result.fresh.source.generatorVersion).toBe('answers-v5');
+  expect(result.fresh.source.generatorVersion).toBe('answers-v6');
   expect(result.fresh.page2.paragraphs.join(' ')).not.toContain('Texto genérico');
   expect(result.fresh.page4.paragraphs).toContain('Florais — Recurso aprovado.');
   expect(result.fresh.dailyEnergySchedule).toEqual(result.schedule);
@@ -448,7 +448,7 @@ test('floral aroma and one Solfeggio remain fixed throughout the journey and ADM
   expect(result.script.every(day => day.lines.join('\n').includes('única frequência-base'))).toBe(true);
   await render(page, 'FullReportApprovedView', { report: result.reports[0] });
   await expect(page.getByRole('region', { name: 'Apoios de toda a jornada' })).toContainText('10 gotas, duas vezes ao dia');
-  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toContainText('recebido durante a sessão de escuta');
+  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toHaveCount(0);
 });
 
 
@@ -470,10 +470,10 @@ test('contextual care welcomes actual experiences, combines documented Karuna sy
   expect(result.anxious.dailyEnergySchedule.some(day => day.energyNames.some(name => /^Karuna Ki · (Shanti|Rama|Harth)/.test(name)))).toBe(true);
   expect(result.anxious.dailyEnergySchedule.some(day => day.energyNames.length >= 3)).toBe(true);
   expect(result.anxious.dailyEnergySchedule.every(day => day.invitation)).toBe(true);
-  expect(result.script.some(day => day.lines.some(line => line.includes('Eu solicito um banho no Templo de Luz')))).toBe(true);
+  expect(result.script.some(day => day.lines.some(line => line.includes('Eu solicito um banho no Templo de Luz')))).toBe(false);
   await render(page, 'FullReportApprovedView', { report: result.anxious });
   await expect(page.locator('.report-page')).not.toContainText('Pertence ao sistema');
-  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toContainText('imagine uma piscina de luz');
+  await expect(page.getByRole('region', { name: 'Como receber os banhos de luz' })).toHaveCount(0);
   await expect(page.getByRole('region', { name: 'Programação diária' })).toContainText('Um gesto possível para hoje');
   await expect(page.locator('.report-page')).not.toContainText('Eu desbloqueio');
 });
@@ -569,4 +569,40 @@ test('recovery links verify in the app without following a localhost redirect an
   expect(result.url).toContain('setup=password');
   expect(result.url).not.toContain('token');
   expect(result.parsed).toEqual({ token_hash: 'test-hash', type: 'recovery' });
+});
+
+test('library crossing remains specific for every isolated answer, has no mandatory Reiki and excludes obsolete baths', async ({ page }) => {
+  await page.goto('/');
+  const result = await page.evaluate(async () => {
+    const { CASOS_DE_TESTE } = await import(/* @vite-ignore */ String('/src/data/sampleCases.ts'));
+    const { PERGUNTAS_ANAMNESE } = await import(/* @vite-ignore */ String('/src/data/questions.ts'));
+    const { BIBLIOTECA_MESTRA } = await import(/* @vite-ignore */ String('/src/data/bibliotecaMestra.ts'));
+    const { documentedEnergyNames, documentedEnergyResource } = await import(/* @vite-ignore */ String('/src/care/dailyEnergySchedule.ts'));
+    const { buildAutomaticCare } = await import(/* @vite-ignore */ String('/src/care/automaticCare.ts'));
+    const { buildEnergyProgrammingScript } = await import(/* @vite-ignore */ String('/src/care/energyProgrammingScript.ts'));
+    const base = { ...CASOS_DE_TESTE[0].dados, respostasObjetivas: Object.fromEntries(PERGUNTAS_ANAMNESE.map(q => [q.id, 0])), relatoLivreNecessidade: '', relatoLivreDesafios: '', relatoLivrePreservado: '', intencaoDeclarada: '', regioesCorporaisPercebidas: [] };
+    const variants = PERGUNTAS_ANAMNESE.flatMap(question => [7, 21].map(days => {
+      const intake = { ...base, respostasObjetivas: { ...base.respostasObjetivas, [question.id]: 4 } };
+      const report = buildAutomaticCare(intake, days).report;
+      const choices = report.dailyEnergySchedule.flatMap(day => day.energyDetails.map(detail => ({ ...detail, supported: detail.questionIds.every(id => intake.respostasObjetivas[id] >= 2) })));
+      const unsafe = ['q3_sensacao_ameaca_inseguranca', 'q4_cansaco_esgotamento'].includes(question.id) && choices.some(choice => BIBLIOTECA_MESTRA.find(s => documentedEnergyNames(s).includes(choice.name)).ehEstimulanteAtivo);
+      return { question: question.id, days, count: report.dailyEnergySchedule.length, supported: choices.every(choice => choice.supported), unsafe, oldBaths: report.careResources.some(r => /^templo-/.test(r.id)), reikiEveryDay: report.dailyEnergySchedule.every(day => day.energyNames.includes('Original Reiki')), starts: report.page2.paragraphs.map(p => p.slice(0, 15)) };
+    }));
+    const emotional = buildAutomaticCare({ ...base, respostasObjetivas: { ...base.respostasObjetivas, q6_engolir_emocoes: 4 } }, 7).report;
+    return { variants, emotional, script: buildEnergyProgrammingScript('Pessoa', emotional.dailyEnergySchedule) };
+  });
+  expect(result.variants).toHaveLength(40);
+  for (const variant of result.variants) {
+    expect(variant.count).toBe(variant.days);
+    expect(variant.supported).toBe(true);
+    expect(variant.unsafe).toBe(false);
+    expect(variant.oldBaths).toBe(false);
+    expect(variant.starts.every(start => !/^Você (relata|conta|descreve|respondeu)/.test(start))).toBe(true);
+  }
+  expect(result.variants.some(variant => !variant.reikiEveryDay)).toBe(true);
+  expect(result.script.some(day => day.lines.some(line => line.startsWith('Respostas que sustentam')))).toBe(true);
+  await render(page, 'FullReportApprovedView', { report: result.emotional });
+  await expect(page.locator('.report-page')).not.toContainText('base contínua');
+  await expect(page.locator('.report-page')).not.toContainText('Respostas que sustentam');
+  await expect(page.locator('.report-page')).not.toContainText('você respondeu');
 });

@@ -17,7 +17,7 @@ export function buildBasicUserResult(analysis: AnaliseCompletaResultado, intake:
   const firstName = intake.nomePessoa.trim().split(/\s+/)[0] || 'Você';
   const full = buildFullReportNarrative({ intake, analysis, composition: null });
   return {
-    headline: present.length ? `${firstName}, vamos acolher o que você vive em relação a ${present[0].name}.` : `${firstName}, há espaço para acolher o seu momento.`,
+    headline: present.length ? `${firstName}, vamos acolher o que hoje pesa: ${present[0].name}.` : `${firstName}, há espaço para acolher o seu momento.`,
     intro: full.page1.intro,
     priorities: present.map(item => item.intention),
     intention: full.page4.paragraphs.join(' '),

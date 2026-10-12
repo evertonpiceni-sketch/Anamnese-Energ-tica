@@ -41,31 +41,31 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
   const intention = intake.intencaoDeclarada?.trim();
   const strengthIsLoss = !!strength && /(?:não|nao|sem|perdi)\s+(?:tenho\s+|sinto\s+|minha?\s+)?(?:fé|fe|força|forca|esperança|esperanca|vontade|criatividade|energia|amor|clareza)/i.test(strength);
   const regions = REGIOES_CORPORAIS.filter(region => intake.regioesCorporaisPercebidas.includes(region.id));
-  const wish = intention ? (/^cura[.!\s]*$/i.test(intention) ? 'Seu desejo de se sentir melhor merece acolhimento e um cuidado atento ao que você está vivendo.' : `A intenção que você trouxe — “${intention}” — nos ajuda a manter perto aquilo que importa para você.`) : '';
+  const wish = intention ? (/^cura[.!\s]*$/i.test(intention) ? 'O desejo de se sentir melhor merece acolhimento e um cuidado atento a este momento.' : `A intenção que você trouxe — “${intention}” — nos ajuda a manter perto aquilo que importa para você.`) : '';
   const diagnosis = [
 
     ...leading.map(item => item.level === 2 ? `Em alguns momentos, ${item.observation.charAt(0).toLowerCase()}${item.observation.slice(1)}` : item.observation),
-    ...(need ? [`Você trouxe um pedido importante: “${need}”. Vamos acolhê-lo como parte do seu caminho, com atenção ao que você precisa e ao que é possível agora.`] : []),
-    ...(challenge ? [`Ao compartilhar “${challenge}”, você nos permite olhar mais de perto para o que está vivendo. Esse relato merece escuta e cuidado, no seu tempo.`] : []),
-    ...(strengthIsLoss ? [`Você também compartilhou: “${strength}”. Há espaço para acolher essa experiência e perceber que apoio faria sentido para você agora.`] : []),
+    ...(need ? [`Seu pedido — “${need}” — merece escuta. Vamos acolhê-lo como parte do seu caminho, com atenção às necessidades e às possibilidades de agora.`] : []),
+    ...(challenge ? [`O desafio descrito como “${challenge}” também faz parte deste momento. Há espaço para compreendê-lo com calma, sem reduzir essa experiência a uma frase.`] : []),
+    ...(strengthIsLoss ? [`Também merece acolhimento o que foi descrito como: “${strength}”. Há espaço para acolher essa experiência e perceber qual apoio seria mais próximo das necessidades de agora.`] : []),
     ...(!present.length ? ['Seu cuidado pode partir do que você deseja cultivar no cotidiano. Há espaço para conversar sobre suas necessidades e encontrar um caminho que faça sentido para você.'] : []),
   ];
   const interactions: string[] = [];
-  if ((level('q3_sensacao_ameaca_inseguranca') ?? 0) >= 3 && (level('q4_cansaco_esgotamento') ?? 0) >= 3) interactions.push('O estado de alerta e o esgotamento aparecem juntos nas suas respostas. Isso nos convida a cuidar de duas necessidades ao mesmo tempo: encontrar mais segurança para pausar e respeitar uma energia que já está reduzida. A sequência começa por sustentação e acolhimento; movimento e novas demandas só entram de forma gradual. Não precisamos transformar o tratamento em mais uma obrigação para você.');
+  if ((level('q3_sensacao_ameaca_inseguranca') ?? 0) >= 3 && (level('q4_cansaco_esgotamento') ?? 0) >= 3) interactions.push('O estado de alerta e o esgotamento aparecem juntos nas suas respostas. Isso nos convida a cuidar de duas necessidades ao mesmo tempo: encontrar mais segurança para pausar e respeitar uma energia que já está reduzida. A sequência começa por sustentação e acolhimento; movimento e novas demandas só entram de forma gradual. Não precisamos transformar o tratamento em mais uma obrigação.');
 
-  if ((level('q2_mente_acelerada') ?? 0) >= 3 && (level('q1_procrastinacao_inicio') ?? 0) >= 3) interactions.push('Quando a mente fica muito ocupada, dar o primeiro passo pode parecer ainda mais difícil. Esses dois movimentos aparecem no que você contou. Podemos cuidar deles juntos, criando espaço para uma prioridade de cada vez.');
+  if ((level('q2_mente_acelerada') ?? 0) >= 3 && (level('q1_procrastinacao_inicio') ?? 0) >= 3) interactions.push('Quando a mente fica muito ocupada, dar o primeiro passo pode parecer ainda mais difícil. Esses dois movimentos aparecem no seu relato. Podemos cuidar deles juntos, criando espaço para uma prioridade de cada vez.');
   if ((level('q4_cansaco_esgotamento') ?? 0) >= 3 && (level('q5_autocobranca_insuficiencia') ?? 0) >= 3) interactions.push('O cansaço e a cobrança interna também se encontram no seu relato. Talvez seja delicado permitir uma pausa quando sente que ainda precisa fazer mais. O cuidado pode começar justamente aí: respeitar sua energia disponível e tornar o descanso um espaço de acolhimento.');
-  if ((level('q7_dificuldade_dizer_nao') ?? 0) >= 3 && (level('q8_dificuldade_receber') ?? 0) >= 3) interactions.push('Colocar limites e permitir-se receber cuidado parecem ser movimentos delicados para você. Podemos abrir espaço para reconhecer o que consegue oferecer e o apoio que gostaria de aceitar, sem culpa ou pressa.');
+  if ((level('q7_dificuldade_dizer_nao') ?? 0) >= 3 && (level('q8_dificuldade_receber') ?? 0) >= 3) interactions.push('Colocar limites e permitir-se receber cuidado parecem ser movimentos delicados neste momento. Podemos abrir espaço para reconhecer o que consegue oferecer e o apoio que gostaria de aceitar, sem culpa ou pressa.');
   const preserved = strength && !strengthIsLoss
     ? [/^f[ée][.!\s]*$/i.test(strength) ? `A fé que você reconhece em si pode ser um ponto de apoio${(level('q15_desconexao_espiritual') ?? 0) >= 2 ? ', mesmo nos dias em que a conexão espiritual parece mais distante' : ''}. Há espaço para cuidar dessa relação com delicadeza, dentro do que faz sentido para você.` : `Você trouxe algo que deseja preservar: “${strength}”. Essa referência também merece espaço no cuidado, junto do que hoje pede atenção.`]
-    : ['Ao longo deste caminho, há espaço para reconhecer o que traz apoio, conforto e sentido para você. Podemos descobrir essas referências juntos, sem pressa.'];
+    : ['Ao longo deste caminho, há espaço para reconhecer o que traz apoio, conforto e sentido neste momento. Podemos descobrir essas referências juntos, sem pressa.'];
 
   const needsStabilization = (level('q3_sensacao_ameaca_inseguranca') ?? 0) >= 3 || (level('q4_cansaco_esgotamento') ?? 0) >= 3;
   const direction = leading.length
     ? `Vamos começar por ${join(leading.slice(0, 2).map(item => item.intention))}. ${needsStabilization ? 'O ritmo será gentil, dando lugar à segurança e ao descanso antes de acrescentar novas demandas.' : 'Cada movimento pode ser pequeno e respeitar o que você consegue viver agora.'}`
     : 'Vamos encontrar com você uma direção que se aproxime do seu pedido e do que deseja cultivar no cotidiano.';
   const care = [direction,
-    leading.length ? 'Para começar, escolha um momento em que possa se acomodar com conforto e sem interrupções. Use os convites de cada dia como possibilidades, não como tarefas obrigatórias. Depois da pausa, perceba uma necessidade concreta: continuar descansando, conversar com alguém, diminuir uma demanda ou dar um passo pequeno. Essa percepção nos ajuda a ajustar o cuidado ao que você vive.' : 'Você pode reservar uma pausa confortável e perceber qual necessidade deseja acolher primeiro. Seus relatos ao longo do percurso ajudam a ajustar o cuidado.',
+    leading.length ? 'Para começar, escolha um momento em que possa se acomodar com conforto e sem interrupções. Use os convites de cada dia como possibilidades, não como tarefas obrigatórias. Depois da pausa, perceba uma necessidade concreta: continuar descansando, conversar com alguém, diminuir uma demanda ou dar um passo pequeno. Essa percepção nos ajuda a ajustar o cuidado ao que você vive.' : 'Uma pausa confortável pode ser um começo e perceber qual necessidade deseja acolher primeiro. Seus relatos ao longo do percurso ajudam a ajustar o cuidado.',
   ];
   if (wish) care.push(wish);
   if (need && /depress[aã]o|ansiedade/i.test(need) && !/(não|nao|sem)\s+(tenho\s+|sinto\s+)?(depress[aã]o|ansiedade)/i.test(need)) care.push('O pedido de cuidado com depressão ou ansiedade que você trouxe merece uma escuta próxima. Se esse sofrimento estiver dificultando seu sono, sua rotina ou sua vontade de viver o dia, procure também apoio psicológico ou médico; você pode receber esse acompanhamento junto do cuidado integrativo. Conte a alguém de confiança como está e compartilhe com Everton o que precisa ser ajustado. Não é preciso atravessar esses momentos sem companhia.');
@@ -85,7 +85,7 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
     page2: { title: 'Diagnóstico da Anamnese', paragraphs: diagnosis, ...((level('q1_procrastinacao_inicio') ?? 0) >= 3 && (level('q5_autocobranca_insuficiencia') ?? 0) >= 3 ? { cycle: 'Quando começar parece difícil e a cobrança aumenta, um passo pequeno pode ser mais acolhedor do que exigir uma grande mudança. Você pode experimentar esse movimento no seu tempo.' } : {}) },
     page3: { title: 'O que suas respostas contam sobre você', paragraphs: [
       ...(interactions.length ? interactions : ['Cada experiência que você compartilhou merece ser acolhida no seu próprio contexto. Vamos construir esse cuidado com espaço para escutar você, além do que aparece nesta leitura.']),
-      ...(regions.length ? [`Você também percebe sensações em ${join(regions.map(region => region.nome.toLowerCase()))}. Podemos acolher esses sinais do corpo e observar o que ajuda você a encontrar conforto.`] : []),
+      ...(regions.length ? [`As sensações percebidas em ${join(regions.map(region => region.nome.toLowerCase()))} também merecem escuta. Podemos acolher esses sinais do corpo e observar o que traz conforto.`] : []),
       'No nosso protocolo, os chakras ajudam a organizar as intenções de cuidado relacionadas ao que você contou. Essa leitura simbólica acompanha suas experiências e não representa uma medição do seu corpo.',
     ], preserved, chakras: buildEvidenceChakras(intake, evidence) },
     page4: { title: 'O que vamos trabalhar com você', paragraphs: care },
@@ -93,7 +93,7 @@ export function buildFullReportNarrative({ intake, analysis, composition, journe
       'A duração segue seu plano confirmado; as energias de cada dia são selecionadas a partir das suas respostas.',
       ...leading.slice(0, 3).map(item => `Um convite possível é ${item.intention}. Perceba como isso se apresenta ao longo dos dias, sem transformar a observação em uma cobrança.`),
       ...(need ? [`Seu pedido — “${need}” — continua no centro desse percurso. Ao longo dos dias, você pode notar o que se aproxima dele e o que ainda precisa de cuidado.`] : []),
-      'Reserve um momento tranquilo para receber o cuidado e siga as orientações que acompanham cada dia. Você pode registrar pequenas percepções e compartilhar o que precisar ser ajustado.',
+      'Reserve um momento tranquilo para receber o cuidado e siga as orientações que acompanham cada dia. Vale registrar pequenas percepções e compartilhar o que precisar ser ajustado.',
       'Não é preciso medir seu caminho pela rapidez das mudanças. O que você sente e o que consegue viver nos ajuda a cuidar dos próximos passos com você.',
     ], closingTitle: `Um convite para você, ${nome}`, closing: [wish || 'Que este percurso seja um espaço de escuta e cuidado, respeitando o que importa para você.', 'Você não precisa dar conta de tudo para merecer cuidado. Há espaço para pausar, receber apoio e seguir um passo de cada vez.'] },
   };
