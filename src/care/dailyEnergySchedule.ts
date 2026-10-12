@@ -9,13 +9,13 @@ export interface DailyEnergyPlan {
   energyDetails?: Array<{ name: string; explanation: string; source: string }>;
 }
 
-export function validateDailyEnergySchedule(schedule: DailyEnergyPlan[], days: 7 | 21, allowedEnergies: string[]): string | null {
+export function validateDailyEnergySchedule(schedule: DailyEnergyPlan[], days: 7 | 21, _allowedEnergies: string[]): string | null {
   if (schedule.length !== days) return `Preencha a composição de todos os ${days} dias.`;
   for (let day = 1; day <= days; day++) {
     const entries = schedule.filter(item => item.day === day);
     if (entries.length !== 1 || !entries[0].energyNames.length) return `Selecione as energias do dia ${day}.`;
+    if (entries[0].energyNames.some(name => !name.trim())) return `Revise as energias do dia ${day}.`;
     if (!entries[0].intention.trim()) return `Defina a intenção do dia ${day}.`;
-    if (entries[0].energyNames.some(name => !allowedEnergies.includes(name))) return `O dia ${day} contém uma energia fora da composição selecionada.`;
   }
   const compositions = schedule.map(item => [...new Set(item.energyNames)].sort().join('|'));
   if (compositions.some((composition, index) => index > 0 && composition === compositions[index - 1])) return 'Revise a programação: dois dias consecutivos não podem ter a mesma composição energética.';
